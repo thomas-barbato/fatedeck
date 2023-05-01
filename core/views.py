@@ -1,5 +1,5 @@
 from django.contrib.auth import authenticate
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
@@ -75,13 +75,6 @@ class CreateAccount(FormView, JsonableResponseMixin, SuccessMessageMixin):
         return self.success_message
 
     def form_valid(self, form):
-        """Override form_valid to create user and add custom success msg
-        :param form: RegisterForm, used to create user.
-        :type form: form
-        :return: JsonResponse with response message and status 200 if request is ajax type
-         else return JsonableResponseMixin form_valid
-        :rtype: Ajax
-        """
         if self.request.is_ajax():
             if form.cleaned_data["password"] == form.cleaned_data["password2"]:
                 form.save()
@@ -91,26 +84,13 @@ class CreateAccount(FormView, JsonableResponseMixin, SuccessMessageMixin):
         return super().form_valid(form)
 
     def form_invalid(self, form):
-        """Override form_invalid to return custom error message
-        :param form: SignupForm, used to create user.
-        :type form: form
-        :return: JsonResponse with response message, error dict and status 200 if request is ajax type
-         else return JsonableResponseMixin form_valid
-        :rtype: Ajax
-        """
         response = super().form_invalid(form)
         if self.request.is_ajax():
             response = {"status": 0, "errors": dict(form.errors.items())}
         return JsonResponse(response, status=200)
 
 
-class LoginAjaxView(LoginView, SuccessMessageMixin):
-    """Check user, login and redirect to flux_view
-    :Ancestor: LoginView
-        Display login form and handle login action
-    :return: "authentication/login.html"
-    :rtype: LoginView
-    """
+class LoginAjaxView(LoginView, JsonableResponseMixin, SuccessMessageMixin):
     class_form = LoginForm
     redirect_authenticated_user = True
     success_url = reverse_lazy("dashboard_view")
@@ -119,6 +99,12 @@ class LoginAjaxView(LoginView, SuccessMessageMixin):
         "<p class='alert-black-text'><b>Vous êtes connecté</b></p>"
         "</div>"
     )
+
+    def get_success_message(self, cleaned_data=""):
+        return self.success_message
+
+    def get_success_url(self):
+        return reverse_lazy("dashboard_view")
 
     def post(self, request, *args, **kwargs):
         user = authenticate(
@@ -132,18 +118,6 @@ class LoginAjaxView(LoginView, SuccessMessageMixin):
             response = {"status": 1}
             messages.success(self.request, self.get_success_message())
         return JsonResponse(response, safe=False)
-
-    def get_success_message(self, cleaned_data=""):
-        return self.success_message
-
-    def get_success_url(self):
-        """success url set to redirect after login in
-        :Argument: self
-        :type self : /
-        :return: redirection to dashboard_view
-        :rtype: str
-        """
-        return reverse_lazy("dashboard_view")
 
     def form_invalid(self, form):
         return JsonResponse(form.errors, status=200)
