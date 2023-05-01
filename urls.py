@@ -30,4 +30,10 @@ urlpatterns = [
         core_views.DisplayDashboardView.as_view(template_name="display/dashboard.html"),
         name="dashboard_view"
     ),
-]
+    path(
+        'logout/',
+        LogoutView.as_view(next_page='index_view'),
+        name='user_logout'
+    ),
+]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
