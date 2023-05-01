@@ -44,6 +44,8 @@ ROOT_URLCONF = 'urls'
 
 # Authentication with email
 AUTHENTICATION_BACKENDS = ['core.backend.authentication.EmailBackend']
+LOGIN_URL = "/"
+LOGOUT_REDIRECT_URL = '/'
 
 TEMPLATES = [
     {
