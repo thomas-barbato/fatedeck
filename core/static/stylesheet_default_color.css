@@ -1,0 +1,105 @@
+.navbar,
+.create-content-form {
+    background-color: none;
+}
+
+html,
+a,
+li,
+p,
+b,
+span,
+h1,
+h2,
+h3,
+h4,
+h5,
+.card,
+li.list-group-item,
+.navbar-text-color,
+.label-style,
+.white-crown {
+    color: #F5F5F5;
+}
+
+input[type="text"],
+input[type="password"],
+.inside-navbar-text-color,
+.card-text,
+.modal-text-color {
+    color: black
+}
+
+.maximum-game-number-reached {
+    color: red
+}
+
+.cancel-button,
+.shuffle-cemetery {
+    color: #F5F5F5;
+    background-color: rgb(95, 5, 131);
+    border: none;
+}
+
+.cancel-button:hover,
+.shuffle-cemetery:hover {
+    background-color: rgb(156, 10, 214);
+    color: #F5F5F5;
+}
+
+.success-button,
+.shuffle-deck {
+    color: #F5F5F5;
+    background-color: rgb(43, 121, 43);
+    border: none;
+}
+
+.shuffle-deck:hover,
+.success-button:hover {
+    color: #F5F5F5;
+    background-color: rgb(68, 216, 80);
+    border: none;
+}
+
+.disabled-button {
+    background-color: darkgray;
+}
+
+.create-account-url-color:hover,
+.can-add-game,
+.draw-card-alert-color-text {
+    color: rgb(68, 216, 80);
+}
+
+.create-account-url-color {
+    color: rgb(43, 121, 43)
+}
+
+.crown {
+    /*color: #e9b304*/
+    color: goldenrod
+}
+
+.list-invite-name {
+    color: rgb(95, 5, 131);
+}
+
+.deny-invitation {
+    color: rgb(95, 5, 131);
+}
+
+.deny-invitation:hover {
+    color: rgb(156, 10, 214);
+}
+
+.accept-invitation {
+    color: rgb(43, 121, 43);
+}
+
+.accept-invitation:hover {
+    color: rgb(68, 216, 80);
+}
+
+.empty-deck-alert-color-text {
+    color: rgb(241, 25, 10)
+}

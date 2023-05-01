@@ -1,0 +1,21 @@
+<div class="container-fluid  navbar-expand-sm navbar-dark top-navbar-background">
+    <nav class="navbar-nav navbar-dark top-navbar-background d-flex justify-content-center">
+        <div class="nav-item d-flex justify-content-start">
+            <a class="navbar-brand" href=""><i class="fas fa-home navbar-text-color"></i></a>
+        </div>
+        <div class="nav-item d-flex  justify-content-center">
+            <span class="navbar-brand"><a class="navbar-text-color" href="{% url 'dashboard_view' %}">Bienvenue {{ request.user }}, accedez à votre session</a></span>
+        </div>
+        <div class="nav-item dropdown show justify-content-end">
+            <a class="nav-link" href="#" role="button" id="options-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="navbar-text-color navbar-brand"><i class="fas fa-cog rotated-cog"></i></span>
+            </a>
+            <div class="dropdown-menu" id="dropdown" aria-labelledby="options-dropdown">
+                <a class="dropdown-item dropdown-option-menu-color" data-toggle="modal" data-target="#ThemeModal" href=""><i class="fas fa-cogs"><span class="p-2 inside-navbar-text-color"></i>Themes</span></a>
+                <a class="dropdown-item" href=""><i class="fas fa-user-circle"></i><span class="p-2 inside-navbar-text-color">Mon compte</span></a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item logout" href=""><i class="fas fa-sign-out-alt"></i><span class="p-2 inside-navbar-text-color">Deconnexion</span></a>
+            </div>
+        </div>
+    </nav>
+</div>

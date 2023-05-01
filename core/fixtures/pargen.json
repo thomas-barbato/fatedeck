@@ -1,0 +1,18 @@
+[{
+    "model": "core.pargen",
+    "pk": null,
+    "fields": {
+        "name": "max_game_per_user",
+        "int_value": 7,
+        "str_value": null,
+        "bool_value": false
+    },
+    "model": "core.pargen",
+    "pk": null,
+    "fields": {
+        "name": "max_game_per_user",
+        "int_value": 7,
+        "str_value": null,
+        "bool_value": false
+    }
+}]

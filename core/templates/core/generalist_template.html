@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fr" SameSite=Lax Secure>
+    
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1" SameSite=Lax Secure >
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        {% load static %}
+        <link rel="stylesheet" type="text/css" href="{% static 'css/style.css'%}">
+        <script src="{% static 'js/jquery/jquery-3.6.0.min.js'%}" type="text/javascript"></script>
+        <script src="{% static 'js/jquery/popper.min.js'%}" type="text/javascript"></script>
+        <script src="{% static 'js/bootstrap/bootstrap.min.js'%}" type="text/javascript"></script>
+        <script src="{% static 'js/jqueryoverlay.min.js'%}" type="text/javascript"></script>
+        <link rel="stylesheet" href="{% static 'css/fontawesome/css/all.css' %} " type="text/css"/>
+        <link rel="stylesheet" href="{% static 'css/bootstrap/bootstrap.css'%}" type="text/css">
+        <link rel="stylesheet" href="{% static 'css/' %}{{ user.user_stylesheet }}"  type="text/css"/>
+        <script src="{% static 'js/vuejs/vue.js'%}" type="text/javascript"></script> 
+        <script src="{% static 'js/ckeditor/ckeditor.js'%}" type="text/javascript"></script> 
+        <link rel="shortcut icon" type="image/png" href="{% static 'icons/Icone_Masque_Mauve.png' %}"/>
+        {% include "jsvar.html" %}
+    </head>
+    <body>
+        {% block title %}
+            <title>malifaux fate-generator</title>
+            {% if user.is_authenticated %}
+                {% with request.get_full_path as path %}
+                {% block not_editable_js %}
+                <script>
+                </script>
+                {% endblock %}
+                    {% if path == '/' %}
+                        {% include "top-pannel-logged-in-index.html" %}
+                    {% elif 'ingame' in path %}
+                        {% include "top-pannel-logged-in-game.html" %}
+                    {% else %}
+                        {% include "top-pannel-logged-in.html" %}
+                    {% endif %}
+                {% endwith %}
+            {% else %}
+                {% include "top-pannel.html" %}
+                <link rel="stylesheet" href="{% static 'css/stylesheet_default_color.css' %}"  type="text/css"/>
+            {% endif %}
+
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }} d-flex justify-content-center"{% endif %}>
+                    {{ message|safe }}
+                </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% endblock %}
+        
+        {% block content %}
+        </body>
+        </html>
+        {% endblock %}
+        
+        {% block javascript %}{% endblock %}

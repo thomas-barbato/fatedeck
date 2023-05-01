@@ -1,0 +1,607 @@
+[
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "1-Belier", 
+		"filename": "1-Belier.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "1-Corbeau", 
+		"filename": "1-Corbeau.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "1-Livre", 
+		"filename": "1-Livre.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "1-Masque", 
+		"filename": "1-Masque.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "10-Belier", 
+		"filename": "10-Belier.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "10-Corbeau", 
+		"filename": "10-Corbeau.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "10-Livre", 
+		"filename": "10-Livre.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "10-Masque", 
+		"filename": "10-Masque.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "11-Belier", 
+		"filename": "11-Belier.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "11-Corbeau", 
+		"filename": "11-Corbeau.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "11-Livre", 
+		"filename": "11-Livre.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "11-Masque", 
+		"filename": "11-Masque.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "12-Belier", 
+		"filename": "12-Belier.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "12-Corbeau", 
+		"filename": "12-Corbeau.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "12-Livre", 
+		"filename": "12-Livre.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "12-Masque", 
+		"filename": "12-Masque.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "13-Belier", 
+		"filename": "13-Belier.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "13-Corbeau", 
+		"filename": "13-Corbeau.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "13-Livre", 
+		"filename": "13-Livre.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "13-Masque", 
+		"filename": "13-Masque.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "2-Belier", 
+		"filename": "2-Belier.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "2-Corbeau", 
+		"filename": "2-Corbeau.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "2-Livre", 
+		"filename": "2-Livre.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "2-Masque", 
+		"filename": "2-Masque.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "3-Belier", 
+		"filename": "3-Belier.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "3-Corbeau", 
+		"filename": "3-Corbeau.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "3-Livre", 
+		"filename": "3-Livre.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "3-Masque", 
+		"filename": "3-Masque.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "4-Belier", 
+		"filename": "4-Belier.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "4-Corbeau", 
+		"filename": "4-Corbeau.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "4-Livre", 
+		"filename": "4-Livre.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "4-Masque", 
+		"filename": "4-Masque.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "5-Belier", 
+		"filename": "5-Belier.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "5-Corbeau", 
+		"filename": "5-Corbeau.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "5-Livre", 
+		"filename": "5-Livre.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "5-Masque", 
+		"filename": "5-Masque.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "6-Belier", 
+		"filename": "6-Belier.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "6-Corbeau", 
+		"filename": "6-Corbeau.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "6-Livre", 
+		"filename": "6-Livre.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "6-Masque", 
+		"filename": "6-Masque.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "7-Belier", 
+		"filename": "7-Belier.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "7-Corbeau", 
+		"filename": "7-Corbeau.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "7-Livre", 
+		"filename": "7-Livre.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "7-Masque", 
+		"filename": "7-Masque.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "8-Belier", 
+		"filename": "8-Belier.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "8-Corbeau", 
+		"filename": "8-Corbeau.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "8-Livre", 
+		"filename": "8-Livre.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "8-Masque", 
+		"filename": "8-Masque.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "9-Belier", 
+		"filename": "9-Belier.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "9-Corbeau", 
+		"filename": "9-Corbeau.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "9-Livre", 
+		"filename": "9-Livre.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "9-Masque", 
+		"filename": "9-Masque.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "dos", 
+		"filename": "dos.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "J-noir", 
+		"filename": "J-noir.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+	},
+	{
+	"model": "core.cards",
+	"pk": null,
+	"fields": {
+		"name": "J-rouge", 
+		"filename": "J-rouge.svg", 
+		"created_at": "2022-12-05 12:54:46", 
+		"updated_at": "2022-12-05 12:54:46", 
+		"deleted_at": null 
+		}
+}
+]

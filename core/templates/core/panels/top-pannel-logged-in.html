@@ -1,0 +1,80 @@
+<div class="container-fluid  navbar-expand-sm navbar-dark top-navbar-background d-flex" id="top-pannel-notification">
+  <nav class="navbar-nav navbar-dark top-navbar-background d-flex col-12">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <div class="nav-item d-flex justify-content-start">
+        <a class="navbar-brand" href="{% url 'index_view' %}"><i class="fas fa-home navbar-text-color"></i></a>
+      </div>
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item dropdown dropstart d-flex justify-content-xl-end justify-content-sm-start">
+          <a class="nav-link" href="#" role="button" id="options-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="navbar-text-color navbar-brand"><i class="fas fa-cog rotated-cog"></i></span>
+          </a>
+          <div class="dropdown-menu dropdown-option-menu-color" id="dropdown" aria-labelledby="options-dropdown">
+            <a class="dropdown-item dropdown-option-menu-color" data-toggle="modal" data-target="#ThemeModal" href=""><i class="fas fa-cogs"><span class="p-2 align-middle navbar-text-color"></i>Themes</span></a>
+            <a class="dropdown-item" href=""><i class="fas fa-user-circle"><span class="p-2 align-middle"></i>Mon compte</span></a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item logout" href=""><i class="fas fa-sign-out-alt"><span class="p-2 align-middle"></i>Deconnexion</span></a>
+          </div>
+        </li>
+      </ul>
+      <ul class="navbar-nav">
+        <li class="nav-item dropdown d-flex justify-content-xl-end align-items-sm-start">
+          <a class="nav-link" href="#" role="button" id="friend-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="navbar-text-color navbar-brand">
+              <i class="fas fa-users">
+                <span class="badge badge-light presentation-no-font-family red-value float-left" v-if="friend_invite_notification > 0">
+                  [[ friend_invite_notification ]]
+                </span>
+              </i>
+            </span>
+          </a>
+          <div class="row no-gutters dropdown-menu" id="display-friend-dropdown" aria-labelledby="friend-dropdown">
+            <div class="dropdown-item " v-if="!friend_invitation_list.length">
+              Vous n'avez pas encore de notification.
+            </div>
+            <div class="dropdown-item ml-5" v-else v-for="contact in friend_invitation_list">
+              <p class="text-break text-justify card-text"><span class="list-invite-name presentation-no-font-family">[[contact.name]]</span> souhaite vous ajouter à ses contacts</p>
+              <div class="row">
+                <div class="col-6 d-flex justify-content-end">
+                  <i class="fas fa-check cursor-pointer accept-invitation add-contact" @click="accept_friend_invitation($event)" :id="[[contact.name]]"></i>
+                </div>
+                <div class="col-6 d-flex justify-content-start">
+                  <i class="fa-ban cursor-pointer deny-invitation denied-contact" @click="deny_friend_invitation($event)" :id="[[contact.name]]"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li class="nav-item dropdown dropstart d-flex justify-content-xl-end justify-content-sm-start">
+          <a class="nav-link" href="#" role="button" id="game-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="navbar-text-color navbar-brand">
+              <i class="fas fa-dice">
+                <span class="badge badge-light presentation-no-font-family red-value"  v-if="game_invite_notification > 0">
+                  [[ game_invite_notification ]]
+                </span>
+              </i>
+            </span>
+          </a>
+          <div class="row no-gutters dropdown-menu" id="display-game-dropdown" aria-labelledby="game-dropdown">
+            <div class="dropdown-item " v-if="!game_invitation_list.length">
+              Vous n'avez pas encore de notification.
+            </div>
+            <div class="dropdown-item ml-5" v-else v-for="game in game_invitation_list">
+              <p class="text-break text-justify card-text"><span class="list-invite-name presentation-no-font-family">[[game.contact_name]]</span> souhaite vous inviter dans sa partie</p>
+              <div class="row">
+                <div class="col-6 d-flex justify-content-end">
+                  <i class="fas fa-check cursor-pointer accept-invitation add-game" @click="accept_game_invitation($event)" :id="[[game.game_name]]"></i>
+                </div>
+                <div class="col-6 d-flex justify-content-start">
+                  <i class="fas fa-ban cursor-pointer deny-invitation denied-game" @click="deny_game_invitation($event)" :id="[[game.game_name]]"></i>
+                </div>
+              </div>
+            </div>
+        </li>
+      </ul>
+    </div>
+  </nav>
+</div>

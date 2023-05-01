@@ -1,0 +1,107 @@
+{% extends "generalist_template.html" %}
+{% load static %}
+{% block content %}
+<div class="container-fluid main-container-fluid-div container-content " id="user-main-container">
+  <form method="POST" name="create_user_form" class="create-user create-content-form col-xl-4 mx-auto p-2 mt-3" action="">
+    {% csrf_token %}
+    <div class="text-center mx-auto p-2 user-main-form">
+      <div class="col-12 fieldWrapper">  
+        <div class="mb-5 col-sm-12 col-xl-12 mx-auto user-main-form-title">
+            <h5 class="p-2 mx-auto label-style"><i>Création d'un nouveau compte</i></h5>
+        </div>
+        {{ register_form.non_field_error }} 
+        {% for field in form %}
+          <div class="fieldWrapper">
+            <label class="label-style" for="{{ field.id_for_label }}" >{{ field.label }}
+              {% if field.name == "username" or field.name == "email" or field.name == "password1" or field.name == "password2"%} 
+                 <span class="tooltip-symbol" data-toggle="tooltip" data-placement="top" title="Champ obligatoire pour sauvegarder votre compte">*</span>:</label>
+              {% endif %}
+            </label>
+          </div>
+          <div class="fieldWrapper">
+            {{ field }}
+          </div>
+          <div class="fieldWrapper w-100" id="{{field.name}}_error">
+              {{ field.errors|escape }}
+          </div>
+        {% endfor %}
+    <div class="row h-100 text-center mx-auto p-2">
+      <div class="col fieldWrapper">
+        <input type="button" class="submit-button btn btn-success register-btn" id="create-user-button" value="Enregistrez vous">
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+
+{% block javascript %}
+<script>
+
+  $('#user-main-container').css('background-size', 'cover').css('background-repeat', 'no-repeat').css('background-position', 'left');
+  $('#id_username, #id_email, #id_password1, #id_password2, #id_first_name, #id_last_name').addClass('text-center presentation-no-font-family')
+  $('#id_username').attr({'maxlength':'16', 'minlength': '4'})
+
+  $('.register-btn').on('click', function(){
+    let url = "{% url 'register_view' %}";
+    let email = $('#id_email').val();
+    let username = $('#id_username').val();
+    let password = $('#id_password').val();
+    let password2 = $('#id_password2').val();
+    $.ajax({
+        url: url,
+        type: 'POST',
+        dataType : 'json',
+        headers: { "X-CSRFToken": '{% csrf_token %}' },
+        data:{
+          'csrfmiddlewaretoken': '{% csrf_token %}',
+          'username': username,
+          'password': password,
+          'password2': password2,
+          'email': email
+        },
+        success(json){
+            if(json.status == 1){
+                window.location = "{% url 'index_view' %}";
+            }else{
+                let password_elem = $('#password_error')
+                let username_elem = $('#username_error')
+                let email_elem = $('#email_error')
+                let index_error = ['password', 'password2', '__all__', 'username', 'email']
+                let array = $.each(json.errors, function(key, value){
+                  console.log(key, value)
+                    return [key, value]
+                })
+                $.each(index_error, function(index){
+                    if(index_error[index] in array){
+                        if(index_error[index] == "password" || index_error[index] == "password2"){
+                           $('#id_password, #id_password2').css('border', '2px solid red');
+                            $(password_elem).html(array["password2"]).show().fadeOut(10000);
+                        }else if(index_error[index] == "__all__"){
+                            $('form>input').css('border', '2px solid red');
+                            $(password_elem).html(array["__all__"]).show().fadeOut(10000);
+                        }else if(index_error[index] == "username"){
+                            $("#id_username").css('border', '2px solid red');
+                            $(username_elem).html(array["username"]).show().fadeOut(10000);
+                        }else if(index_error[index] == "email"){
+                            $("#id_email").css('border', '2px solid red');
+                            $(email_elem).html(array["email"]).show().fadeOut(10000);
+                        }
+                    }else{
+                        $('#id_'+index_error[index]).css('border', '2px solid green');
+                    }
+                })
+                $(document).ready(function () {
+                    setTimeout( function(){
+                        $('form>input').css('border','');
+                    },5000);
+                });
+
+            }
+        }
+    })
+  })
+
+</script>
+{% endblock %}
+

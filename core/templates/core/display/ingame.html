@@ -1,0 +1,1508 @@
+{% extends 'generalist_template.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container-fluid" id="game-container">
+  <div class="row no-gutters">
+    <div class="row no-gutters">
+      <div class="col-12">
+        <h3 class="text-center mt-2">{{ game_informations.0.name|title }}{% if request.user.id == game_owner %}<span class="col-12 text-center presentation-no-font-family"><i> ({{ game_informations.0.game_invite_code }})</i></span>{% endif %}</h3>
+      </div>
+    </div>
+    <div class="row no-gutters mx-auto">
+      <div class="col-6 d-flex justify-content-end">
+        <div class="card col-xl-2 col-md-4 col-sm-5 game-card-style draw-card">
+          <div class="card-title text-center col-12 section-title">
+            <p>pioche <span class="presentation-no-font-family">( [[ deck_current_len ]] / 54)</span></p> 
+          </div>
+          <div class="card-body col-12 game-card-style">
+            <img v-if="count_card_in_hands < 5"  v-on:click="pick_a_card()" class="card-img card-size action-cursor" src="{% static '/cards/dos.svg' %}"></img>
+            <img v-else class="card-img unallowed-cursor-and-disable" src="{% static '/cards/dos.svg' %}" disabled></img>
+            <div class="card-footer game-card-style text-center action-cursor col-12">
+              {% if request.user.id == game_owner%}
+              <div class="btn shuffle-deck mx-auto" v-on:click='reset_all_cards()'>
+                <i class="fas fa-random"></i>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 d-flex justify-content-start">
+        <div class="card col-xl-2 col-md-4 col-sm-5 game-card-style">
+          <div class="card-title text-center col-12 section-title">
+            <p>defausse</p>
+          </div>
+          <div class="card-body col-12 game-card-style">
+            <img class="card-img unallowed-cursor-and-disable game-card-style" src="{% static '/cards/dos.svg' %}"></img>
+            <div class="card-footer game-card-style text-center action-cursor col-12">
+              {% if request.user.id == game_owner%}
+              <div class="btn shuffle-cemetery mx-auto " v-on:click="clean_inhand_cards()">
+                <i class="fas fa-broom"></i>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row no-gutters">
+    <div v-if="count_card_in_hands >= 5" class="col col-12 d-flex">
+      <b class="col col-xl-2 col-md-4 col-sm-5  d-flex justify-content-center presentation-no-font-family-bold draw-card-alert-color-text text-center mx-auto background-transparency-color  alert unallowed-cursor" id="warning-card-draw-text"><i class="fas fa-exclamation-circle mt-1"> Attention, zone de tirage pleine</i></b>
+    </div>
+  </div>
+  <div class="row no-gutters">
+    <div v-if="deck_current_len === 0" class="col col-12 d-flex">
+      <b class="col col-4 d-flex justify-content-center presentation-no-font-family-bold empty-deck-alert-color-text text-center mx-auto background-transparency-color  alert unallowed-cursor" id="warning-card-draw-text"><i class="fas fa-exclamation-circle mt-1"> Attention, deck vide</i></b>
+    </div>
+  </div>
+  {{ character_sheet.0.fields.charinfo }}
+  <!-- in hand part -->
+  <div class="row mt-5">
+    <p class="ms-auto section-title" style="">Tirages:</p>
+  </div>
+  <div class="row no-gutters d-flex align-self-center justify-content-center mx-auto col-xl-6 col-md-6 col-12" >
+    <div class="card col-xl-2 col-md-4 col-sm-3 col-6 game-card-style d-flex justify-content-center card-size" v-if="count_card_in_hands <= 5" v-for="card in cards_drawn">
+      <div class="card-body game-card-style">
+        <img class="card-img game-card-style" v-bind:src="card.filename"></img>
+      </div>
+      <div class="card-footer game-card-style text-center last-picked-up-style">
+          <b class="last-picked-up-style col-12 presentation-no-font-family-bold">[[ card.last_picked_up_by ]]</b>
+      </div>
+    </div>
+  </div>
+  <!-- friend's list -->
+  <div class="row d-flex background-transparency-color card-border-style col-xl-2 col-md-10 col-lg-10 mx-auto col-sm-1s0 d-flex align-self-start justify-content-start mt-4 mb-5">
+    <div class="card-title"><h5 class="text-center">Joueurs</h5></div>
+    <div class="card-body">
+      <ul class="list-group list-contact row list-group-flush">
+        <li v-for="player, name, id, owner_uuid_id in players" class="list-group-item test-justify presentation-no-font-family d-flex friend-list" v-bind:id="[[ player.id]]">
+          <span v-if="player.id === game_owner" class="presentation-no-font-family">[[ player.name ]] <i class="fas fa-crown me-auto"></i></span>
+          <span v-else class="presentation-no-font-family player-size-name">[[ player.name ]]</span>
+          <span v-if="player.is_online" class="dot green-dot ms-auto mt-2"></span>
+          <span v-else class="dot red-dot ms-auto mt-2"></span>
+        </li>
+      </ul>
+    </div>
+    <div class="card-footer">
+      {% if request.user.id == game_owner %}
+      <div class="row no-gutters col-12">
+        <h5 class="text-center cursor-pointer presentation-no-font-family col-5 ms-auto" data-toggle="modal" data-target="#invite-friend-modal"><i class="fas fa-user-friends fa-2x"></i>
+        <h5 class="text-center cursor-pointer presentation-no-font-family col-5 ms-auto" data-toggle="modal" data-target="#add-contact-modal"><i class="fas fa-address-book fa-2x"></i>
+      </div>
+      {% endif %}
+    </div>  
+  </div> 
+  <!-- new player modal part -->
+  <div class="modal fade" id="invite-friend-modal" tabindex="-1" role="dialog" aria-labelledby="invite-friend-modal-Label" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title modal-text-color mx-auto" id="exampleModalLabel">Ajouter ce contact</h5>
+        </div>
+        <div class="modal-body form-group">
+          <label for="input-invitation-name">Nom du contact :</label>
+          <input type="text" name="invite_code" value="" minlength="4" maxlength="22" class="form-control presentation-no-font-family" id="input-friend-name" aria-describedby="input-game-name-help" placeholder="un_user#1234">
+          <small id="input-invitation-name-help" class="form-text text-muted">Pas plus de 22 caractères.</small>
+          <p class="alert alert-danger friend-invitation-error">Cet utilisateur n'existe pas...</p>
+          <p class="alert alert-success friend-invitation-success">Cet utilisateur existe...</p>
+          <p class="alert alert-warning friend-same-user-error">Vous ne pouvez pas vous ajouter vous meme...</p>
+          <p class="alert alert-warning already-friend-error">Ce contact est déjà présent dans votre liste...</p>
+        </div>
+        <div class="modal-footer mx-auto">
+          <button type="button" v-on:click="create_player_invitation($event)" id="submit-invitation" class="btn btn-primary success-button"data-dismiss="modal">Inviter</button>
+          <button type="button" class="btn btn-secondary cancel-button" data-dismiss="modal">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- new player modal from friend list part -->
+  <div class="modal fade" id="add-contact-modal" tabindex="-1" role="dialog" aria-labelledby="add-contact-modal-Label" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title modal-text-color mx-auto" id="exampleModalLabel">Invitez vos amis</h5>
+        </div>
+        <div class="modal-body form-group">
+          <select class="form-select" aria-label="select-example" name="friend-select" id="friend-select">
+            <option value=''>Selectionnez un contact</option>
+            <option v-for="friend in friend_list" :value='[[ friend ]]'>[[ friend ]]</option>
+          </select>
+        </div>
+        <div class="modal-footer mx-auto">
+          <button type="button" v-on:click="create_player_invitation($event)" id="submit-contact" class="btn btn-primary success-button"data-dismiss="modal">Inviter</button>
+          <button type="button" class="btn btn-secondary cancel-button" data-dismiss="modal">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Character Sheet modal -->
+<div class="modal fade" id="character-sheet-modal" tabindex="-1" role="dialog" aria-labelledby="add-contact-modal-Label" aria-hidden="true">
+  <div class="modal-dialog modal-fullscreen " role="document">
+    <form action="" class="modal-content" id="character-sheet-modal-content" method="POST">
+      {% csrf_token %}
+      <div class="modal-header row no-gutters d-flex character-sheet-color">
+        <h2 class="d-flex justify-content-center col-11 character-sheet-category-title" id="exampleModalToggleLabel">A travers la brèche</h2>
+        <h3 class="d-flex justify-content-center col-12 mt-2 pr-5 character-sheet-category-title">Bienvenue à Malifaux</h3>
+        <div class="row">
+          <div class="row">
+            <button type="button " class="btn-close col-1 d-flex justify-content-end" data-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="col-6 d-flex justify-content-end button-page-1">
+            <h5 class="mx-auto character-sheet-category-title cursor-pointer character-sheet-button">Page 1</h5> 
+          </div>
+          <div class="col-6 d-flex justify-content-start button-page-2">
+            <h5 class="mx-auto character-sheet-category-title cursor-pointer character-sheet-button">Page 2</h5>
+          </div>
+        </div>
+      </div>
+      <div class="modal-body form-group character-sheet-color" id="page-1">
+        <div class="row no-gutters col-12 d-flex justify-content-center">
+          {#--page 1 left side row 1 --#}
+          <div class="row col-xl-6 col-md-5 col-sm-10 col-10 d-flex align-self-start mx-auto mt-2">
+            <div class="form-row col-12 character-sheet-border ">
+              <div class="form-group align-items-center col-12">
+                <label for="name">Nom de votre personnage:</label>
+                <input type="text" class="form-control" id="name" value="{{character_sheet.0.charinfo.name }}" placeholder="Nom de votre personnage..."/>
+              </div>
+              <div class="row">
+                <div class="form-group align-items-center col-4">
+                  <label for="age">Age:</label>
+                  <input type="text" class="form-control " step="1" id="age" value="{{character_sheet.0.charinfo.age}}" placeholder="0" min="0"/>
+                </div>
+                <div class="form-group align-items-center col-4">
+                  <label for="lenght">Taille:</label>
+                  <input type="text" class="form-control " step=".01" id="length" value="{{character_sheet.0.charinfo.lenght}}" placeholder="0" min="0"/>
+                </div>
+                <div class="form-group align-items-center col-4">
+                  <label for="weight">Poid:</label>
+                  <input type="text" class="form-control " id="weight" value="{{character_sheet.0.charinfo.weight}}" placeholder="0" min="0"/>
+                </div>
+              </div>
+              <div class="form-group align-items-center col-12">
+                <label for="Description">Description:</label>
+                <div class="form-group" id="description-textarea" style="color:black;">
+                  {% autoescape off %}
+                  {{ character_sheet.0.charinfo.description|safe }}
+                  {% endautoescape %}
+                </div>
+              </div>
+            </div>
+          </div>
+          {#--page 1 right side row 1 --#}
+          <div class="col-xl-6 col-md-5 col-sm-10 col-10 d-flex align-self-start mx-auto mt-2">
+            <div class="form-row col-12 no-gutters mb-2 character-sheet-border">
+              <div class="form-group col-12 character-sheet-border character-sheet-title-color">
+                <h5 class="text-center mx-auto col-12 character-sheet-title-color mt-2">OCCUPATIONS</h5>
+              </div>
+              <div class="input-group align-items-center col-12 mt-2 occupation">
+                <span class="input-group-addon"><input type="checkbox" id="occupation1-checkbox" {% if character_sheet.1.occupation.is_checked %} checked {% endif %}></span>
+                <input type="text" class="form-control col-10" id="occupation1" value="{{ character_sheet.1.occupation.text }}" placeholder="occupation1..."/>
+              </div>
+              <div class="input-group align-items-center col-12 mt-1 occupation">
+                <span class="input-group-addon"><input type="checkbox" id="occupation2-checkbox" {% if character_sheet.2.occupation.is_checked %} checked {% endif %}> </span>
+                <input type="text" class="form-control col-10" id="occupation2" value="{{ character_sheet.2.occupation.text }}" placeholder="occupation2..."/>
+              </div>
+              <div class="input-group align-items-center col-12 mt-1 occupation">
+                <span class="input-group-addon"><input type="checkbox" id="occupation3-checkbox" {% if character_sheet.3.occupation.is_checked %} checked {% endif %}> </span>
+                <input type="text" class="form-control col-10" id="occupation3" value="{{ character_sheet.3.occupation.text }}" placeholder="occupation3..."/>
+              </div>
+              <div class="input-group align-items-center col-12 mt-1 mb-2 occupation">
+                <span class="input-group-addon"><input type="checkbox" id="occupation4-checkbox" {% if character_sheet.4.occupation.is_checked %} checked {% endif %}> </span>
+                <input type="text" class="form-control col-10" id="occupation4" value="{{ character_sheet.4.occupation.text }}" placeholder="occupation4..."/>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row no-gutters col-12 d-flex justify-content-center mt-1">
+          {#--page 1 left side row 2 --#}
+          <div class="col-xl-6 col-md-5 col-sm-10 col-10 d-flex align-self-start mx-auto mt-1">
+            <div class="form-row col-12 no-gutters mb-2 character-sheet-border">
+              <div class="form-group col-12 character-sheet-border character-sheet-title-color">
+                <h5 class="text-center mx-auto col-12 character-sheet-title-color mt-2">ASPECTS</h5>
+              </div>
+              <div class="row mt-1">
+                <div class="col-6 text-center">
+                  <span class="character-sheet-category-title">Physique</span>
+                </div>
+                <div class="col-6 text-center">
+                  <span class="character-sheet-category-title">Mental</span>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-6">
+                  <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
+                    <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12 mx-auto">Puissance</span>
+                    <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="power" name="power" value="{{ character_sheet.5.aspect.power }}" aria-describedby="basic-addon3">
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
+                    <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Intellect</span>
+                    <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="intel" name="intel" value="{{ character_sheet.5.aspect.intel }}" aaria-describedby="basic-addon3">
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-6">
+                  <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
+                    <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Agilité</span>
+                    <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="agility" name="agility" value="{{ character_sheet.5.aspect.agility }}" aaria-describedby="basic-addon3">
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
+                    <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Charme</span>
+                    <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="charisma" name="charisma" value="{{ character_sheet.5.aspect.charisma }}" aaria-describedby="basic-addon3">
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-6">
+                  <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
+                    <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Vitesse</span>
+                    <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="speed" name="speed" value="{{ character_sheet.5.aspect.speed }}" aaria-describedby="basic-addon3">
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
+                    <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Ruse</span>
+                    <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="cunning" name="cunning" value="{{ character_sheet.5.aspect.cunning }}" aaria-describedby="basic-addon3">
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-6">
+                  <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
+                    <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Résilience</span>
+                    <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="resilience" name="resilience" value="{{ character_sheet.5.aspect.resilience }}" aaria-describedby="basic-addon3">
+                  </div>
+                </div>
+                <div class="col-6 mb-2">
+                  <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
+                    <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Ténacité</span>
+                    <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="steadiness" name="steadiness" value="{{ character_sheet.5.aspect.steadiness }}" aaria-describedby="basic-addon3">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {#--page 1 right side row 2 --#}
+          <div class="col-xl-6 col-md-5 col-sm-10 col-10 d-flex align-self-start mx-auto mt-1">
+            <div class="form-row col-12 no-gutters mb-2 character-sheet-border">
+              <div class="form-group col-12 character-sheet-border character-sheet-title-color">
+                <h5 class="text-center mx-auto col-12 character-sheet-title-color mt-2">ORIGINES</h5>
+              </div>
+              <div class="form-control" id="origine-textarea">{% autoescape off %} {{character_inventory_and_origins.0.origin|safe }}{% endautoescape %} </div>
+            </div>
+          </div>
+        </div>
+        <div class="row no-gutters col-12 d-flex justify-content-center mt-1">
+        {#--page 1 left side row 3 --#}
+          <div class="col-xl-6 col-md-6 col-sm-10 col-10 d-flex align-self-start mx-auto mt-1">
+            <div class="form-row col-12 no-gutters mb-2 character-sheet-border">
+              <div class="form-group col-12 character-sheet-border character-sheet-title-color">
+                <h5 class="text-center mx-auto col-12 character-sheet-title-color mt-2">ASPECTS DERIVES</h5>
+              </div>
+              <div class="row">
+                <div class="col-6">
+                  <div class="input-group col-4 mt-2 pl-1 pr-1">
+                    <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12 mx-auto">Défense</span>
+                    <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="defense" name="defense" value="{{ character_sheet.6.sub_aspect.defense }}" aria-describedby="basic-addon3">
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="input-group col-4 mt-2 pl-1 pr-1">
+                    <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Marche</span>
+                    <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="walk" name="walk" value="{{ character_sheet.6.sub_aspect.walk }}" aria-describedby="basic-addon3">
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-6">
+                  <div class="input-group col-4 mb-1 pl-1 pr-1">
+                    <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Armure</span>
+                    <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="armor" name="armor" value="{{ character_sheet.6.sub_aspect.armor }}" aria-describedby="basic-addon3">
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="input-group col-4 mb-1 pl-1 pr-1">
+                    <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Charge</span>
+                    <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="charge" name="charge" value="{{ character_sheet.6.sub_aspect.charge }}" aria-describedby="basic-addon3">
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-6">
+                  <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
+                    <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Volonté</span>
+                    <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="will" name="will" value="{{ character_sheet.6.sub_aspect.will }}" aria-describedby="basic-addon3">
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
+                    <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Initiative</span>
+                    <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="initiative" name="initiative" value="{{ character_sheet.6.sub_aspect.initiative }}" aria-describedby="basic-addon3">
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-6">
+                  <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
+                    <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Blessures</span>
+                    <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="wound" name="wound" value="{{ character_sheet.6.sub_aspect.wound }}" aria-describedby="basic-addon3">
+                  </div>
+                </div>
+                <div class="col-6 mb-2">
+                  <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
+                    <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Taille</span>
+                    <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="height" name="height" value="{{ character_sheet.6.sub_aspect.height }}" aria-describedby="basic-addon3">
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-xl-12 col-md-12 col-sm-10 col-10 d-flex align-self-start mx-auto mt-1">
+                  <div class="form-row col-12 no-gutters ">
+                    <div class="form-group col-12">
+                      <h5 class="text-center mx-auto col-12 character-sheet-title-color pt-2 pb-3">ATTAQUE</h5>
+                    </div>
+                    <div class="col-xl-12">
+                      <div class="input-group col-12 mb-1 mt-1 pl-1 pr-1">
+                        <span class="input-group-text col-md-2 col-4 col-sm-4" id="basic-addon3">Nom</span>
+                        <input type="text" class="form-control col-md-2 col-8 col-sm-8" id="attack-name-1" name="attack-name-1" value="{{ character_sheet.7.attack.name }}" aria-describedby="basic-addon3">
+                      </div>
+                      <div class="input-group col-2">
+                        <div class="col-4 mb-1 mt-1 pl-1 pr-1">
+                          <span class="col-12 text-center mx-auto character-sheet-category-title d-flex justify-content-center">Attaque</span>
+                        </div>
+                        <div class="col-4 mb-1 mt-1 pl-1 pr-1">
+                          <span class="col-12 text-center mx-auto character-sheet-category-title d-flex justify-content-center">Portée</span>
+                        </div>
+                        <div class="col-4 mb-1 mt-1 pl-1 pr-1">
+                          <span class="col-12 text-center mx-auto character-sheet-category-title d-flex justify-content-center">Dégats</span>
+                        </div>
+                      </div>
+                      <div class="input-group col-2">
+                        <div class="col-4 mb-1 mt-1 pl-1 pr-1">
+                          <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-va-1" name="attack-va-1" value="{{ character_sheet.7.attack.va }}" aria-describedby="basic-addon3">
+                        </div>
+                        <div class="col-4 mb-1 mt-1 pl-1 pr-1">
+                          <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-range-1" name="attack-range-1" value="{{ character_sheet.7.attack.range }}" aria-describedby="basic-addon3">
+                        </div>
+                        <div class="col-4 mb-1 mt-1 pl-1 pr-1">
+                          <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-damage-1" name="attack-damage-1" value="{{ character_sheet.7.attack.damage }}" aria-describedby="basic-addon3">
+                        </div>
+                      </div>
+                      <div class="input-group col-12 mb-1 mt-1 pl-1 pr-1">
+                        <span class="input-group-text col-md-2 col-4 col-sm-4" id="basic-addon3">Spécial</span>
+                        <input type="text" class="form-control col-md-2 col-8 col-sm-8" id="attack-special-1" name="attack-special-1" value="{{ character_sheet.7.attack.special }}" aria-describedby="basic-addon3">
+                      </div>
+                      <div class="input-group col-2">
+                        <div class="col-6 mb-1 mt-1 pl-1 pr-1">
+                          <span class="col-12 text-center mx-auto character-sheet-category-title d-flex justify-content-center">Capacité</span>
+                        </div>
+                        <div class="col-6 mb-1 mt-1 pl-1 pr-1">
+                          <span class="col-12 text-center mx-auto character-sheet-category-title d-flex justify-content-center">Recharge</span>
+                        </div>
+                      </div>
+                      <div class="input-group col-2">
+                        <div class="col-6 mb-1 mt-1 pl-1 pr-1">
+                          <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-skill-1" name="attack-skill-1" value="{{ character_sheet.7.attack.skill }}" aria-describedby="basic-addon3">
+                        </div>
+                        <div class="col-6 mb-1 mt-1 pl-1 pr-1">
+                          <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-reload-1" name="attack-reload-1" value="{{ character_sheet.7.attack.reload }}" aria-describedby="basic-addon3">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row mt-1">
+                <div class="col-xl-12 col-md-12 col-sm-10 col-10 d-flex align-self-start mx-auto mt-1">
+                  <div class="form-row col-12 no-gutters ">
+                    <div class="form-group col-12">
+                      <h5 class="text-center mx-auto col-12 character-sheet-title-color pt-2 pb-3">ATTAQUE 2</h5>
+                    </div>
+                    <div class="col-xl-12">
+                      <div class="input-group col-12 mb-1 mt-1 pl-1 pr-1">
+                        <span class="input-group-text col-4 col-sm-4" id="basic-addon3">Nom</span>
+                        <input type="text" class="form-control col-md-4 col-8 col-sm-8" id="attack-name-2" name="attack-name-2" value="{{ character_sheet.8.attack2.name }}" aria-describedby="basic-addon3">
+                      </div>
+                      <div class="input-group col-2">
+                        <div class="col-4 mb-1 mt-1 pl-1 pr-1">
+                          <span class="col-12 text-center mx-auto character-sheet-category-title d-flex justify-content-center">Attaque</span>
+                        </div>
+                        <div class="col-4 mb-1 mt-1 pl-1 pr-1">
+                          <span class="col-12 text-center mx-auto character-sheet-category-title d-flex justify-content-center">Portée</span>
+                        </div>
+                        <div class="col-4 mb-1 mt-1 pl-1 pr-1">
+                          <span class="col-12 text-center mx-auto character-sheet-category-title d-flex justify-content-center">Dégats</span>
+                        </div>
+                      </div>
+                      <div class="input-group col-2">
+                        <div class="col-4 mb-1 mt-1 pl-1 pr-1">
+                          <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-va-2" name="attack-va-2" value="{{ character_sheet.8.attack2.va }}" aria-describedby="basic-addon3">
+                        </div>
+                        <div class="col-4 mb-1 mt-1 pl-1 pr-1">
+                          <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-range-2" name="attack-range-2" value="{{ character_sheet.8.attack2.range }}" aria-describedby="basic-addon3">
+                        </div>
+                        <div class="col-4 mb-1 mt-1 pl-1 pr-1">
+                          <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-damage-2" name="attack-damage-2" value="{{ character_sheet.8.attack2.damage }}" aria-describedby="basic-addon3">
+                        </div>
+                      </div>
+                      <div class="input-group col-12 mb-1 mt-1 pl-1 pr-1">
+                        <span class="input-group-text col-md-2 col-4 col-sm-4" id="basic-addon3">Spécial</span>
+                        <input type="text" class="form-control col-md-2 col-8 col-sm-8" id="attack-special-2" name="attack-name-2" value="{{ character_sheet.8.attack2.special }}" aria-describedby="basic-addon3">
+                      </div>
+                      <div class="input-group col-2">
+                        <div class="col-6 mb-1 mt-1 pl-1 pr-1">
+                          <span class="col-12 text-center mx-auto character-sheet-category-title d-flex justify-content-center">Capacité</span>
+                        </div>
+                        <div class="col-6 mb-1 mt-1 pl-1 pr-1">
+                          <span class="col-12 text-center mx-auto character-sheet-category-title d-flex justify-content-center">Recharge</span>
+                        </div>
+                      </div>
+                      <div class="input-group col-2">
+                        <div class="col-6 mb-1 mt-1 pl-1 pr-1">
+                          <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-skill-2" name="attack-skill-2" value="{{ character_sheet.8.attack2.skill }}" aria-describedby="basic-addon3">
+                        </div>
+                        <div class="col-6 mb-1 mt-1 pl-1 pr-1">
+                          <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-reload-2" name="attack-reload-2" value="{{ character_sheet.8.attack2.reload }}" aria-describedby="basic-addon3">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {#-- page 1 right side row 3 --#}
+          <div class="col-xl-6 col-md-6 col-sm-10 col-10 d-flex align-self-start mx-auto mt-1">
+            <div class="form-row col-12 no-gutters mb-2 character-sheet-border">
+              <div class="form-group col-12 character-sheet-border character-sheet-title-color">
+                <h5 class="text-center mx-auto col-12 character-sheet-title-color mt-2">COMPETENCES</h5>
+              </div>
+              <div class="row mt-1">
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <span class="character-sheet-category-title">Competence</span>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <span class="character-sheet-category-title">Aspect</span>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <span class="character-sheet-category-title">Rang</span>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <span class="character-sheet-category-title">VA</span>
+                </div>
+              </div>
+              <div class="row mt-1 skill-data " id="skill-data-1">
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="competence-1" value="{{ character_sheet.9.skill.competence }}" name="competence1"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="aspect-1"  value="{{ character_sheet.9.skill.aspect }}" name="aspect1"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="rang-1"  value="{{ character_sheet.9.skill.rang }}" name="rang1"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control"id="va-1"  value="{{ character_sheet.9.skill.va }}" name="va1"></input>
+                </div>
+              </div> 
+              <div class="row mt-1 skill-data" id="skill-data-2">
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="competence-2"  value="{{ character_sheet.10.skill.competence }}" name="competence1"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="aspect-2" value="{{ character_sheet.10.skill.aspect }}" name="aspect1"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="rang-2" value="{{ character_sheet.10.skill.rang }}" name="rang1"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="va-2" value="{{ character_sheet.10.skill.va }}" name="va1"></input>
+                </div>
+              </div>
+              <div class="row mt-1 skill-data" id="skill-data-3">
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="competence-3" value="{{ character_sheet.11.skill.competence }}" name="competence3"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="aspect-3" value="{{ character_sheet.11.skill.aspect }}" name="competence3"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="rang-3" value="{{ character_sheet.11.skill.rang }}" name="rang3"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="va-3" value="{{ character_sheet.11.skill.va }}" name="va3"></input>
+                </div>
+              </div>
+              <div class="row mt-1 skill-data" id="skill-data-4">
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="competence-4" value="{{ character_sheet.12.skill.competence }}" name="competence4"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="aspect-4" value="{{ character_sheet.12.skill.aspect }}" name="competence4"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="rang-4" value="{{ character_sheet.12.skill.rang }}" name="rang4"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="va-4" value="{{ character_sheet.12.skill.va }}" name="va4"></input>
+                </div>
+              </div>
+              <div class="row mt-1 skill-data" id="skill-data-5">
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="competence-5" value="{{ character_sheet.13.skill.competence }}" name="competence5"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="aspect-5" value="{{ character_sheet.13.skill.aspect }}" name="competence5"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="rang-5" value="{{ character_sheet.13.skill.rang }}" name="rang5"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="va-5" value="{{ character_sheet.13.skill.va }}" name="va5"></input>
+                </div>
+              </div>
+              <div class="row mt-1 skill-data" id="skill-data-6">
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="competence-6" value="{{ character_sheet.14.skill.competence }}" name="competence6"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="aspect-6" value="{{ character_sheet.14.skill.aspect }}" name="competence6"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="rang-6" value="{{ character_sheet.14.skill.rang }}" name="rang6"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="va-6" value="{{ character_sheet.14.skill.va }}" name="va6"></input>
+                </div>
+              </div>
+              <div class="row mt-1 skill-data" id="skill-data-7">
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="competence-7" value="{{ character_sheet.15.skill.competence }}" name="competence7"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="aspect-7" value="{{ character_sheet.15.skill.aspect }}" name="competence7"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="rang-7" value="{{ character_sheet.15.skill.rang }}" name="rang7"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="va-7" value="{{ character_sheet.15.skill.va }}" name="va7"></input>
+                </div>
+              </div>
+              <div class="row mt-1 skill-data" id="skill-data-8">
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="competence-8" value="{{ character_sheet.16.skill.competence }}" name="competence8"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="aspect-8" value="{{ character_sheet.16.skill.aspect }}" name="competence8"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="rang-8" value="{{ character_sheet.16.skill.rang }}" name="rang8"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="va-8" value="{{ character_sheet.16.skill.va }}" name="va8"></input>
+                </div>
+              </div>
+              <div class="row mt-1 skill-data" id="skill-data-9">
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="competence-9" value="{{ character_sheet.17.skill.competence }}" name="competence9"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="aspect-9" value="{{ character_sheet.17.skill.aspect }}" name="competence9"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="rang-9" value="{{ character_sheet.17.skill.rang }}" name="rang9"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="va-9" value="{{ character_sheet.17.skill.va }}" name="va9"></input>
+                </div>
+              </div>
+              <div class="row mt-1 skill-data" id="skill-data-10">
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="competence-10" value="{{ character_sheet.18.skill.competence }}" name="competence10"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="aspect-10" value="{{ character_sheet.18.skill.aspect }}" name="competence10"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="rang-10" value="{{ character_sheet.18.skill.rang }}" name="rang10"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="va-10" value="{{ character_sheet.18.skill.va }}" name="va10"></input>
+                </div>
+              </div>
+              <div class="row mt-1 skill-data" id="skill-data-11">
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="competence-11" value="{{ character_sheet.19.skill.competence }}" name="competence11"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="aspect-11" value="{{ character_sheet.19.skill.aspect }}" name="competence11"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="rang-11" value="{{ character_sheet.19.skill.rang }}" name="rang11"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="va-11" value="{{ character_sheet.19.skill.va }}" name="va11"></input>
+                </div>
+              </div>
+              <div class="row mt-1 skill-data" id="skill-data-12">
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="competence-12" value="{{ character_sheet.20.skill.competence }}" name="competence12"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="aspect-12" value="{{ character_sheet.20.skill.aspect }}" name="competence12"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="rang-12" value="{{ character_sheet.20.skill.rang }}" name="rang12"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="va-12" value="{{ character_sheet.20.skill.va }}" name="va12"></input>
+                </div>
+              </div>
+              <div class="row mt-1 skill-data" id="skill-data-13">
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="competence-13" value="{{ character_sheet.21.skill.competence }}" name="competence13"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="aspect-13" value="{{ character_sheet.21.skill.aspect }}" name="competence13"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="rang-13" value="{{ character_sheet.21.skill.rang }}" name="rang13"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="va-13" value="{{ character_sheet.21.skill.va }}" name="va13"></input>
+                </div>
+              </div>
+              <div class="row mt-1 skill-data" id="skill-data-14">
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="competence-14" value="{{ character_sheet.22.skill.competence }}" name="competence14"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="aspect-14" value="{{ character_sheet.22.skill.aspect }}" name="competence14"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="rang-14" value="{{ character_sheet.22.skill.rang }}" name="rang14"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="va-14" value="{{ character_sheet.22.skill.va }}" name="va14"></input>
+                </div>
+              </div>
+              <div class="row mt-1 skill-data" id="skill-data-15">
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="competence-15" value="{{ character_sheet.23.skill.competence }}" name="competence15"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="aspect-15" value="{{ character_sheet.23.skill.aspect }}" name="competence15"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="rang-15" value="{{ character_sheet.23.skill.rang }}" name="rang15"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="va-15" value="{{ character_sheet.23.skill.va }}" name="va15"></input>
+                </div>
+              </div>
+              <div class="row mt-1 skill-data" id="skill-data-16">
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="competence-16" value="{{ character_sheet.24.skill.competence }}" name="competence16"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="aspect-16" value="{{ character_sheet.24.skill.aspect }}" name="competence16"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="rang-16" value="{{ character_sheet.24.skill.rang }}" name="rang16"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="va-16" value="{{ character_sheet.24.skill.va }}" name="va16"></input>
+                </div>
+              </div>
+              <div class="row mt-1 skill-data" id="skill-data-17">
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="competence-17" value="{{ character_sheet.25.skill.competence }}" name="competence17"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="aspect-17" value="{{ character_sheet.25.skill.aspect }}" name="competence17"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="rang-17" value="{{ character_sheet.25.skill.rang }}" name="rang17"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="va-17" value="{{ character_sheet.25.skill.va }}" name="va17"></input>
+                </div>
+              </div>
+              <div class="row mt-1 skill-data" id="skill-data-18">
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="competence-18" value="{{ character_sheet.26.skill.competence }}" name="competence18"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="aspect-18" value="{{ character_sheet.26.skill.aspect }}" name="competence18"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="rang-18" value="{{ character_sheet.26.skill.rang }}" name="rang18"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="va-18" value="{{ character_sheet.26.skill.va }}" name="va18"></input>
+                </div>
+              </div>
+              <div class="row mt-1 skill-data" id="skill-data-19">
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="competence-19" value="{{ character_sheet.27.skill.competence }}" name="competence19"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="aspect-19" value="{{ character_sheet.27.skill.aspect }}" name="competence19"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="rang-19" value="{{ character_sheet.27.skill.rang }}" name="rang19"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="va-19" value="{{ character_sheet.27.skill.va }}" name="va19"></input>
+                </div>
+              </div>
+              <div class="row mt-1 skill-data" id="skill-data-20">
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="competence-20" value="{{ character_sheet.28.skill.competence }}" name="competence20"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="aspect-20" value="{{ character_sheet.28.skill.aspect }}" name="competence20"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                  <input type="text" class="competence form-control" id="rang-20" value="{{ character_sheet.28.skill.rang }}" name="rang20"></input>
+                </div>
+                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center mb-2">
+                  <input type="text" class="competence form-control" id="va-20" value="{{ character_sheet.28.skill.va }}" name="va20"></input>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-body form-group character-sheet-color" id="page-2">
+        <div class="row no-gutters col-12 d-flex justify-content-center">
+          {#--page 2 full side row 1 --#}
+          <div class="col-10 d-flex align-self-start mx-auto mt-1">
+            <div class="form-row col-12 no-gutters mb-2 character-sheet-border">
+              <div class="form-group col-12 character-sheet-border character-sheet-title-color">
+                <h5 class="text-center mx-auto col-12 character-sheet-title-color mt-2">TALENTS / POUVOIRS MANIFESTES / THEORIES MAGIQUES</h5>
+                <div class="mx-auto col-12 mt-1 row">
+                  <div class=" d-flex justify-content-end col-6 add-talent">
+                    <i class="fas fa-angle-down fa-2x cursor-pointer add-remove-talent-color"></i>
+                  </div>
+                  <div class=" d-flex justify-content-start col-6 cursor-pointer remove-talent">
+                    <i class="fas fa-angle-up fa-2x add-remove-talent-color"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="row mt-2 talent-row">
+                {% for row in sheet_inventory_talent.0.talent %}
+                <div class="col-xl-6 col-md-6 col-12 col-sm-12 text-center mb-1 talent-subrow">
+                  <textarea id="{{ row.id }}" class="col-12 talent" name="{{ row.id }}">{{ row.value }}</textarea>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          {#--page 2 left side row 2 --#}
+          <div class="col-xl-6 col-md-6 col-10 col-sm-10 d-flex align-self-start mx-auto mt-1">
+            <div class="form-row col-12 no-gutters mb-2 character-sheet-border">
+              <div class="form-group col-12 character-sheet-border character-sheet-title-color">
+                <h5 class="text-center mx-auto col-12 character-sheet-title-color mt-2">DESTINES</h5>
+              </div>
+              
+              <div class="input-group align-items-center col-12 mt-2 destiny">
+                <label for="destiny1" class="col-12">Destin d'effort :</label>
+                <textarea class="form-control d-flex justify-content-center col-9" id="destiny1" rows="1">{{ character_sheet.29.destiny.text }}</textarea>
+                <span class="input-group-addon"><input type="checkbox" id="destiny1-checkbox"{% if character_sheet.29.destiny.is_check%} checked {% endif %}> </span>
+              </div>
+              <div class="input-group align-items-center col-12 mt-2 destiny">
+                <label for="destiny2" class="col-12">Destin d'esprit :</label>
+                <textarea class="form-control d-flex justify-content-center col-9" id="destiny2" rows="1">{{ character_sheet.30.destiny.text }}</textarea>
+                <span class="input-group-addon"><input type="checkbox" id="destiny2-checkbox"{% if character_sheet.30.destiny.is_check%} checked {% endif %}> </span>
+              </div>
+              <div class="input-group align-items-center col-12 mt-2 destiny">
+                <label for="destiny3" class="col-12">Destin racine :</label>
+                <textarea class="form-control d-flex justify-content-center col-9" id="destiny3" rows="1">{{ character_sheet.31.destiny.text }}</textarea>
+                <span class="input-group-addon"><input type="checkbox" id="destiny3-checkbox"{% if character_sheet.31.destiny.is_check%} checked {% endif %}> </span>
+              </div>
+              <div class="input-group align-items-center col-12 mt-2 mb-2 destiny">
+                <label for="destiny4" class="col-12">Destin de corps :</label>
+                <textarea class="form-control d-flex justify-content-center col-9" id="destiny4" rows="1">{{ character_sheet.32.destiny.text }}</textarea>
+                <span class="input-group-addon"><input type="checkbox" id="destiny4-checkbox"{% if character_sheet.32.destiny.is_check%} checked {% endif %}> </span>
+              </div>
+              <div class="input-group align-items-center col-12 mt-2 mb-2 destiny">
+                <label for="destiny4" class="col-12">Destin des origines :</label>
+                <textarea class="form-control d-flex justify-content-center col-9" id="destiny5" rows="1">{{ character_sheet.33.destiny.text }}</textarea>
+                <span class="input-group-addon"><input type="checkbox" id="destiny5-checkbox"{% if character_sheet.33.destiny.is_check%} checked {% endif %}> </span>
+              </div>
+            </div>
+          </div>
+          {#--page 2 right side row 2 --#}
+          <div class="col-xl-6 col-md-6 col-10 col-sm-10 d-flex align-self-start mx-auto mt-1">
+            <div class="form-row col-12 no-gutters mb-2 character-sheet-border">
+              <div class="form-group col-12 character-sheet-border character-sheet-title-color">
+                <h5 class="text-center mx-auto col-12 character-sheet-title-color mt-2">GRIMOIRE</h5>
+              </div>
+              <div class="row mt-1 spell-data">
+                <div class="col-xl-6 col-md-6 col-12 col-sm-12 text-center">
+                  <label for="destiny4" class="col-12">Magies :</label>
+                  <div class="form-control" id="magic">
+                    {% autoescape off %}{{ character_sheet.34.spellbook.magic|safe }}{% endautoescape %}</div>
+                </div>
+                <div class="col-xl-6 col-md-6 col-12 col-sm-12 text-center">
+                  <label for="destiny4" class="col-12">Immuto :</label>
+                  <div class="form-control" id="immuto">
+                    {% autoescape off %}{{ character_sheet.34.spellbook.immuto|safe }}{% endautoescape %}</div>
+                </div>
+              </div>
+              <div class="col-12 text-center mb-2">
+                <label for="destiny5" class="col-12">Spécial :</label>
+                <div class="form-control" id="special">{% autoescape off %}{{ character_sheet.34.spellbook.special|safe }}{% endautoescape %}</div>
+              </div>
+            </div>
+          </div>
+          {#--page 2 left side row 3 --#}
+          <div class="col-xl-6 col-md-6 col-10 col-sm-10 d-flex align-self-start mx-auto mt-1">
+            <div class="form-row col-12 no-gutters mb-2 character-sheet-border">
+              <div class="form-group col-12 character-sheet-border character-sheet-title-color">
+                <h5 class="text-center mx-auto col-12 character-sheet-title-color mt-2">TWIST DECK</h5>
+              </div>
+              <div class="row mt-1 book-data">
+                <div class="col-xl-6 col-md-6 col-12 col-sm-12 text-center">
+                  <img src="{% static '/icons/light/Icone_Belier.png'%}" class="col-xl-7 col-md-7 col-sm-10 col-10 picture-font-color"></img>
+                  <select name="twist-deck-ram" id="twist-deck-ram" class="col-xl-7 col-md-7 col-sm-10 col-10 twist-deck-data">
+                    <option value="choice_1" {% if character_sheet.35.twist_deck.is_selected %}selected=selected{% endif %}>4, 8, 12</option>
+                    <option value="choice_2" {% if character_sheet.36.twist_deck.is_selected %}selected=selected{% endif %}>1, 5, 9, 13</option>
+                    <option value="choice_3" {% if character_sheet.37.twist_deck.is_selected %}selected=selected{% endif %}>3, 7, 11</option>
+                    <option value="choice_4" {% if character_sheet.38.twist_deck.is_selected %}selected=selected{% endif %}>2, 6, 10</option>
+                  </select>
+                </div>
+                <div class="col-xl-6 col-md-6 col-12 col-sm-12 text-center">
+                  <img src="{% static '/icons/light/Icone_Corbeau.png'%}" class="col-xl-7 col-md-7 col-sm-10 col-10 picture-font-color"></img>
+                  <select name="twist-deck-raven" id="twist-deck-raven" class="col-xl-7 col-md-7 col-sm-10 col-10 twist-deck-data">
+                    <option value="choice_1" {% if character_sheet.39.twist_deck.is_selected %}selected{% endif %}>4, 8, 12</option>
+                    <option value="choice_2" {% if character_sheet.40.twist_deck.is_selected %}selected{% endif %}>1, 5, 9, 13</option>
+                    <option value="choice_3" {% if character_sheet.41.twist_deck.is_selected %}selected{% endif %}>3, 7, 11</option>
+                    <option value="choice_4" {% if character_sheet.42.twist_deck.is_selected %}selected{% endif %}>2, 6, 10</option>
+                  </select>
+                </div>
+                <div class="col-xl-6 col-md-6 col-12 col-sm-12 text-center mt-1">
+                  <img src="{% static '/icons/light/Icone_Livre.png'%}" class="col-xl-7 col-md-7 col-sm-10 col-10 picture-font-color"></img>
+                  <select name="twist-deck-book" id="twist-deck-book" class="col-xl-7 col-md-7 col-sm-10 col-10 twist-deck-data">
+                    <option value="choice_1" {% if character_sheet.43.twist_deck.is_selected %}selected{% endif %}>4, 8, 12</option>
+                    <option value="choice_2" {% if character_sheet.44.twist_deck.is_selected %}selected{% endif %}>1, 5, 9, 13</option>
+                    <option value="choice_3" {% if character_sheet.45.twist_deck.is_selected %}selected{% endif %}>3, 7, 11</option>
+                    <option value="choice_4" {% if character_sheet.46.twist_deck.is_selected %}selected{% endif %}>2, 6, 10</option>
+                  </select>
+                </div>
+                <div class="col-xl-6 col-md-6 col-12 col-sm-12 text-center mt-1">
+                  <img src="{% static '/icons/light/Icone_Masque.png'%}" class="col-xl-7 col-md-7 col-sm-10 col-10 picture-font-color"></img>
+                  <select name="twist-deck-mask" id="twist-deck-mask" class="col-xl-7 col-md-7 col-sm-10 col-10 twist-deck-data">
+                    <option value="choice_1" {% if character_sheet.47.twist_deck.is_selected %}selected{% endif %}>4, 8, 12</option>
+                    <option value="choice_2" {% if character_sheet.48.twist_deck.is_selected %}selected{% endif %}>1, 5, 9, 13</option>
+                    <option value="choice_3" {% if character_sheet.49.twist_deck.is_selected %}selected{% endif %}>3, 7, 11</option>
+                    <option value="choice_4" {% if character_sheet.50.twist_deck.is_selected %}selected{% endif %}>2, 6, 10</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          {#--page 2 right side row 3 --#}
+          <div class="col-xl-6 col-md-6 col-10 col-sm-10 d-flex align-self-start mx-auto mt-1">
+            <div class="form-row col-12 no-gutters mb-2 character-sheet-border">
+              <div class="form-group col-12 character-sheet-border character-sheet-title-color">
+                <h5 class="text-center mx-auto col-12 character-sheet-title-color mt-2">EQUIPEMENT</h5>
+              </div>
+              <div class="form-control" id="inventory-textarea" >{% autoescape off %} {{character_inventory_and_origins.0.inventory|safe }} {% endautoescape %}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer mx-auto character-sheet-color col-12">
+        <button type="button" id="submit-character-sheet" class="btn btn-primary success-button mx-auto" value="send" data-dismiss="modal">Sauvegarder</button>
+      </div>
+    </form>
+    </div>
+  </div>
+</div>
+
+
+
+{% endblock %}
+{% block javascript %}
+<script type="application/javascript">
+$(document).ready(function(){
+  let background_img ="{% static 'fonts/malifaux-skyline.jpg' %}";
+  $('body').css({"background-image":"url(" + background_img +")","border-radius": '0%','height': '100vh','background-size': 'cover'});
+  
+  $('#page-2').addClass('d-none');
+  
+  $('.button-page-1').on('click', function(){
+    $('#page-1').removeClass('d-none');
+    $('#page-2').addClass('d-none');
+  })
+
+  $('.button-page-2').on('click', function(){
+    $('#page-2').removeClass('d-none');
+    $('#page-1').addClass('d-none');
+  });
+
+  let len = 0;
+  $('.add-talent').on('click', function(){
+    len = $('.talent').length
+    $('\
+    <div class="row mt-1 talent-row">\
+      <div class="col-xl-6 col-md-5 col-12 col-sm-12 text-center talent-subrow">\
+        <textarea id="talent-'+ (len++) +'" value="" class="col-12 talent" name="talent-'+ (len++) +'"></textarea>\
+      </div>\
+      <div class="col-xl-6 col-md-5 col-12 col-sm-12 text-center talent-subrow">\
+        <textarea id="talent-'+ (len+=2) +'" value="" class="col-12 talent" name="talent-'+ (len+=2) +'"></textarea>\
+      </div>\
+    </div>').insertAfter($('.talent-row:last'));
+  });
+
+  $('.remove-talent').on('click', function(){
+    $('.talent-subrow:last').remove()
+  });
+  
+});
+
+$('#submit-character-sheet').on('click',function(){
+  let url = "{% url 'backend:save_character_sheet' %}";
+  let character_informations = [];
+  let occupation = []; 
+  let origine = origine_editor.getData();
+  let aspect = [];
+  let sub_aspect = [];
+  let attack = [];
+  let attack2 = [];
+  let skill_data = [];
+  let talent = [];
+  let inventory = inventory_editor.getData();
+  let destiny = [];
+  let spellbook = [];
+  let twist_deck = [];
+  
+  character_informations.push({
+    'name': $('#name').val(), 
+    'age': parseInt($('#age').val()),
+    'lenght': parseFloat($('#length').val()),
+    'weight': parseFloat($('#weight').val()),
+    'description': description_editor.getData()
+  });
+
+  $('.occupation').each(function(){
+    let id = $(this).children('input').attr('id');
+    occupation.push({
+      'is_checked': $('#'+id+'-checkbox').is(':checked'), 
+      'text': $('#'+id).val()
+    })
+  })
+
+  aspect.push({
+    'power' : parseInt($('#power').val()),
+    'intel' : parseInt($('#intel').val()), 
+    'agility' : parseInt($('#agility').val()), 
+    'charisma' : parseInt($('#charisma').val()), 
+    'speed' : parseInt($('#speed').val()), 
+    'cunning' : parseInt($('#cunning').val()),
+    'resilience' : parseInt($('#resilience').val()),
+    'steadiness' : parseInt($('#steadiness').val())
+  })
+
+  attack.push({
+    'name': $('#attack-name-1').val(),
+    'va': parseInt($('#attack-va-1').val()),
+    'range': parseInt($('#attack-range-1').val()),
+    'damage': parseInt($('#attack-damage-1').val()),
+    'special': $('#attack-special-1').val(),
+    'skill': $('#attack-skill-1').val(),
+    'reload': parseInt($('#attack-reload-1').val()) 
+  })
+
+  attack2.push({
+    'name': $('#attack-name-2').val(),
+    'va': parseInt($('#attack-va-2').val()),
+    'range': parseInt($('#attack-range-2').val()),
+    'damage': parseInt($('#attack-damage-2').val()),
+    'special': $('#attack-special-2').val(),
+    'skill': $('#attack-skill-2').val(),
+    'reload': parseInt($('#attack-reload-2').val()) 
+  })
+
+  sub_aspect.push({
+    'defense':parseInt($('#defense').val()), 
+    'walk':parseInt($('#walk').val()), 
+    'armor':parseInt($('#armor').val()), 
+    'charge':parseInt($('#charge').val()), 
+    'will':parseInt($('#will').val()), 
+    'initiative':parseInt($('#initiative').val()), 
+    'wound':parseInt($('#wound').val()), 
+    'height':parseInt($('#height').val()), 
+  })
+
+  $('.skill-data').each(function(){
+    let id_number = $(this).attr('id').split('-')[2];
+    skill_data.push({
+      'competence': $('#competence-'+id_number).val(),
+      'aspect': $('#aspect-'+id_number).val(),
+      'rang': parseInt($('#rang-'+id_number).val()),
+      'va': parseInt($('#va-'+id_number).val()),
+    })
+  })
+
+  $('.talent').each(function(){
+    let id_number = $(this).attr('id');
+    talent.push({
+      'id':id_number,
+      'value':$(this).val()
+    })
+  })
+  
+  $('.destiny>textarea').each(function(){
+    let id_number = $(this).attr('id');
+    destiny.push({
+      'id':id_number,
+      'text': $('#'+id_number).val(),
+      'is_checked': $('#'+id_number+'-checkbox').is(":checked")
+    });
+  })
+  
+  spellbook.push({
+    'magic': magic_editor.getData(),
+    'immuto': immuto_editor.getData(),
+    'special': special_editor.getData(),
+  });
+
+  $('.twist-deck-data>option').each(function(){
+    let id_number = $(this).parent().attr('id');
+    twist_deck.push({
+      'id': id_number, 
+      'value':$(this).val(), 
+      'is_selected': $(this).is(':selected')
+    });
+  })
+
+  $.ajax({
+    url: url,
+    type: 'POST',
+    dataType : 'json',
+    headers: {"X-CSRFToken":"{{ csrf_token }}" },
+    data:{
+      'game_id': '{{ game_id }}',// fait
+      'character_information' : JSON.stringify(character_informations), // fait
+      'occupation': JSON.stringify(occupation),  // fait
+      'origine' : JSON.stringify(origine),// fait
+      'aspect': JSON.stringify(aspect),  // fait
+      'sub_aspect': JSON.stringify(sub_aspect),  // fait
+      'attack': JSON.stringify(attack), // fait
+      'attack2': JSON.stringify(attack2), // fait 
+      'skill': JSON.stringify(skill_data),  // fait
+      'talent': JSON.stringify(talent), // fait
+      'destiny': JSON.stringify(destiny),  // fait
+      'spellbook': JSON.stringify(spellbook), // fait
+      'inventory': JSON.stringify(inventory), // fait 
+      'twist_deck': JSON.stringify(twist_deck), // fait
+      'csrfmiddlewaretoken': '{{ csrf_token }}',
+    },
+    success: function () {},
+    fail: function(response_data){},
+  });
+})
+
+let ingame_view = new Vue({
+  el: '#game-container',
+  delimiters: ['[[', ']]'],
+  data: {
+    game_owner : '{{ game_owner }}',
+    deck_current_len : '{{ deck_current_len }}',
+    game_id: '{{ game_informations.0.id }}',
+    game_invitation_code: '{{ game_informations.0.game_invite_code }}',
+    players: [
+      {% for player in players %}
+      {"name":"{{ player.username_invite_code }}","id":"{{ player.id }}","is_online":"{{ player.is_online}}"},
+      {% endfor %}
+    ],
+    friend_list: [
+      {% for friend in friends_not_in_game_list %}
+        "{{ friend.username_invite_code }}",
+      {% endfor %}
+    ],
+    count_card_in_hands: 0,
+    deck: [
+    ],
+    cemetery:[
+    ],
+    cards_drawn:[
+    ]
+  },
+  methods: {
+    auto_update_players_list: async function(){
+      let url = '{% url "backend:get_players_list" %}'
+      $.ajax({
+        url: url,
+        async: true,
+        context : this,
+        type: 'POST',
+        dataType : 'json',
+        headers: {"X-CSRFToken":"{{ csrf_token }}" },
+        data:{
+          'game_id': this.game_id,
+          'csrfmiddlewaretoken': '{{ csrf_token }}'
+        },
+        success: function (response_data) {
+          let can_be_added = true;
+          let can_be_deleted = false;
+          $.each(response_data['players'], function(index){
+            $.each(ingame_view.players, function(friend_index){
+              if(response_data['players'][index]['id'] === ingame_view.players[friend_index]['id']){
+                can_be_added = false;
+                if(response_data['players'][index]['is_online'] != ingame_view.players[friend_index]['is_online']){
+                  ingame_view.players[friend_index]['is_online'] = response_data['players'][index]['is_online']
+                }
+              }
+            })
+            if(can_be_added === true){
+              ingame_view.players.push({"name": response_data['players'][index]['username_invite_code'],"id": response_data['players'][index]['id'],"is_online": response_data['players'][index]['is_online']})
+            }
+          });
+        },
+        fail: function(response_data){
+        },
+      })
+    },
+    create_player_invitation: function(event){
+        let url = '{% url "backend:set_game_invitation" %}';
+        let id = event.target.id;
+        let player_invitation_code;
+        if( event.target.id === "submit-contact"){
+          $('#friend-select option').each(function(i) {
+            if (this.selected == true) {
+              player_invitation_code = this.value;
+            }
+          });
+        }else{
+          player_invitation_code = $('#input-friend-name').val();
+        }
+        if(player_invitation_code != ''){
+          $.ajax({
+            url: url,
+            async: false,
+            context : this,
+            type: 'POST',
+            dataType : 'json',
+            headers: {"X-CSRFToken":"{{ csrf_token }}" },
+            data:{
+              'player_invite_code': player_invitation_code,
+              'game_invite_code': ingame_view.game_invitation_code,
+              'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function (response_data) {
+              if(response_data['success']){
+                $.each(ingame_view.friend_list, function(index){
+                  if(ingame_view.friend_list[index] == player_invitation_code){
+                    ingame_view.friend_list.splice(index,1)
+                  }
+                })
+              }
+            },
+            fail: function(response_data){
+            }
+          });
+        }
+      },
+      get_cards_informations: async function(){
+        let game_id = '{{ game_id }}';
+        let url = '{% url "backend:generate_first_card_deck" %}';
+        $.ajax({
+          url: url,
+          async: true,
+          context : this,
+          type: 'POST',
+          dataType : 'json',
+          headers: {"X-CSRFToken":"{{ csrf_token }}" },
+          data:{
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+            'game_id':game_id
+          },
+          success: function (response_data) {
+            ingame_view.deck_current_len = response_data['deck_current_len']
+            if(response_data['success']){
+              ingame_view.deck = [];
+              $.each(response_data['deck'], function(index){
+                ingame_view.deck.push({
+                  'id': response_data['deck'][index]['id']
+                });
+              });
+              ingame_view.cemetery = [];
+              $.each(response_data['deck_cemetery'], function(index){
+                ingame_view.cemetery.push({
+                  'id': response_data['deck_cemetery'][index]['id']
+                });
+              });
+              ingame_view.cards_drawn = [];
+              $.each(response_data['cards_drawn'], function(index){
+                ingame_view.cards_drawn.push({
+                  'id': response_data['cards_drawn'][index]['ingamecards__id'],
+                  'filename': '/static/cards/'+response_data['cards_drawn'][index]['filename'],
+                  'last_picked_up_by': response_data['cards_drawn'][index]['ingamecards__last_picked_up_by'],
+                });
+                ingame_view.count_card_in_hands++;
+              });
+            }
+          }
+        });
+      },
+      pick_a_card: async function(){
+        let audio_file = "{% static '/sound/117256-Card_being_placed_on_table-2.mp3' %}";
+        const audio = new Audio(audio_file);
+        audio.type = 'audio/mp3';
+        audio.play();
+        let game_id = '{{ game_id }}';
+        let url = '{% url "backend:pick_a_card" %}';
+        $.ajax({
+          url: url,
+          async: true,
+          context : this,
+          type: 'POST',
+          dataType : 'json',
+          headers: {"X-CSRFToken":"{{ csrf_token }}" },
+          data:{
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+            'game_id':game_id
+          },
+          success: function (response_data) {
+            if(response_data['success']){
+              let can_be_added = true;
+              $.each(response_data['picked_card'], function(index){
+                can_be_added = true;
+                $.each(ingame_view.cards_drawn, function(card_index){
+                  if(response_data['picked_card'][index]['ingamecards__id'] === ingame_view.cards_drawn[card_index]['id']){
+                    can_be_added = false;
+                  }
+                });
+                if(can_be_added === true){
+                  ingame_view.cards_drawn.push({
+                    'id': response_data['picked_card'][index]['ingamecards__id'],
+                    'filename': '/static/cards/'+response_data['picked_card'][index]['filename'],
+                    'last_picked_up_by': response_data['picked_card'][index]['ingamecards__last_picked_up_by'],
+                  });
+                  ingame_view.count_card_in_hands++;
+                }
+              });
+              ingame_view.deck_current_len = response_data['deck_current_len']
+            }
+          }
+        });
+      },
+      clean_inhand_cards: async function(){
+        let audio_file = "{% static '/sound/157239-MB-Card-Take-01.mp3' %}";
+        const audio = new Audio(audio_file);
+        audio.play();
+        let game_id = '{{ game_id }}';
+        let url = '{% url "backend:clean_inhand_cards" %}';
+        $.ajax({
+          url: url,
+          async: true,
+          context : this,
+          type: 'POST',
+          dataType : 'json',
+          headers: {"X-CSRFToken":"{{ csrf_token }}" },
+          data:{
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+            'game_id':game_id
+          },
+          success: function (response_data) {
+            if(response_data['success']){
+              ingame_view.cards_drawn = []
+              ingame_view.count_card_in_hands = 0;
+              $.each(response_data['cemetery'], function(index){
+                can_be_added = true;
+                $.each(ingame_view.cemetery, function(card_index){
+                  if(response_data['cemetery'][index]['id'] === ingame_view.cemetery[card_index]['id']){
+                    can_be_added = false;
+                  }
+                });
+                if(can_be_added === true){
+                  ingame_view.cemetery.push({
+                    "id": response_data['cemetery'][index]['ingamecards__id'],
+                  });
+                }
+              });
+            }
+          }
+        });
+      },
+      auto_update_cards_deck_and_cemetery_list: async function(){
+        let game_id = '{{ game_id }}';
+        let url = '{% url "backend:generate_first_card_deck" %}';
+        $.ajax({
+          url: url,
+          async: true,
+          context : this,
+          type: 'POST',
+          dataType : 'json',
+          headers: {"X-CSRFToken":"{{ csrf_token }}" },
+          data:{
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+            'game_id':game_id
+          },
+          success: function (response_data) {
+            if(response_data['success']){
+              ingame_view.deck = [];
+              ingame_view.cemetery = [];
+              $.each(response_data['deck'], function(index){
+                  ingame_view.deck.push({
+                    'id': response_data['deck'][index]['id']
+                  });
+              });
+              $.each(response_data['deck_cemetery'], function(index){
+                ingame_view.cemetery.push({
+                  'id': response_data['deck_cemetery'][index]['id']
+                });
+              });
+              ingame_view.deck_current_len = response_data['deck_current_len'];
+            }
+          }
+        });
+      },
+      auto_update_cards_drawn: async function(){
+        let game_id = '{{ game_id }}';
+        let url = '{% url "backend:auto_update_drawned_cards" %}';
+        $.ajax({
+          url: url,
+          async: true,
+          context : this,
+          type: 'POST',
+          dataType : 'json',
+          headers: {"X-CSRFToken":"{{ csrf_token }}" },
+          data:{
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+            'game_id':game_id
+          },
+          success: function (response_data) {
+            if(response_data['success']){
+              let can_be_added = true;
+              if(response_data['picked_card'].length > 0){
+                $.each(response_data['picked_card'], function(index){
+                  can_be_added = true;
+                  $.each(ingame_view.cards_drawn, function(card_index){
+                    if(response_data['picked_card'][index]['ingamecards__id'] === ingame_view.cards_drawn[card_index]['id']){
+                      can_be_added = false;
+                    }
+                  });
+                  if(can_be_added === true){
+                    ingame_view.cards_drawn.push({
+                      "id": response_data['picked_card'][index]['ingamecards__id'],
+                      "filename": '/static/cards/'+response_data['picked_card'][index]['filename'],
+                      "last_picked_up_by": response_data['picked_card'][index]['ingamecards__last_picked_up_by'], 
+                    });
+                    ingame_view.count_card_in_hands++;
+                  }
+                });
+              }else{
+                ingame_view.cards_drawn = [];
+                ingame_view.count_card_in_hands = 0;
+              }
+            }
+          }
+        });
+      },
+      reset_all_cards: async function(){
+        let audio_file = "{% static '/sound/107688-Great_audio_of_a_fine_card_shuffle-AOS00634.mp3' %}";
+        const audio = new Audio(audio_file);
+        audio.play();
+        let game_id = '{{ game_id }}';
+        let url = '{% url "backend:reset_all_cards" %}';
+        $.ajax({
+          url: url,
+          async: true,
+          context : this,
+          type: 'POST',
+          dataType : 'json',
+          headers: {"X-CSRFToken":"{{ csrf_token }}" },
+          data:{
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+            'game_id':game_id
+          },
+          success: function (response_data) {
+            if(response_data['success']){
+              ingame_view.cards_drawn = [];
+              ingame_view.count_card_in_hands = 0;
+              ingame_view.cemetery = [];
+              ingame_view.deck = [];
+              $.each(response_data['deck'], function(index){
+                ingame_view.deck.push({
+                  'id': response_data['deck'][index]['id']
+                });
+              });
+            }
+          }
+        });
+      }
+    }
+  });
+
+
+function firstCall(){
+  ingame_view.get_cards_informations();
+  ingame_view.auto_update_players_list();
+}
+
+function callEverything(){
+  ingame_view.auto_update_players_list();
+  ingame_view.auto_update_cards_drawn();
+  ingame_view.auto_update_cards_deck_and_cemetery_list();
+}
+
+$(window).on('load',function(){
+  firstCall();
+  description_editor = CKEDITOR.replace('description-textarea',
+  {
+    customConfig : 'config_custom.js',
+    height: '10vh',
+  })
+  inventory_editor = CKEDITOR.replace('inventory-textarea',
+  {
+    customConfig : 'config_custom.js',
+    height: '10vh'
+  });
+  origine_editor = CKEDITOR.replace('origine-textarea',
+  {
+    customConfig : 'config_custom.js',
+    height: '10vh'
+  });
+  magic_editor = CKEDITOR.replace('magic',
+  {
+    customConfig : 'config_custom_lighter.js',
+    height: '10vh'
+  })
+  immuto_editor = CKEDITOR.replace('immuto',
+  {
+    customConfig : 'config_custom_lighter.js',
+    height: '10vh'
+  })
+  special_editor = CKEDITOR.replace('special',
+  {
+    customConfig : 'config_custom_lighter.js',
+    height: '10vh'
+  })
+
+  {% autoescape on %}
+  description_editor.setData(`{{ character_sheet.0.charinfo.description|safe }}`)
+  inventory_editor.setData(`{{ character_inventory_and_origins.0.inventory|safe }}`)
+  origine_editor.setData(`{{ character_inventory_and_origins.0.origin|safe }}`)
+  {% endautoescape %}
+
+});
+
+$(document).ready(function(){
+  $('.friend-invitation-error, .friend-invitation-success, .friend-same-user-error, .already-friend-error').hide();
+  setInterval(callEverything,3000);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,552 @@
+/* Extra small devices (portrait phones, less than 576px) */
+
+@media (max-width: 575.98px) {
+    /* login part */
+    .login-card-size {
+        width: 90vw;
+    }
+    ul.list-contact {
+        min-height: 20vh;
+        max-height: 20vh;
+        overflow-x: scroll;
+        overflow-y: hidden;
+    }
+    ul.list-contact>li {
+        min-height: 10vh;
+        max-height: 10vh;
+    }
+    ul.list-player {
+        min-height: 10vh;
+        max-height: 10vh;
+        overflow-x: scroll;
+        overflow-y: hidden;
+    }
+}
+
+
+/* Small devices (landscape phones, 576px and up) */
+
+@media (min-width: 576px) and (max-width: 767.99px) {
+    /* login part */
+    .login-card-size {
+        width: 40vw;
+    }
+    ul.list-contact {
+        min-height: 20vh;
+        max-height: 20vh;
+        overflow-x: scroll;
+        overflow-y: hidden;
+    }
+    ul.list-contact>li {
+        min-height: 10vh;
+        max-height: 10vh;
+    }
+    ul.list-player {
+        min-height: 10vh;
+        max-height: 10vh;
+        overflow-x: scroll;
+        overflow-y: hidden;
+    }
+}
+
+
+/* Medium devices (tablets, 768px and up) */
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+    /* login part */
+    .login-card-size {
+        width: 40vw;
+    }
+    ul.list-contact {
+        min-height: 20vh;
+        overflow-x: scroll;
+        overflow-y: hidden;
+    }
+    ul.list-player {
+        min-height: 20vh;
+        overflow-x: scroll;
+        overflow-y: hidden;
+    }
+}
+
+
+/* Large devices (desktops, 992px and up) */
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    /* login part */
+    .login-card-size {
+        width: 40vw;
+    }
+    ul.list-contact {
+        min-height: 20vh;
+        overflow-x: scroll;
+        overflow-y: hidden;
+    }
+    ul.list-player {
+        min-height: 5vh;
+        overflow-x: scroll;
+        overflow-y: hidden;
+    }
+}
+
+
+/* 1080p devices (large desktops, 1201px and 1979) */
+
+@media (min-width: 1201px) and (max-width: 1979px) {
+    /* login part */
+    .login-card-size {
+        width: 20vw;
+    }
+    ul.list-contact {
+        height: 20vh;
+        overflow-x: scroll;
+        overflow-y: hidden;
+    }
+    ul.list-player {
+        overflow-x: scroll;
+        overflow-y: hidden;
+        min-height: 5vh;
+        max-height: 5vh;
+    }
+    .gm-buttons {
+        min-height: 10vh;
+        max-height: 10vh;
+    }
+}
+
+
+/* 1080p devices (large desktops, 1980px and up) */
+
+@media (min-width: 1980px) {
+    /* login part */
+    .login-card-size {
+        width: 20vw;
+    }
+    ul.list-contact {
+        min-height: 20vh;
+        max-height: 20vh;
+        overflow-x: scroll;
+        overflow-y: hidden;
+    }
+    ul.list-player {
+        min-height: 5vh;
+        max-height: 5vh;
+        overflow-x: scroll;
+        overflow-y: hidden;
+    }
+    .gm-buttons {
+        min-height: 10vh;
+        max-height: 10vh;
+    }
+}
+
+
+/*******************************************
+*********** CUSTOM FONT FAMILY *************
+*******************************************/
+
+@font-face {
+    font-family: 'Bleeding_Cowboys';
+    font-style: normal;
+    font-weight: bold;
+    src: local('Bleeding_Cowboys'), url('/static/css/policy/bleeding_cowboys/Bleeding_Cowboys.ttf') format('opentype');
+}
+
+@font-face {
+    font-family: 'bloodcrow';
+    font-style: normal;
+    font-weight: normal;
+    src: local('bloodcrow'), url('/static/css/policy/Malifaux-blood_crow/bloodcrow.ttf') format('opentype');
+}
+
+@font-face {
+    font-family: 'bloodcrow';
+    font-style: normal;
+    font-weight: bold;
+    src: local('bloodcrow'), url('/static/css/policy/Malifaux-blood_crow/bloodcrow.ttf') format('opentype');
+}
+
+.nave-link-note {
+    border: none;
+    cursor: pointer;
+}
+
+.url-path {
+    text-decoration: none;
+}
+
+.url-path:hover {
+    text-decoration: none;
+}
+
+.errorlist {
+    list-style: none;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/*************************************************
+************** GENERAL LINK STYLE ****************
+*************************************************/
+
+a,
+a:hover,
+a:active,
+a:visited,
+a:link,
+a:hover {
+    text-decoration: none;
+}
+
+.login-windows {
+    border-left: 1px #000005 solid;
+    border-right: 1px #000005 solid;
+    border-bottom: 1px #000005 solid;
+    box-shadow: 0.25vw 0.20vh 0.5vw 0.15vw #000005;
+    background-color: rgba(0, 0, 0, .75)
+}
+
+
+/********************************
+********** LABEL STYLE **********
+********************************/
+
+label {
+    font-weight: bold;
+}
+
+select {
+    font-family: 'FontAwesome';
+    scrollbar-width: none;
+    text-align-last: center;
+    direction: ltr;
+    /*For Firefox*/
+    ;
+    -ms-overflow-style: none;
+    /*For Internet Explorer 10+*/
+    ;
+    overflow: hidden
+}
+
+select:-webkit-scrollbar {
+    /*For WebKit Browsers*/
+    width: 0;
+    height: 0;
+    overflow: hidden
+}
+
+.no-scroll::-webkit-scrollbar,
+.no-scroll::-moz-scrollbar,
+.no-scroll::-o-scrollbar,
+.no-scroll::-google-ms-scrollbar,
+.no-scroll::-khtml-scrollbar {
+    display: none;
+}
+
+
+/**********************************
+************ TOOLTIP **************
+**********************************/
+
+.tooltip-symbol {
+    cursor: help;
+    color: red;
+}
+
+.break-text {
+    word-break: break-word;
+}
+
+.hr-presentation-style {
+    background-color: whitesmoke;
+    opacity: 50%
+}
+
+.presentation-police-size {
+    font-size: 1.1em;
+}
+
+.keyword-menu-dropdown,
+.create-content-form,
+.dropdown-menu,
+.card-border-style {
+    box-shadow: 0.25vw 0.20vh 0.5vw 0.15vw #000005;
+    border-radius: 2%;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+.login-transparency {
+    background-color: rgba(0, 0, 0, .75)
+}
+
+.url-path {
+    text-decoration: none;
+}
+
+html,
+a,
+li,
+p,
+span,
+label,
+small,
+button[type="button"],
+input[type="password"] {
+    font-family: bloodcrow;
+}
+
+h1,
+h2,
+h3,
+h4,
+b,
+h5 {
+    font-family: Bleeding_Cowboys;
+}
+
+.presentation-no-font-family {
+    font-family: serif;
+    font-size: medium;
+}
+
+.presentation-no-font-family-bold {
+    font-family: serif;
+    font-size: bold;
+}
+
+.presentation-police-size {
+    font-size: 1.2em;
+}
+
+.border-hr {
+    border-bottom: #000005;
+}
+
+.background-transparency-color,
+.last-picked-up-style {
+    background-color: rgba(16, 17, 17, 0.7);
+    border-color: rgb(16, 17, 17);
+}
+
+.game-card-style>img {
+    background-color: grey;
+    border-radius: 5%;
+}
+
+li.list-group-item {
+    background-color: rgba(16, 17, 17, 0.7);
+}
+
+.url-path:hover,
+.navbar-text-color:hover,
+.card-size:hover,
+.success-button:hover,
+.cancel-button:hover {
+    transform: scale(1.1);
+    z-index: 1500;
+}
+
+.create-new-game-card,
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.unallowed-new-game-card,
+.unallowed-cursor-and-disable {
+    cursor: not-allowed;
+    filter: brightness(30%)
+}
+
+.unallowed-cursor {
+    cursor: not-allowed;
+}
+
+::placeholder {
+    text-align: center;
+}
+
+small {
+    color: red;
+}
+
+.fade {
+    background-color: rgba(16, 17, 17, 0.7);
+}
+
+.dot {
+    height: 8px;
+    width: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    opacity: .25;
+}
+
+@keyframes red-up-right {
+    0% {
+        transform: scale(1);
+        opacity: .25;
+        background-color: #a81005;
+        box-shadow: 0 0 5px #a81005;
+    }
+    50% {
+        transform: scale (1, 5);
+        opacity: 1;
+        background-color: #f04122;
+        box-shadow: 0 0 20px #f04122;
+    }
+    100% {
+        transform: scale(1);
+        opacity: .25;
+        background-color: #a81005;
+        box-shadow: 0 0 5px #a81005;
+    }
+}
+
+@keyframes green-up-right {
+    0% {
+        transform: scale(1);
+        opacity: .25;
+        background-color: #2ba805;
+        box-shadow: 0 0 5px #2ba805;
+    }
+    50% {
+        transform: scale (1, 5);
+        opacity: 1;
+        background-color: #49e819;
+        box-shadow: 0 0 20px #49e819;
+    }
+    100% {
+        transform: scale(1);
+        opacity: .25;
+        background-color: #2ba805;
+        box-shadow: 0 0 5px #2ba805;
+    }
+}
+
+.red-dot {
+    background-color: #6e0202;
+    -webkit-animation: urgb(228, 112, 18) 1s infinite;
+    -moz-animation: red-up-right 1300ms infinite;
+    -o-animation: red-up-right 1300ms infinite;
+    animation: red-up-right 1300ms infinite;
+}
+
+.green-dot {
+    background-color: rgb(84, 238, 23);
+    -webkit-animation: urgb(78, 168, 5) 1s infinite;
+    -moz-animation: green-up-right 1300ms infinite;
+    -o-animation: green-up-right 1300ms infinite;
+    animation: green-up-right 1300ms infinite;
+}
+
+@keyframes red-up-value {
+    0% {
+        transform: scale(1);
+        opacity: .25;
+        color: #a81005;
+    }
+    50% {
+        transform: scale (1, 5);
+        opacity: 1;
+        color: #f04122;
+    }
+    100% {
+        transform: scale(1);
+        opacity: .25;
+        color: #a81005;
+    }
+}
+
+@keyframes green-up-value {
+    0% {
+        transform: scale(1);
+        opacity: .25;
+        color: #2ba805;
+    }
+    50% {
+        transform: scale (1, 5);
+        opacity: 1;
+        color: #49e819;
+    }
+    100% {
+        transform: scale(1);
+        opacity: .25;
+        color: #2ba805;
+    }
+}
+
+.green-value {
+    color: rgb(84, 238, 23);
+    -webkit-animation: urgb(78, 168, 5) 1s infinite;
+    -moz-animation: green-up-value 1300ms infinite;
+    -o-animation: green-up-value 1300ms infinite;
+    animation: green-up-value 1300ms infinite;
+}
+
+.red-value {
+    color: #6e0202;
+    -webkit-animation: urgb(78, 168, 5) 1s infinite;
+    -moz-animation: red-up-value 1300ms infinite;
+    -o-animation: red-up-value 1300ms infinite;
+    animation: red-up-value 1300ms infinite;
+}
+
+div.game-card-style {
+    border: none;
+    background-color: rgba(245, 245, 245, 0);
+}
+
+.action-cursor {
+    cursor: pointer
+}
+
+.section-title {
+    font-size: 1.2em
+}
+
+.login-alert-text {
+    color: #000005;
+}
+
+.character-sheet-border {
+    border: 0.5vh black solid;
+}
+
+.character-sheet-color {
+    background-color: whitesmoke;
+}
+
+.character-sheet-title-color {
+    color: #f08622;
+    background-color: #000005;
+}
+
+.character-sheet-category-title {
+    color: #000005;
+}
+
+.eye-opened-color,
+.eye-closed-color {
+    color: #F5F5F5;
+}
+
+.add-remove-talent-color:hover:hover,
+.character-sheet-button:hover {
+    color: #f0c022;
+}
+
+.character-sheet-button:hover {
+    color: #f0c022;
+    transform: scale(1.1);
+}
+
+.picture-font-color {
+    background-color: #000005;
+}
+
+.va-width {
+    width: 01vw;
+}

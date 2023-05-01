@@ -1,0 +1,44 @@
+{% extends 'generalist_template.html' %}
+{% load static %}
+{% block content %}   
+<div class="container-fluid content-row ">
+  <div class="container-fluid">
+    <div class="row">
+      <h2  class="mx-auto text-center mt-3" style="color:white"> Malifaux Card Generator</h2>
+    </div>
+    <div class="row no-gutters mt-5"> 
+        <div class="col-12">
+            <div class="col-xl-6 col-md-6 col-lg-8 col-sm-10 mx-auto background-transparency-color pt-2 pb-1 break-text presentation-text-color">
+                
+                <p class="text-justify text-center break-text presentation-no-font-family presentation-police-size p-1 border-hr">MALIFAUX CARD GENERATOR est une application web en lien avec le jeu de role <i>'through the breach'</i>, qui permet de tirer les cartes necessaires au bon déroulement d'une partie.</p>
+                <p class="text-justify break-text presentation-no-font-family p-2">
+                    <b class="presentation-no-font-family">D</b>ans notre pratique du jeu de rôle sur le web, il n'est pas toujours aisé de trouver des logiciels qui peuvent permettre de retranscrire les mécaniques d'un jeu. 
+                </p>
+                <p class="text-justify break-text presentation-no-font-family p-2">
+                    <b class="presentation-no-font-family">P</b>arfois, un simple bot de lancer de dés ne suffit pas et ne trouvant pas de solution viable pour throug the breach, j'ai décidé de developper cette application.
+                </p>
+                <p class="text-justify break-text presentation-no-font-family p-2">
+                    <b class="presentation-no-font-family">C</b>ette appli se veut simple et n'est pas un gros système de Tabletop, simplement un compagnon informatique pour le MJ et ses joueurs. 
+                </p>
+                <p class="text-justify break-text presentation-no-font-family p-2"><b class="presentation-no-font-family">L</b>es participants pourront alors:</p>
+                <ul>
+                    <li class="mb-1 presentation-no-font-family">Créer une partie privée</li>
+                    <li class="mb-1 presentation-no-font-family">Inviter leurs amis sur cette partie</li>
+                    <li class="mb-1 presentation-no-font-family">Tirer les cartes</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script >
+  
+  if($('.alert').is(':visible')){
+    $('.alert').fadeOut(10000);  
+  }
+
+</script>
+{% endblock %}

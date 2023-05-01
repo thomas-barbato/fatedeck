@@ -1,0 +1,121 @@
+{% extends 'generalist_template.html' %}
+{% load static %}
+{% block content%}
+
+<div class="container-fluid" id="dashboard-container">
+  <div class="row mt-2">
+    <h3 class="col-12 text-center">Bonjour {{ request.user|title }} <span class="col-12 text-center presentation-no-font-family"><i>({{ request.user.username_invite_code }})</i></span></h3>
+  </div>
+  <div class="row">
+    <p class="col-12 text-center presentation-no-font-family"> <i>Dernière connexion le {{ last_login|date:"d M Y à h:i" }} </i></p>
+  </div>
+  <div class="row">
+    <h3 class="col-12 text-center mt-3 ">
+      <b>P</b>arties en cours 
+      <p class="presentation-no-font-family">( 
+        <span v-if="game_list_count >= max_game_per_user"  class="presentation-no-font-family maximum-game-number-reached">
+          [[ game_list_count ]]
+        </span> 
+        <span v-else-if="game_list_count < max_game_per_user" class="presentation-no-font-family can-add-game">
+          [[ game_list_count ]]
+        </span> 
+        / [[ max_game_per_user ]] )
+      </p> 
+    </h3>
+  </div>
+  <div class="container-fluid">
+    <div class="row no-gutters">
+      
+      <div class="row  col-xl-12 col-md-12 col-lg-12 col-sm-12 col-12 d-flex mx-auto align-self-center justify-content-center mt-2">
+        <!-- create game card -->
+        <div v-if="game_list_count >= max_game_per_user" class="card col-xl-1 col-md-3 col-sm-6 col-10 d-flex align-items-center m-1 unallowed-new-game-card">
+            <img class="card-img-top" src="{% static 'icons/joker-hat-svgrepo-com.svg' %}" alt="Card image cap">
+            <div class="card-body">
+              <p class="card-text black-color text-justify text-center">nouvelle partie</p>
+            </div>
+          </div>
+          <div v-else-if="game_list_count < max_game_per_user" class="card col-xl-1 col-md-3 col-sm-6 col-10  d-flex align-items-center card-border-style card-size m-1 create-new-game-card" data-toggle="modal" data-target="#create-game-modal">
+            <div class="col card-title fas fa-crown mt-1 white-crown ms-auto"></div>
+            <img class="card-img-top" src="{% static 'icons/joker-hat-svgrepo-com.svg' %}" alt="Card image cap">
+            <div class="card-body">
+              <p class="card-text black-color text-justify text-center ">nouvelle partie</p>
+            </div>
+          </div>
+          <!-- game card -->
+          <!-- don't need :key="game_list_count"-->
+          <a v-for="game in games" @click="go_in_game($event)" class="card col-xl-1 col-md-3 col-sm-6 col-10 d-flex align-items-center card-border-style card-size m-1 game-card" v-bind:id="[[ game.id ]]">
+            <div v-if="game.owner_uuid_id === user_id" class="col card-title fas fa-crown mt-1 crown ms-auto"></div>
+            <div v-else class="col card-title fas fa-crown mt-1 white-crown ms-auto"></div>
+            <img class="card-img-top game-card-img-background" src="{% static 'icons/dark/Wyrd_TheOtherSide_Suit_Icon_Tome.png' %}" alt="Card image cap">
+            <div class="card-body">
+              <p class="card-text black-color text-justify text-center">[[game.name]]</p>
+            </div>
+          </a>
+        </div>
+      </div>
+  <!-- friend's list -->
+  <div class="row d-flex background-transparency-color card-border-style col-xl-2 col-md-10 col-lg-10 mx-auto col-sm-1s0 d-flex align-self-start justify-content-start mt-5">
+    <div class="card-title"><h5 class="text-center">Liste d'amis</h5></div>
+    <div class="card-body">
+      <ul class="list-group list-contact row list-group-flush">
+        <li v-for="friend, name, id, owner_uuid_id in friends" class="list-group-item test-justify presentation-no-font-family d-flex friend-list" v-bind:id="[[ friend.id]]">
+          [[friend.name]]
+          <span v-if="friend.is_online" class="dot green-dot ms-auto mt-2"></span>
+          <span v-else class="dot red-dot ms-auto mt-2"></span>
+        </li>
+      </ul>
+    </div>
+    <div class="card-footer">
+      <h5 class="text-center cursor-pointer" data-toggle="modal" data-target="#invite-friend-modal">Ajouter un contact</h5>
+    </div>  
+  </div>
+      </div>
+        <div class="modal fade" id="create-game-modal" tabindex="-1" role="dialog" aria-labelledby="create-game-modal-Label" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title modal-text-color mx-auto" id="exampleModalLabel">Créer une nouvelle partie</h5>
+              </div>
+              <div class="modal-body form-group">
+                <label for="input-game-name">Nom du jeu :</label>
+                <input type="text" name="game_name" value="" minlength="4" maxlength="16" class="form-control" id="input-game-name" aria-describedby="input-game-name-help" placeholder="entrez le nom du jeu..." maxlength="16">
+                <small id="input-game-name-help" class="form-text text-muted">Pas plus de 16 caractères.</small>
+              </div>
+              <div class="modal-footer mx-auto">
+                <button v-if="game_list_count < max_game_per_user" type="button" id="submit-game-creation" class="btn btn-primary success-button" v-on:click="create_game()" data-dismiss="modal">Créer</button>
+                <button v-else-if="game_list_count === max_game_per_user" type="button" class="btn btn-primary success-button disabled-button" disabled hidden>Créer</button>
+                <button type="button" class="btn btn-secondary cancel-button" data-dismiss="modal">Fermer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      <div class="modal fade" id="invite-friend-modal" tabindex="-1" role="dialog" aria-labelledby="invite-friend-modal-Label" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title modal-text-color mx-auto" id="exampleModalLabel">Ajouter ce contact</h5>
+            </div>
+            <div class="modal-body form-group">
+              <label for="input-invitation-name">Nom du contact :</label>
+              <input type="text" name="invite_code" value="" minlength="4" maxlength="22" class="form-control presentation-no-font-family" id="input-friend-name" aria-describedby="input-game-name-help" placeholder="un_user#1234">
+              <small id="input-invitation-name-help" class="form-text text-muted">Pas plus de 22 caractères.</small>
+              <p class="alert alert-danger friend-invitation-error">Cet utilisateur n'existe pas...</p>
+              <p class="alert alert-success friend-invitation-success">Cet utilisateur existe...</p>
+              <p class="alert alert-warning friend-same-user-error">Vous ne pouvez pas vous ajouter vous meme...</p>
+              <p class="alert alert-warning already-friend-error">Ce contact est déjà présent dans votre liste...</p>
+            </div>
+            <div class="modal-footer mx-auto">
+              <button type="button" v-on:click="create_friend_invitation()" id="submit-invitation-sending" class="btn btn-primary success-button"data-dismiss="modal">Inviter</button>
+              <button type="button" class="btn btn-secondary cancel-button" data-dismiss="modal">Fermer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+{% endblock %}
+<script type="javascript/text">
+
+</script>
+{% block javascript %}
+{% endblock %}
