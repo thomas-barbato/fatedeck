@@ -1,19 +1,19 @@
-from django.contrib.auth import authenticate
-from django.contrib.auth.views import LoginView, LogoutView
-from django.contrib.messages.views import SuccessMessageMixin
-from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView, FormView
-
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Value, Q
-from django.http import HttpResponseRedirect, JsonResponse
-from django.urls import reverse, reverse_lazy
+from django.http import JsonResponse
+from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
+
+from core.backend.middlewares import (
+    JsonableResponseMixin,
+    AuthRequiredMiddleware
+)
 
 from .models import (
     User,
@@ -25,33 +25,12 @@ from .models import (
     Friendlist,
     Gameinviation,
     Friendinviation,
-    Pargen
 )
 
 from .forms import (
     LoginForm,
     RegisterForm
 )
-
-
-class JsonableResponseMixin:
-    """
-    Mixin to add JSON support to a form.
-    Must be used with an object-based FormView (e.g. CreateView)
-    """
-
-    def form_invalid(self, form):
-        """docstring"""
-        if self.request.is_ajax():
-            return JsonResponse(form.errors, status=400)
-        return super().form_invalid(form)
-
-    def form_valid(self, form):
-        """docstring"""
-        if self.request.is_ajax():
-            data = {"message": "Successfully submitted form data."}
-            return JsonResponse(data)
-        return super().form_valid(form)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -123,5 +102,14 @@ class LoginAjaxView(LoginView, JsonableResponseMixin, SuccessMessageMixin):
         return JsonResponse(form.errors, status=200)
 
 
+@method_decorator(AuthRequiredMiddleware, name="dispatch")
 class DisplayDashboardView(TemplateView, LoginRequiredMixin):
     template_name = "display/dashboard.html"
+    login_url = reverse_lazy('index_view')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        test = User.objects.select_related('ingameplayer').filter(id=self.request.user.id)
+        print(test)
+        context["max_game_per_user"] = 7
+
