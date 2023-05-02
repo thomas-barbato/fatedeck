@@ -63,7 +63,7 @@ class User(AbstractUser):
         return True
 
     def __str__(self):
-        return f'{self.email}'
+        return f'{self.username}'
 
 
 class Game(models.Model):
@@ -87,8 +87,8 @@ class Cards(models.Model):
 
 class Ingameplayer(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    id_game_id = models.ForeignKey(Game, on_delete=models.CASCADE, null=True)
-    id_player_id = models.ForeignKey(User, on_delete=models.CASCADE, null=True,
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, null=True)
+    player = models.ForeignKey(User, on_delete=models.CASCADE, null=True,
                                      related_name="ingameplayer_other_player_id")
     owner_uuid = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name="ingameplayer_owner_id")
     last_connection = models.DateTimeField('derniere connexion', auto_now_add=True, null=True, blank=True)
@@ -96,8 +96,8 @@ class Ingameplayer(models.Model):
 
 
 class Ingamecards(models.Model):
-    id_game_id = models.ForeignKey(Game, on_delete=models.CASCADE, null=True)
-    id_card_id = models.ForeignKey(Cards, on_delete=models.CASCADE, null=True)
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, null=True)
+    card = models.ForeignKey(Cards, on_delete=models.CASCADE, null=True)
     current_state = models.CharField(max_length=8, unique=False, default="PIOCHE")
     # current_state can be : PIOCHE , MAIN , DEFAUSSE
     order = models.PositiveSmallIntegerField(null=True)
@@ -106,7 +106,7 @@ class Ingamecards(models.Model):
 
 
 class Ingamecharactersheet(models.Model):
-    id_game_id = models.ForeignKey(Game, on_delete=models.CASCADE, null=True)
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, null=True)
     owner_uuid = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     charinfo = JSONField(default=dict)
     origin = JSONField(default=dict)
@@ -128,7 +128,7 @@ class Ingamecharactersheet(models.Model):
 class Friendlist(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner_uuid = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name="friendlist_owner_id")
-    id_player_id = models.ForeignKey(User, on_delete=models.CASCADE, null=True,
+    player = models.ForeignKey(User, on_delete=models.CASCADE, null=True,
                                      related_name="friendlist_other_player_id")
     created_at = models.DateTimeField('creation date', auto_now_add=True, null=True, blank=True)
 
@@ -136,22 +136,14 @@ class Friendlist(models.Model):
 class Gameinviation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner_uuid = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name="game_owner_id")
-    id_player_id = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name="game_other_player_id")
-    id_game_id = models.ForeignKey(Game, on_delete=models.CASCADE, null=True)
+    player = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name="game_other_player_id")
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField('creation date', auto_now_add=True, null=True, blank=True)
 
 
 class Friendinviation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner_uuid = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name="invitation_owner_id")
-    id_player_id = models.ForeignKey(User, on_delete=models.CASCADE, null=True,
+    player = models.ForeignKey(User, on_delete=models.CASCADE, null=True,
                                      related_name="invitation_other_player_id")
     created_at = models.DateTimeField('creation date', auto_now_add=True, null=True, blank=True)
-
-
-class Pargen(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=60, null=False, default="pargen_default_option")
-    int_value = models.IntegerField(null=True, blank=True)
-    str_value = models.CharField(max_length=60, null=True, blank=True)
-    bool_value = models.BooleanField(null=False, default=True)
