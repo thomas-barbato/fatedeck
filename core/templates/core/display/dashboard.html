@@ -68,7 +68,7 @@
         {% for friend in friends %}
         <li class="list-group-item test-justify presentation-no-font-family d-flex friend-list" id="[[ friend.id]]">
           [[friend.name]]
-          {% if friend.last_connection|today == True }
+          {% if friend.last_connection|today == True %}
           <span class="dot green-dot ms-auto mt-2"></span>
           {% else %}
           <span class="dot red-dot ms-auto mt-2"></span>
@@ -130,6 +130,8 @@
 </div>
 {% endblock %}
 <script type="javascript/text">
+
+
 
 </script>
 {% block javascript %}
