@@ -1,55 +1,49 @@
 {% extends 'generalist_template.html' %}
 {% load static %}
 {% load customtags %}
-{% block content%}
 
+{% block content%}
 <div class="container-fluid" id="dashboard-container">
   <div class="row mt-2">
     <h3 class="col-12 text-center">Bonjour {{ request.user|title }} <span class="col-12 text-center presentation-no-font-family"><i>({{ request.user.username_invite_code }})</i></span></h3>
   </div>
   <div class="row">
-    <p class="col-12 text-center presentation-no-font-family"> <i>Dernière connexion le {{ request.user.last_connection|date:"d M Y" }} </i></p>
+    <p class="col-12 text-center presentation-no-font-family"> <i>Dernière connexion le {{ last_login|date:"d M Y à h:i" }} </i></p>
   </div>
   <div class="row">
     <h3 class="col-12 text-center mt-3 ">
-      <b>P</b>arties en cours 
+      <b>P</b>arties en cours
       <p class="presentation-no-font-family">(
-        {% if game_list_count >= max_game_per_user %}
-        <span class="presentation-no-font-family maximum-game-number-reached">
+        <span v-if="game_list_count >= max_game_per_user"  class="presentation-no-font-family maximum-game-number-reached">
           [[ game_list_count ]]
         </span>
-        {% elif game_list_count < max_game_per_user %}
-        <span class="presentation-no-font-family can-add-game">
+        <span v-else-if="game_list_count < max_game_per_user" class="presentation-no-font-family can-add-game">
           [[ game_list_count ]]
         </span>
-        {% endif %}
-        / {{ max_game_per_user }} )
-      </p> 
+        / [[ max_game_per_user ]] )
+      </p>
     </h3>
   </div>
   <div class="container-fluid">
     <div class="row no-gutters">
-      
+
       <div class="row  col-xl-12 col-md-12 col-lg-12 col-sm-12 col-12 d-flex mx-auto align-self-center justify-content-center mt-2">
         <!-- create game card -->
-        {% if game_list_count >= max_game_per_user %}
-        <div class="card col-xl-1 col-md-3 col-sm-6 col-10 d-flex align-items-center m-1 unallowed-new-game-card">
+        <div v-if="game_list_count >= max_game_per_user" class="card col-xl-1 col-md-3 col-sm-6 col-10 d-flex align-items-center m-1 unallowed-new-game-card">
             <img class="card-img-top" src="{% static 'icons/joker-hat-svgrepo-com.svg' %}" alt="Card image cap">
             <div class="card-body">
               <p class="card-text black-color text-justify text-center">nouvelle partie</p>
             </div>
-        </div>
-        {% elif game_list_count < max_game_per_user %}
-        <div v-else-if="game_list_count < max_game_per_user" class="card col-xl-1 col-md-3 col-sm-6 col-10  d-flex align-items-center card-border-style card-size m-1 create-new-game-card" data-toggle="modal" data-target="#create-game-modal">
-          <div class="col card-title fas fa-crown mt-1 white-crown ms-auto"></div>
-          <img class="card-img-top" src="{% static 'icons/joker-hat-svgrepo-com.svg' %}" alt="Card image cap">
-          <div class="card-body">
-            <p class="card-text black-color text-justify text-center ">nouvelle partie</p>
           </div>
-        </div>
-        {% endif %}
-        <!-- game card -->
-        {% for game in games %}
+          <div v-else-if="game_list_count < max_game_per_user" class="card col-xl-1 col-md-3 col-sm-6 col-10  d-flex align-items-center card-border-style card-size m-1 create-new-game-card" data-toggle="modal" data-target="#create-game-modal">
+            <div class="col card-title fas fa-crown mt-1 white-crown ms-auto"></div>
+            <img class="card-img-top" src="{% static 'icons/joker-hat-svgrepo-com.svg' %}" alt="Card image cap">
+            <div class="card-body">
+              <p class="card-text black-color text-justify text-center ">nouvelle partie</p>
+            </div>
+          </div>
+          <!-- game card -->
+          <!-- don't need :key="game_list_count"-->
           <a v-for="game in games" @click="go_in_game($event)" class="card col-xl-1 col-md-3 col-sm-6 col-10 d-flex align-items-center card-border-style card-size m-1 game-card" v-bind:id="[[ game.id ]]">
             <div v-if="game.owner_uuid_id === user_id" class="col card-title fas fa-crown mt-1 crown ms-auto"></div>
             <div v-else class="col card-title fas fa-crown mt-1 white-crown ms-auto"></div>
@@ -58,28 +52,23 @@
               <p class="card-text black-color text-justify text-center">[[game.name]]</p>
             </div>
           </a>
-        {% endfor %}
+        </div>
       </div>
   <!-- friend's list -->
   <div class="row d-flex background-transparency-color card-border-style col-xl-2 col-md-10 col-lg-10 mx-auto col-sm-1s0 d-flex align-self-start justify-content-start mt-5">
     <div class="card-title"><h5 class="text-center">Liste d'amis</h5></div>
     <div class="card-body">
       <ul class="list-group list-contact row list-group-flush">
-        {% for friend in friends %}
-        <li class="list-group-item test-justify presentation-no-font-family d-flex friend-list" id="[[ friend.id]]">
+        <li v-for="friend, name, id, owner_uuid_id in friends" class="list-group-item test-justify presentation-no-font-family d-flex friend-list" v-bind:id="[[ friend.id]]">
           [[friend.name]]
-          {% if friend.last_connection|today == True %}
-          <span class="dot green-dot ms-auto mt-2"></span>
-          {% else %}
-          <span class="dot red-dot ms-auto mt-2"></span>
-          {% endif %}
+          <span v-if="friend.is_online" class="dot green-dot ms-auto mt-2"></span>
+          <span v-else class="dot red-dot ms-auto mt-2"></span>
         </li>
-        {% endfor %}
       </ul>
     </div>
     <div class="card-footer">
       <h5 class="text-center cursor-pointer" data-toggle="modal" data-target="#invite-friend-modal">Ajouter un contact</h5>
-    </div>  
+    </div>
   </div>
       </div>
         <div class="modal fade" id="create-game-modal" tabindex="-1" role="dialog" aria-labelledby="create-game-modal-Label" aria-hidden="true">
@@ -94,11 +83,8 @@
                 <small id="input-game-name-help" class="form-text text-muted">Pas plus de 16 caractères.</small>
               </div>
               <div class="modal-footer mx-auto">
-                {% if game_list_count < max_game_per_user %}
-                <button type="button" id="submit-game-creation" class="btn btn-primary success-button" data-dismiss="modal">Créer</button>
-                {% elif game_list_count == max_game_per_user %}
-                <button type="button" class="btn btn-primary success-button disabled-button" disabled hidden>Créer</button>
-                {% endif %}
+                <button v-if="game_list_count < max_game_per_user" type="button" id="submit-game-creation" class="btn btn-primary success-button" v-on:click="create_game()" data-dismiss="modal">Créer</button>
+                <button v-else-if="game_list_count === max_game_per_user" type="button" class="btn btn-primary success-button disabled-button" disabled hidden>Créer</button>
                 <button type="button" class="btn btn-secondary cancel-button" data-dismiss="modal">Fermer</button>
               </div>
             </div>
@@ -120,7 +106,7 @@
               <p class="alert alert-warning already-friend-error">Ce contact est déjà présent dans votre liste...</p>
             </div>
             <div class="modal-footer mx-auto">
-              <button type="button" id="submit-invitation-sending" class="btn btn-primary success-button"data-dismiss="modal">Inviter</button>
+              <button type="button" v-on:click="create_friend_invitation()" id="submit-invitation-sending" class="btn btn-primary success-button"data-dismiss="modal">Inviter</button>
               <button type="button" class="btn btn-secondary cancel-button" data-dismiss="modal">Fermer</button>
             </div>
           </div>
@@ -129,10 +115,440 @@
     </div>
 </div>
 {% endblock %}
-<script type="javascript/text">
 
-
-
-</script>
 {% block javascript %}
+<script>
+
+if($('.alert').is(':visible')){
+    $('.alert').fadeOut(10000);
+}
+let vuejs_view = new Vue({
+    el: '#dashboard-container',
+    delimiters: ['[[', ']]'],
+    data: {
+        max_game_per_user: '{{ max_game_per_user }}',
+        game_list_count: parseInt('{{ game_list_count }}'),
+        get_game_list: '{{ game_list }}',
+        user_id: '{{ request.user.id }}',
+        id_array: [
+          {% for game in game_list %}
+          "{{game.id}}",
+          {% endfor %}
+        ],
+        games: [
+          {% for game in game_list %}
+          {"name": "{{game.name}}", "id":"{{game.id}}", "owner_uuid_id":"{{game.owner_uuid_id}}"},
+          {% endfor %}
+        ],
+        friends: [
+        ],
+    },
+    methods: {
+      reRender(){
+         this.$forceUpdate()
+      },
+      create_game: function() {
+        let name = $('#input-game-name').val();
+        let url = "{% url 'create_game_view' %}";
+        $.ajax({
+          url: url,
+          type: 'POST',
+          dataType : 'json',
+          headers: { "X-CSRFToken": "{{ csrf_token }}" },
+          data:{
+            'game_name': name,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+          },
+          success: function (response_data) {
+            $('#input-game-name').val('');
+            vuejs_view.game_list_count = response_data['game_list_count'];
+            $('.game-card').each(function(index){
+              if(vuejs_view.id_array.indexOf(response_data['game_data']['id']) === -1){
+                vuejs_view.id_array.push(response_data['game_data']['id'])
+                vuejs_view.games.push(response_data['game_data']);
+              }
+            })
+          },
+          fail: function(response_data){
+          }
+        });
+      },
+      auto_update_game_data: async function(){
+        let url = ''
+        $.ajax({
+          url: url,
+          async: true,
+          context : this,
+          type: 'POST',
+          dataType : 'json',
+          headers: { "X-CSRFToken": "{{ csrf_token }}" },
+          data:{
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+          },
+          success: function (response_data) {
+            // loop on json response
+            // check if response len is the same
+            if(response_data['game_data'].length < vuejs_view.games.length ){
+              if(response_data['game_data'].length === 0){
+                vuejs_view.games = []
+              }else{
+                let can_be_deleted = false;
+                $.each(vuejs_view.games, function(index_dashboard){
+                  if(jQuery.inArray(vuejs_view.games[index_dashboard]['id'], response_data['game_data']) === 0){
+                    can_be_deleted = true;
+                  }
+                  if(can_be_deleted == true){
+                    vuejs_view.games.splice(index_dashboard, 1);
+                    vuejs_view.game_list_count = response_data['game_count'];
+                  }
+                });
+              }
+            }else if(response_data['game_data'].length >= vuejs_view.games.length){
+              $.each(response_data['game_data'], function(index){
+                // check if json response is in id_array
+                if(jQuery.inArray(response_data['game_data'][index]['id'],vuejs_view.id_array) === -1){
+                  // if not, push json response in id_array
+                  vuejs_view.id_array.push(response_data['game_data'][index]['id'])
+                  // if not, push json response in games
+                  vuejs_view.games.push(response_data['game_data'][index]);
+                  // if not, itterate game_list_count var.
+                  vuejs_view.game_list_count = response_data['game_count'];
+                }
+              });
+            }
+          },
+          fail: function(response_data){
+          },
+        })
+      },
+      auto_update_friends_list: async function(){
+        let url = ''
+        $.ajax({
+          url: url,
+          async: true,
+          context : this,
+          type: 'POST',
+          dataType : 'json',
+          headers: { "X-CSRFToken": "{{ csrf_token }}" },
+          data:{
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+          },
+          success: function (response_data) {
+            let can_be_added = true;
+            let can_be_deleted = false;
+            $.each(response_data['friends'], function(index){
+              $.each(vuejs_view.friends, function(friend_index){
+                if(response_data['friends'][index]['id'] === vuejs_view.friends[friend_index]['id']){
+                  can_be_added = false;
+                  if(response_data['friends'][index]['is_online'] != vuejs_view.friends[friend_index]['is_online']){
+                    vuejs_view.friends[friend_index]['is_online'] = response_data['friends'][index]['is_online']
+                  }
+                }
+              })
+              if(can_be_added === true){
+                vuejs_view.friends.push({"name": response_data['friends'][index]['username_invite_code'], "id": response_data['friends'][index]['id'], "is_online": response_data['friends'][index]['is_online']})
+              }
+            });
+          },
+          fail: function(response_data){
+          },
+        })
+      },
+      cancelAutoUpdate () {
+        clearTimeout(this.timer);
+      },
+      beforeDestroy () {
+        this.cancelAutoUpdate();
+      },
+      create_friend_invitation: function(){
+          let invite_code = $('#input-friend-name').val();
+          let url = ''
+          $.ajax({
+            url: url,
+            async: false,
+            context : this,
+            type: 'POST',
+            dataType : 'json',
+            headers: { "X-CSRFToken": "{{ csrf_token }}" },
+            data:{
+              'invite_code': invite_code,
+              'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function (response_data) {
+            },
+            fail: function(response_data){
+            }
+          })
+      },
+      go_in_game: function(event){
+        let targetId = event.currentTarget.id;
+        let next_url = ''
+        window.location.replace(next_url);
+      }
+    }
+  })
+
+
+  let notifications = new Vue({
+    el: '#top-pannel-notification',
+    delimiters: ['[[', ']]'],
+    data: {
+      friend_invite_notification : '{{ friend_invitation_count }}',
+      friend_invitation_list : [],
+      game_invitation_list : [],
+      game_invite_notification : 0,
+    },
+    methods:{
+      auto_update_friend_notification: async function(){
+        let url = ""
+        $.ajax({
+          url: url,
+          async: true,
+          context: this,
+          type: 'POST',
+          dataType : 'json',
+          headers: { "X-CSRFToken": "{{ csrf_token }}" },
+          data:{
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+          },
+          success: function (response_data) {
+            if(response_data.success){
+              notifications.friend_invite_notification = response_data['friend_invitation']
+            }
+          },
+          fail: function(response_data){
+          }
+        })
+      },
+      auto_update_friend_menu: async function(){
+        let url = "";
+        $.ajax({
+          url: url,
+          async: true,
+          context: this,
+          type: 'POST',
+          dataType : 'json',
+          headers: { "X-CSRFToken": "{{ csrf_token }}" },
+          data:{
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+          },
+          success: function (response_data) {
+            let can_be_added = true;
+            notifications.friend_invitation_list = [];
+            $.each(response_data['friend_invitation_list'], function(index){
+              can_be_added = true;
+              $.each(notifications.friend_invitation_list, function(friend_index){
+                if(response_data['friend_invitation_list'][index]['id'] === notifications.friend_invitation_list[friend_index]['id']){
+                  can_be_added = false;
+                }
+              });
+              if(can_be_added === true){
+                notifications.friend_invitation_list.push({"name": response_data['friend_invitation_list'][index]['username_invite_code'], "id": response_data['friend_invitation_list'][index]['id']})
+              }
+            });
+          },
+          fail: function(response_data){
+          }
+        })
+      },
+      auto_update_game_menu: async function(){
+        let url = "";
+        $.ajax({
+          url: url,
+          async: true,
+          context: this,
+          type: 'POST',
+          dataType : 'json',
+          headers: { "X-CSRFToken": "{{ csrf_token }}" },
+          data:{
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+          },
+          success: function (response_data) {
+            let can_be_added = true;
+            $.each(response_data['game_invitation_list'], function(index){
+              can_be_added = true
+              $.each(notifications.game_invitation_list, function(game_index){
+                if(response_data['game_invitation_list'][index]['game_name'] === notifications.game_invitation_list[game_index]['game_name']){
+                  can_be_added = false;
+                }
+              })
+              if(can_be_added === true){
+                notifications.game_invitation_list.push({"contact_name": response_data['game_invitation_list'][index]['contact_name'], "game_name": response_data['game_invitation_list'][index]['game_name']})
+              }
+            });
+
+          },
+          fail: function(response_data){
+          },
+        })
+      },
+      accept_friend_invitation: async function(event){
+        let id = event.target.id
+        let url = "";
+        $.ajax({
+          url: url,
+          async: true,
+          context: this,
+          type: 'POST',
+          dataType : 'json',
+          headers: { "X-CSRFToken": "{{ csrf_token }}" },
+          data:{
+            'contact_name' : id,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+          },
+          success: function (response_data) {
+            let i = 0
+            $.each(notifications.friend_invitation_list, function(index){
+              if(notifications.friend_invitation_list[index]['name'] == id){
+                notifications.friend_invitation_list.splice(index, 1)
+                notifications.friend_invite_notification--;
+              }
+            })
+          }
+        });
+      },
+      deny_friend_invitation: async function(){
+        let id = event.target.id
+        let url = "";
+        $.ajax({
+          url: url,
+          async: true,
+          context: this,
+          type: 'POST',
+          dataType : 'json',
+          headers: { "X-CSRFToken": "{{ csrf_token }}" },
+          data:{
+            'contact_name' : id,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+          },
+          success: function (response_data) {
+            $.each(notifications.friend_invitation_list, function(index){
+              if(notifications.friend_invitation_list[index]['name'] == id){
+                notifications.friend_invitation_list.splice(index, 1)
+                notifications.friend_invite_notification--;
+              }
+            });
+          }
+        });
+      },
+      auto_update_game_notification: async function(){
+        let url = ""
+        $.ajax({
+          url: url,
+          async: true,
+          context: this,
+          type: 'POST',
+          dataType : 'json',
+          headers: { "X-CSRFToken": "{{ csrf_token }}" },
+          data:{
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+          },
+          success: function (response_data) {
+            if(response_data.success){
+              notifications.game_invite_notification = response_data['game_invitation']
+            }
+          },
+          fail: function(response_data){
+          }
+        })
+      },
+      accept_game_invitation: async function(event){
+        let id = event.target.id;
+        let contact_name;
+        $.each(notifications.game_invitation_list, function(index){
+          if(notifications.game_invitation_list[index]['game_name'] == id){
+            contact_name = notifications.game_invitation_list[index]['contact_name']
+          }
+        })
+        let url = "";
+        $.ajax({
+          url: url,
+          async: true,
+          context: this,
+          type: 'POST',
+          dataType : 'json',
+          headers: { "X-CSRFToken": "{{ csrf_token }}" },
+          data:{
+            'game_name' : id,
+            'contact_name': contact_name,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+          },
+          success: function (response_data) {
+            $.each(notifications.game_invitation_list, function(index){
+              if(notifications.game_invitation_list[index]['game_name'] == id){
+                notifications.game_invitation_list.splice(index, 1);
+                notifications.game_invite_notification--;
+              }
+            })
+          }
+        });
+      },
+      deny_friend_invitation: async function(event){
+        let id = event.target.id;
+        let contact_name;
+        $.each(notifications.game_invitation_list, function(index){
+          if(notifications.game_invitation_list[index]['game_name'] == id){
+            contact_name = notifications.game_invitation_list[index]['contact_name']
+          }
+        });
+        let url = "";
+        $.ajax({
+          url: url,
+          async: true,
+          context: this,
+          type: 'POST',
+          dataType : 'json',
+          headers: { "X-CSRFToken": "{{ csrf_token }}" },
+          data:{
+            'game_name' : id,
+            'contact_name': contact_name,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+          },
+          success: function (response_data) {
+            $.each(notifications.game_invitation_list, function(index){
+              if(notifications.game_invitation_list[index]['game_name'] == id){
+                notifications.game_invitation_list.splice(index, 1)
+                notifications.game_invite_notification--;
+              }
+            });
+          }
+        });
+      },
+    }
+  });
+
+  $('#input-friend-name').on('keyup',function(){
+    let invite_code = $('#input-friend-name').val();
+    let url = ''
+    $.ajax({
+      url: url,
+      async: false,
+      context : this,
+      type: 'POST',
+      dataType : 'json',
+      headers: { "X-CSRFToken": "{{ csrf_token }}" },
+      data:{
+        'invite_code': invite_code,
+        'csrfmiddlewaretoken': '{{ csrf_token }}'
+      },
+      success: function (response_data) {
+        if(response_data.success){
+          $('#submit-invitation-sending, .friend-invitation-success').show()
+          $('.friend-invitation-error, .friend-same-user-error, .already-friend-error').hide()
+        }else if(response_data.error_same_user){
+          $('.friend-same-user-error').show()
+          $('#submit-invitation-sending, .friend-invitation-error, .friend-invitation-success, .already-friend-error').hide()
+        }else if(response_data.already_friend_error){
+          $('.already-friend-error').show()
+          $('#submit-invitation-sending, .friend-invitation-error, .friend-invitation-success').hide()
+        }else{
+          $('.friend-invitation-error').show()
+          $('#submit-invitation-sending, .friend-invitation-success, .friend-same-user-error, .already-friend-error').hide()
+        }
+      },
+      fail: function(response_data){
+      }
+    })
+  });
+</script>
 {% endblock %}
