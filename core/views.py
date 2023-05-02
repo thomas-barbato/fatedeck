@@ -111,8 +111,9 @@ class DisplayDashboardView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        user_id = self.request.user.id
         context["max_game_per_user"] = 7
-        context["game_list_count"] = 0
+        context["game_list_count"] = Ingameplayer.objects.filter(Q(player_id=user_id)|Q(owner_uuid_id=user_id)).count()
         context["CreateGameForm"] = CreateGameForm
         context["game_list"] = Game.objects.filter(owner_uuid_id=self.request.user.id)
 
