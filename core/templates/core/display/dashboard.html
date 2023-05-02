@@ -1,5 +1,6 @@
 {% extends 'generalist_template.html' %}
 {% load static %}
+{% load customtags %}
 {% block content%}
 
 <div class="container-fluid" id="dashboard-container">
@@ -7,19 +8,22 @@
     <h3 class="col-12 text-center">Bonjour {{ request.user|title }} <span class="col-12 text-center presentation-no-font-family"><i>({{ request.user.username_invite_code }})</i></span></h3>
   </div>
   <div class="row">
-    <p class="col-12 text-center presentation-no-font-family"> <i>Dernière connexion le {{ last_login|date:"d M Y à h:i" }} </i></p>
+    <p class="col-12 text-center presentation-no-font-family"> <i>Dernière connexion le {{ request.user.last_connection|date:"d M Y" }} </i></p>
   </div>
   <div class="row">
     <h3 class="col-12 text-center mt-3 ">
       <b>P</b>arties en cours 
-      <p class="presentation-no-font-family">( 
-        <span v-if="game_list_count >= max_game_per_user"  class="presentation-no-font-family maximum-game-number-reached">
+      <p class="presentation-no-font-family">(
+        {% if game_list_count >= max_game_per_user %}
+        <span class="presentation-no-font-family maximum-game-number-reached">
           [[ game_list_count ]]
-        </span> 
-        <span v-else-if="game_list_count < max_game_per_user" class="presentation-no-font-family can-add-game">
+        </span>
+        {% elif game_list_count < max_game_per_user %}
+        <span class="presentation-no-font-family can-add-game">
           [[ game_list_count ]]
-        </span> 
-        / [[ max_game_per_user ]] )
+        </span>
+        {% endif %}
+        / {{ max_game_per_user }} )
       </p> 
     </h3>
   </div>
@@ -28,21 +32,24 @@
       
       <div class="row  col-xl-12 col-md-12 col-lg-12 col-sm-12 col-12 d-flex mx-auto align-self-center justify-content-center mt-2">
         <!-- create game card -->
-        <div v-if="game_list_count >= max_game_per_user" class="card col-xl-1 col-md-3 col-sm-6 col-10 d-flex align-items-center m-1 unallowed-new-game-card">
+        {% if game_list_count >= max_game_per_user %}
+        <div class="card col-xl-1 col-md-3 col-sm-6 col-10 d-flex align-items-center m-1 unallowed-new-game-card">
             <img class="card-img-top" src="{% static 'icons/joker-hat-svgrepo-com.svg' %}" alt="Card image cap">
             <div class="card-body">
               <p class="card-text black-color text-justify text-center">nouvelle partie</p>
             </div>
+        </div>
+        {% elif game_list_count < max_game_per_user %}
+        <div v-else-if="game_list_count < max_game_per_user" class="card col-xl-1 col-md-3 col-sm-6 col-10  d-flex align-items-center card-border-style card-size m-1 create-new-game-card" data-toggle="modal" data-target="#create-game-modal">
+          <div class="col card-title fas fa-crown mt-1 white-crown ms-auto"></div>
+          <img class="card-img-top" src="{% static 'icons/joker-hat-svgrepo-com.svg' %}" alt="Card image cap">
+          <div class="card-body">
+            <p class="card-text black-color text-justify text-center ">nouvelle partie</p>
           </div>
-          <div v-else-if="game_list_count < max_game_per_user" class="card col-xl-1 col-md-3 col-sm-6 col-10  d-flex align-items-center card-border-style card-size m-1 create-new-game-card" data-toggle="modal" data-target="#create-game-modal">
-            <div class="col card-title fas fa-crown mt-1 white-crown ms-auto"></div>
-            <img class="card-img-top" src="{% static 'icons/joker-hat-svgrepo-com.svg' %}" alt="Card image cap">
-            <div class="card-body">
-              <p class="card-text black-color text-justify text-center ">nouvelle partie</p>
-            </div>
-          </div>
-          <!-- game card -->
-          <!-- don't need :key="game_list_count"-->
+        </div>
+        {% endif %}
+        <!-- game card -->
+        {% for game in games %}
           <a v-for="game in games" @click="go_in_game($event)" class="card col-xl-1 col-md-3 col-sm-6 col-10 d-flex align-items-center card-border-style card-size m-1 game-card" v-bind:id="[[ game.id ]]">
             <div v-if="game.owner_uuid_id === user_id" class="col card-title fas fa-crown mt-1 crown ms-auto"></div>
             <div v-else class="col card-title fas fa-crown mt-1 white-crown ms-auto"></div>
@@ -51,18 +58,23 @@
               <p class="card-text black-color text-justify text-center">[[game.name]]</p>
             </div>
           </a>
-        </div>
+        {% endfor %}
       </div>
   <!-- friend's list -->
   <div class="row d-flex background-transparency-color card-border-style col-xl-2 col-md-10 col-lg-10 mx-auto col-sm-1s0 d-flex align-self-start justify-content-start mt-5">
     <div class="card-title"><h5 class="text-center">Liste d'amis</h5></div>
     <div class="card-body">
       <ul class="list-group list-contact row list-group-flush">
-        <li v-for="friend, name, id, owner_uuid_id in friends" class="list-group-item test-justify presentation-no-font-family d-flex friend-list" v-bind:id="[[ friend.id]]">
+        {% for friend in friends %}
+        <li class="list-group-item test-justify presentation-no-font-family d-flex friend-list" id="[[ friend.id]]">
           [[friend.name]]
-          <span v-if="friend.is_online" class="dot green-dot ms-auto mt-2"></span>
-          <span v-else class="dot red-dot ms-auto mt-2"></span>
+          {% if friend.last_connection|today == True }
+          <span class="dot green-dot ms-auto mt-2"></span>
+          {% else %}
+          <span class="dot red-dot ms-auto mt-2"></span>
+          {% endif %}
         </li>
+        {% endfor %}
       </ul>
     </div>
     <div class="card-footer">
@@ -82,8 +94,11 @@
                 <small id="input-game-name-help" class="form-text text-muted">Pas plus de 16 caractères.</small>
               </div>
               <div class="modal-footer mx-auto">
-                <button v-if="game_list_count < max_game_per_user" type="button" id="submit-game-creation" class="btn btn-primary success-button" v-on:click="create_game()" data-dismiss="modal">Créer</button>
-                <button v-else-if="game_list_count === max_game_per_user" type="button" class="btn btn-primary success-button disabled-button" disabled hidden>Créer</button>
+                {% if game_list_count < max_game_per_user %}
+                <button type="button" id="submit-game-creation" class="btn btn-primary success-button" data-dismiss="modal">Créer</button>
+                {% elif game_list_count == max_game_per_user %}
+                <button type="button" class="btn btn-primary success-button disabled-button" disabled hidden>Créer</button>
+                {% endif %}
                 <button type="button" class="btn btn-secondary cancel-button" data-dismiss="modal">Fermer</button>
               </div>
             </div>
@@ -105,7 +120,7 @@
               <p class="alert alert-warning already-friend-error">Ce contact est déjà présent dans votre liste...</p>
             </div>
             <div class="modal-footer mx-auto">
-              <button type="button" v-on:click="create_friend_invitation()" id="submit-invitation-sending" class="btn btn-primary success-button"data-dismiss="modal">Inviter</button>
+              <button type="button" id="submit-invitation-sending" class="btn btn-primary success-button"data-dismiss="modal">Inviter</button>
               <button type="button" class="btn btn-secondary cancel-button" data-dismiss="modal">Fermer</button>
             </div>
           </div>
