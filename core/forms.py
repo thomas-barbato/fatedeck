@@ -6,7 +6,7 @@ from django.core.exceptions import NON_FIELD_ERRORS
 
 import re
 from .models import (
-    User
+    User, Game, Ingameplayer, Cards, Ingamecards
 )
 import datetime
 from core.backend.check_data import CheckPasswordPolicy, CheckImageExtension, CheckEmail
@@ -110,3 +110,21 @@ class LoginForm(ModelForm):
         model = User
         fields = ["email", "password"]
         exclude = ["user_id"]
+
+
+class CreateGameForm(ModelForm):
+    name = forms.CharField(
+        widget=TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "entrez le nom du jeu...",
+                "minlength": 4,
+                "maxlength": 16,
+                "describedby": "input-game-name-help",
+            }
+        ),
+        required=True,
+    )
+    class Meta:
+        model = Game
+        fields = ["name"]
