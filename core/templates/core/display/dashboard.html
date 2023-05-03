@@ -8,7 +8,7 @@
     <h3 class="col-12 text-center">Bonjour {{ request.user|title }} <span class="col-12 text-center presentation-no-font-family"><i>({{ request.user.username_invite_code }})</i></span></h3>
   </div>
   <div class="row">
-    <p class="col-12 text-center presentation-no-font-family"> <i>Dernière connexion le {{ last_login|date:"d M Y à h:i" }} </i></p>
+    <p class="col-12 text-center presentation-no-font-family"> <i>Dernière connexion le {{ request.user.last_login|date:"d M Y" }} </i></p>
   </div>
   <div class="row">
     <h3 class="col-12 text-center mt-3 ">
@@ -148,7 +148,6 @@ let vuejs_view = new Vue({
          this.$forceUpdate()
       },
       create_game: function() {
-        let name = $('#input-game-name').val();
         let url = "{% url 'create_game_view' %}";
         $.ajax({
           url: url,
@@ -156,18 +155,21 @@ let vuejs_view = new Vue({
           dataType : 'json',
           headers: { "X-CSRFToken": "{{ csrf_token }}" },
           data:{
-            'game_name': name,
+            'game_name': $('#input-game-name').val(),
             'csrfmiddlewaretoken': '{{ csrf_token }}'
           },
           success: function (response_data) {
             $('#input-game-name').val('');
-            vuejs_view.game_list_count = response_data['game_list_count'];
-            $('.game-card').each(function(index){
-              if(vuejs_view.id_array.indexOf(response_data['game_data']['id']) === -1){
-                vuejs_view.id_array.push(response_data['game_data']['id'])
-                vuejs_view.games.push(response_data['game_data']);
-              }
-            })
+            if(response_data.success){
+              vuejs_view.game_list_count = response_data['game_list_count'];
+              $('.game-card').each(function(index){
+                if(vuejs_view.id_array.indexOf(response_data['game_data']['id']) === -1){
+                  vuejs_view.id_array.push(response_data['game_data']['id'])
+                  vuejs_view.games.push(response_data['game_data']);
+                }
+              })
+            }else{
+            }
           },
           fail: function(response_data){
           }
@@ -213,45 +215,6 @@ let vuejs_view = new Vue({
           },
         })
       },
-      auto_update_friends_list: async function(){
-        let url = ''
-        $.ajax({
-          url: url,
-          async: true,
-          context : this,
-          type: 'POST',
-          dataType : 'json',
-          headers: { "X-CSRFToken": "{{ csrf_token }}" },
-          data:{
-            'csrfmiddlewaretoken': '{{ csrf_token }}'
-          },
-          success: function (response_data) {
-            let can_be_added = true;
-            let can_be_deleted = false;
-            $.each(response_data['friends'], function(index){
-              $.each(vuejs_view.friends, function(friend_index){
-                if(response_data['friends'][index]['id'] === vuejs_view.friends[friend_index]['id']){
-                  can_be_added = false;
-                  if(response_data['friends'][index]['is_online'] != vuejs_view.friends[friend_index]['is_online']){
-                    vuejs_view.friends[friend_index]['is_online'] = response_data['friends'][index]['is_online']
-                  }
-                }
-              })
-              if(can_be_added === true){
-                vuejs_view.friends.push({"name": response_data['friends'][index]['username_invite_code'], "id": response_data['friends'][index]['id'], "is_online": response_data['friends'][index]['is_online']})
-              }
-            });
-          },
-          fail: function(response_data){
-          },
-        })
-      },
-      cancelAutoUpdate () {
-        clearTimeout(this.timer);
-      },
-      beforeDestroy () {
-        this.cancelAutoUpdate();
-      },
       create_friend_invitation: function(){
           let invite_code = $('#input-friend-name').val();
           let url = ''
@@ -271,6 +234,37 @@ let vuejs_view = new Vue({
             fail: function(response_data){
             }
           })
+      },
+      auto_update_friends_list: async function(){
+        let url = '{% url "display_friendlist" %}'
+        $.ajax({
+          url: url,
+          async: true,
+          context : this,
+          type: 'GET',
+          dataType : 'json',
+          headers: { "X-CSRFToken": "" },
+          data:{},
+          success: function (response_data) {
+            let can_be_added = true;
+            let can_be_deleted = false;
+            $.each(response_data['friends'], function(index){
+              $.each(vuejs_view.friends, function(friend_index){
+                if(response_data['friends'][index]['id'] === vuejs_view.friends[friend_index]['id']){
+                  can_be_added = false;
+                  if(response_data['friends'][index]['is_online'] != vuejs_view.friends[friend_index]['is_online']){
+                    vuejs_view.friends[friend_index]['is_online'] = response_data['friends'][index]['is_online']
+                  }
+                }
+              })
+              if(can_be_added === true){
+                vuejs_view.friends.push({"name": response_data['friends'][index]['name'], "id": response_data['friends'][index]['id'], "is_online": response_data['friends'][index]['is_online']})
+              }
+            });
+          },
+          fail: function(response_data){
+          },
+        })
       },
       go_in_game: function(event){
         let targetId = event.currentTarget.id;
@@ -547,6 +541,7 @@ let vuejs_view = new Vue({
 
   function callEverything(){
     vuejs_view.auto_update_game_data();
+    vuejs_view.auto_update_friends_list();
   }
 
   $(window).on('load',function(){
