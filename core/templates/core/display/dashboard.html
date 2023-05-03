@@ -174,20 +174,16 @@ let vuejs_view = new Vue({
         });
       },
       auto_update_game_data: async function(){
-        let url = ''
+        let url = "{% url 'create_game_view' %}";
         $.ajax({
           url: url,
           async: true,
           context : this,
-          type: 'POST',
+          type: 'GET',
           dataType : 'json',
-          headers: { "X-CSRFToken": "{{ csrf_token }}" },
-          data:{
-            'csrfmiddlewaretoken': '{{ csrf_token }}'
-          },
+          headers: { "X-CSRFToken": "" },
+          data:{},
           success: function (response_data) {
-            // loop on json response
-            // check if response len is the same
             if(response_data['game_data'].length < vuejs_view.games.length ){
               if(response_data['game_data'].length === 0){
                 vuejs_view.games = []
@@ -205,13 +201,9 @@ let vuejs_view = new Vue({
               }
             }else if(response_data['game_data'].length >= vuejs_view.games.length){
               $.each(response_data['game_data'], function(index){
-                // check if json response is in id_array
                 if(jQuery.inArray(response_data['game_data'][index]['id'],vuejs_view.id_array) === -1){
-                  // if not, push json response in id_array
                   vuejs_view.id_array.push(response_data['game_data'][index]['id'])
-                  // if not, push json response in games
                   vuejs_view.games.push(response_data['game_data'][index]);
-                  // if not, itterate game_list_count var.
                   vuejs_view.game_list_count = response_data['game_count'];
                 }
               });
@@ -549,6 +541,21 @@ let vuejs_view = new Vue({
       fail: function(response_data){
       }
     })
+  });
+
+
+
+  function callEverything(){
+    vuejs_view.auto_update_game_data();
+  }
+
+  $(window).on('load',function(){
+    callEverything();
+  });
+
+  $(document).ready(function(){
+    $('.friend-invitation-error, .friend-invitation-success, .friend-same-user-error, .already-friend-error').hide()
+    setInterval(callEverything, 3000)
   });
 </script>
 {% endblock %}
