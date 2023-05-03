@@ -1,3 +1,4 @@
+from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView, FormView, ListView, CreateView
 from django.contrib import messages
@@ -126,7 +127,18 @@ class CreateNewGameAjaxView(LoginRequiredMixin, JsonableResponseMixin, FormView)
     form_class = CreateGameForm
     success_url = reverse_lazy("dashboard_view")
 
-    def post(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
+        cleaned_game_data = [
+            elem for elem in Ingameplayer.objects.select_related('game_id').filter(player_id=self.request.user.id).values('game_id', 'game_id__name', 'owner_uuid_id')
+        ]
+        response_data = {
+            'success': True,
+            'game_count' : len(cleaned_game_data),
+            'game_data': cleaned_game_data
+        }
+        return JsonResponse(response_data)
+
+    def post(self, request, *args, **kwarg):
         if Game.objects.filter(owner_uuid=self.request.user.id).count() < 7:
             name = "sans noms" if self.request.POST.get('game_name') is None else self.request.POST.get('game_name')
             if len(name) >= 4 and len(name) <= 16:
