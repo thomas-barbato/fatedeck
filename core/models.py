@@ -47,7 +47,7 @@ class User(AbstractUser):
     username_invite_code = models.CharField(max_length=22, unique=True, null=True, blank=True)
     is_online = models.BooleanField(default=False)
     user_stylesheet = models.CharField(max_length=60, default="stylesheet_default_color.css", null=False)
-    last_connection =  models.DateTimeField('derniere connexion', auto_now_add=True, null=True, blank=True)
+    last_connection =  models.DateField('derniere connexion', auto_now_add=True, null=True, blank=True)
     created_at = models.DateTimeField('creation date', auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField('update date', auto_now=True)
     deleted_at = models.DateTimeField('deletion date', null=True)
@@ -64,6 +64,15 @@ class User(AbstractUser):
 
     def __str__(self):
         return f'{self.username}'
+
+# Model to store the list of logged in users
+class LoggedInUser(models.Model):
+    user = models.OneToOneField(User, related_name='logged_in_user', on_delete=models.RESTRICT)
+    # Session keys are 32 characters long
+    session_key = models.CharField(max_length=32, null=True, blank=True)
+
+    def __str__(self):
+        return self.user.email
 
 
 class Game(models.Model):
