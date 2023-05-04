@@ -6,7 +6,7 @@ from django.core.exceptions import NON_FIELD_ERRORS
 
 import re
 from .models import (
-    User, Game, Ingameplayer, Cards, Ingamecards
+    User, Game, Ingameplayer, Cards, Ingamecards, Friendlist
 )
 import datetime
 from core.backend.check_data import CheckPasswordPolicy, CheckImageExtension, CheckEmail
@@ -24,7 +24,6 @@ class RegisterForm(ModelForm):
         ),
         required=True,
         label="Email",
-        validators=[CheckEmail().validate],
         help_text=CheckEmail().get_help_text(),
     )
 
@@ -66,7 +65,7 @@ class RegisterForm(ModelForm):
 
     class Meta:
         model = User
-        fields = ["username", "email", "password"]
+        fields = ["username", "email", "password", "password2"]
         exclude = ["user_id"]
 
     def save(self, *args, **kwargs):
@@ -128,3 +127,9 @@ class CreateGameForm(ModelForm):
     class Meta:
         model = Game
         fields = ["name"]
+
+class FriendInvitationForm(ModelForm):
+
+    class Meta:
+        model = Friendlist
+        fields = []

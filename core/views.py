@@ -37,7 +37,7 @@ from .models import (
 
 from .forms import (
     LoginForm,
-    RegisterForm, CreateGameForm
+    RegisterForm, CreateGameForm, FriendInvitationForm
 )
 
 
@@ -72,6 +72,7 @@ class CreateAccount(FormView, JsonableResponseMixin, SuccessMessageMixin):
 
     def form_invalid(self, form):
         response = super().form_invalid(form)
+        print(form)
         if self.request.is_ajax():
             response = {"status": 0, "errors": dict(form.errors.items())}
         return JsonResponse(response, status=200)
@@ -151,30 +152,23 @@ class CreateNewGameAjaxView(LoginRequiredMixin, JsonableResponseMixin, FormView)
             regexp_name = re.sub(r"[0-9][A-Z][a-z]", '',name)
             user_id = self.request.user.id
             game_invite_code = f'{regexp_name}#{random.randint(99, 9999)}'
-            game = Game(
+            game = Game.objects.create(
                 name=regexp_name,
                 game_invite_code=game_invite_code,
                 owner_uuid_id=user_id
             )
-            game.save()
-            game_id = Game.objects.filter(
-                name=name,
-                game_invite_code=game_invite_code,
-                owner_uuid_id=user_id
-            ).values('id')
 
-            player = Ingameplayer(
-                game_id=game_id,
+            Ingameplayer.objects.create(
+                game_id=game.id,
                 player_id=user_id,
                 owner_uuid_id=user_id
             )
-            player.save()
 
             for entry in Cards.objects.values('id', 'name'):
                 Ingamecards(
                     card_id=entry['id'],
                     current_state="PIOCHE" if entry['name'] != 'dos' else 'SPECIAL',
-                    game_id=game_id
+                    game_id=game.id
                 ).save()
 
             game_list_count = Ingameplayer.objects.filter(player_id=user_id).count()
@@ -188,7 +182,7 @@ class CreateNewGameAjaxView(LoginRequiredMixin, JsonableResponseMixin, FormView)
         return JsonResponse(response_data)
 
 
-class DisplayFriendListView(LoginRequiredMixin, JsonableResponseMixin, FormView):
+class DisplayAndAddFriendListView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
     template_name = "display/dashboard.html"
     login_url = settings.LOGIN_URL
 
@@ -198,12 +192,30 @@ class DisplayFriendListView(LoginRequiredMixin, JsonableResponseMixin, FormView)
             {'name':elem['player_id__username_invite_code'],
              'id':elem['id'],
              'is_online': LoggedInUser.objects.filter(user_id=elem['player_id']).exists(),
-             } for elem in Friendlist.objects.select_related('player_id').filter(owner_uuid_id=user_id).values('id','player_id', 'player_id__username_invite_code', 'player_id__last_connection')
+             } for elem in Friendlist.objects.select_related('player_id').filter(owner_uuid_id=user_id).values('id','player_id', 'player_id__username_invite_code')
         ]
-        print(cleaned_friend_list)
         response_data = {
             'success': True,
             'friends': cleaned_friend_list
         }
         return JsonResponse(response_data)
 
+    def post(self, request, *args, **kwargs):
+        if self.request.POST.get('invite_code'):
+            user = self.request.user
+            friend_invitation_code = self.request.POST.get('invite_code')
+            friend = User.objects.filter(username_invite_code=friend_invitation_code)
+            if friend.exists() is False:
+                response_data = {'user_does_not_exists': True}
+            elif user.username_invite_code == friend_invitation_code:
+                response_data = {'error_same_user': True}
+            elif Friendlist.objects.filter(Q(owner_uuid_id=user.id, player_id=friend.values('id')[0]['id']) | Q(owner_uuid_id=friend.values('id')[0]['id'], player_id=user.id)).exists():
+                response_data = {'already_friend_error': True}
+            elif Friendinviation.objects.filter(Q(owner_uuid_id=user.id, player_id=friend.values('id')[0]['id']) | Q(owner_uuid_id=friend.values('id')[0]['id'], player_id=user.id)).exists():
+                response_data = {'invitation_already_sent': True}
+            else:
+                Friendinviation.objects.create(owner_uuid_id=user.id, player_id=friend.values('id')[0]['id'])
+                response_data = {'success': True}
+        else:
+            response_data = {'empty': True}
+        return JsonResponse(response_data, safe=False)
