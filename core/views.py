@@ -15,6 +15,7 @@ from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 import random
+from django.shortcuts import get_object_or_404
 from django.contrib.sessions.backends.base import SessionBase
 
 import settings
@@ -124,7 +125,12 @@ class DisplayDashboardView(LoginRequiredMixin, ListView):
         context["game_list_count"] = Ingameplayer.objects.filter(player_id=user_id).count()
         context["CreateGameForm"] = CreateGameForm
         context["game_list"] = [{'name':elem['game_id__name'], 'id':elem['game_id'], 'owner_uuid_id':elem['owner_uuid_id'],} for elem in Ingameplayer.objects.select_related('game_id').filter(player_id=self.request.user.id).values('game_id', 'game_id__name', 'owner_uuid_id')]
-
+        context["friends_list"] = [
+            {'name':elem['player_id__username_invite_code'],
+             'id':elem['id'],
+             'is_online': LoggedInUser.objects.filter(user_id=elem['player_id']).exists(),
+             } for elem in Friendlist.objects.select_related('player_id').filter(owner_uuid_id=user_id).values('id','player_id', 'player_id__username_invite_code')
+        ]
         return context
 
 class CreateNewGameAjaxView(LoginRequiredMixin, JsonableResponseMixin, FormView):
@@ -204,18 +210,59 @@ class DisplayAndAddFriendListView(LoginRequiredMixin, JsonableResponseMixin, Tem
         if self.request.POST.get('invite_code'):
             user = self.request.user
             friend_invitation_code = self.request.POST.get('invite_code')
-            friend = User.objects.filter(username_invite_code=friend_invitation_code)
-            if friend.exists() is False:
+            friend = get_object_or_404(User, username_invite_code=friend_invitation_code)
+            if not friend.id:
                 response_data = {'user_does_not_exists': True}
             elif user.username_invite_code == friend_invitation_code:
                 response_data = {'error_same_user': True}
-            elif Friendlist.objects.filter(Q(owner_uuid_id=user.id, player_id=friend.values('id')[0]['id']) | Q(owner_uuid_id=friend.values('id')[0]['id'], player_id=user.id)).exists():
+            elif Friendlist.objects.filter(Q(owner_uuid_id=user.id, player_id=friend.id) | Q(owner_uuid_id=friend.id, player_id=user.id)).exists():
                 response_data = {'already_friend_error': True}
-            elif Friendinviation.objects.filter(Q(owner_uuid_id=user.id, player_id=friend.values('id')[0]['id']) | Q(owner_uuid_id=friend.values('id')[0]['id'], player_id=user.id)).exists():
+            elif Friendinviation.objects.filter(Q(owner_uuid_id=user.id, player_id=friend.id) | Q(owner_uuid_id=friend.id, player_id=user.id)).exists():
                 response_data = {'invitation_already_sent': True}
             else:
-                Friendinviation.objects.create(owner_uuid_id=user.id, player_id=friend.values('id')[0]['id'])
+                Friendinviation.objects.create(owner_uuid_id=user.id, player_id=friend.id)
                 response_data = {'success': True}
         else:
             response_data = {'empty': True}
         return JsonResponse(response_data, safe=False)
+
+
+class FriendListInvitationView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
+    template_name = "display/dashboard.html"
+    login_url = settings.LOGIN_URL
+
+    def get(self, request, *args, **kwargs):
+        user_id = self.request.user.id
+        friend_invitation = [
+            {'name':elem['owner_uuid_id__username_invite_code'],
+             'id':elem['id'],
+             } for elem in Friendinviation.objects.select_related('owner_uuid_id').filter(player_id=user_id).values('id','owner_uuid_id', 'owner_uuid_id__username_invite_code')
+        ]
+
+        response_data = {
+            'success': True,
+            'friend_invitation': len(friend_invitation),
+            'friend_invitation_list': friend_invitation
+        }
+        return JsonResponse(response_data)
+
+    def post(self, request, *args, **kwargs):
+        if request.POST.get('choices') and request.POST.get('choices') in ['accept', 'deny']:
+            choices = request.POST.get('choices')
+            user_id = request.user.id
+            contact_id = get_object_or_404(User, username_invite_code=request.POST.get('contact_name')).id
+            if choices == "accept":
+                Friendlist.objects.bulk_create(
+                    [
+                        Friendlist(
+                            player_id=contact_id,
+                            owner_uuid_id=user_id,
+                        ),
+                        Friendlist(
+                            player_id=user_id,
+                            owner_uuid_id=contact_id,
+                        )
+                    ]
+                )
+            Friendinviation.objects.get(owner_uuid_id=contact_id, player_id=user_id).delete()
+            return JsonResponse({'success': True}, safe=False)

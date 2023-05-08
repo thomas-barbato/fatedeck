@@ -39,10 +39,10 @@
               <p class="text-break text-justify card-text"><span class="list-invite-name presentation-no-font-family">[[contact.name]]</span> souhaite vous ajouter à ses contacts</p>
               <div class="row">
                 <div class="col-6 d-flex justify-content-end">
-                  <i class="fas fa-check cursor-pointer accept-invitation add-contact" @click="accept_friend_invitation($event)" :id="[[contact.name]]"></i>
+                  <i class="fas fa-check cursor-pointer accept-invitation add-contact" @click="accept_or_deny_friend_invitation($event)" :id="[[contact.name]]"></i>
                 </div>
                 <div class="col-6 d-flex justify-content-start">
-                  <i class="fa-ban cursor-pointer deny-invitation denied-contact" @click="deny_friend_invitation($event)" :id="[[contact.name]]"></i>
+                  <i class="fas fa-ban cursor-pointer deny-invitation denied-contact" @click="accept_or_deny_friend_invitation($event)" :id="[[contact.name]]"></i>
                 </div>
               </div>
             </div>
