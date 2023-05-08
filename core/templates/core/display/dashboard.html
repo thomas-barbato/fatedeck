@@ -60,8 +60,8 @@
     <div class="card-body">
       <ul class="list-group list-contact row list-group-flush">
         <li v-for="friend, name, id, owner_uuid_id in friends" class="list-group-item test-justify presentation-no-font-family d-flex friend-list" v-bind:id="[[ friend.id]]">
-          [[friend.name]]
-          <span v-if="friend.is_online" class="dot green-dot ms-auto mt-2"></span>
+          <i class="fas fa-user-minus mt-1 col-2"></i><span class="d-flex col-8 ">[[friend.name]]</span>
+          <span v-if="friend.is_online" class="dot green-dot ms-auto mt-2 "></span>
           <span v-else class="dot red-dot ms-auto mt-2"></span>
         </li>
       </ul>
@@ -98,15 +98,17 @@
             </div>
             <div class="modal-body form-group">
               <label for="input-invitation-name">Nom du contact :</label>
-              <input type="text" name="invite_code" value="" minlength="4" maxlength="22" class="form-control presentation-no-font-family" id="input-friend-name" aria-describedby="input-game-name-help" placeholder="un_user#1234">
+              <input type="text" name="invite_code" value="" minlength="4" maxlength="22" class="form-control presentation-no-font-family" id="input-friend-name" aria-describedby="input-game-name-help" placeholder="un_user#1234" required>
               <small id="input-invitation-name-help" class="form-text text-muted">Pas plus de 22 caractères.</small>
+              <p class="alert alert-danger friend-invitation-empty">Vous devez entrer un utilisateur...</p>
               <p class="alert alert-danger friend-invitation-error">Cet utilisateur n'existe pas...</p>
-              <p class="alert alert-success friend-invitation-success">Cet utilisateur existe...</p>
+              <p class="alert alert-success friend-invitation-success">Invitation envoyée</p>
+              <p class="alert alert-warning friend-invitation-already-sent">Une invitation est toujours en attente d'être acceptée</p>
               <p class="alert alert-warning friend-same-user-error">Vous ne pouvez pas vous ajouter vous meme...</p>
               <p class="alert alert-warning already-friend-error">Ce contact est déjà présent dans votre liste...</p>
             </div>
             <div class="modal-footer mx-auto">
-              <button type="button" v-on:click="create_friend_invitation()" id="submit-invitation-sending" class="btn btn-primary success-button"data-dismiss="modal">Inviter</button>
+              <button type="button" v-on:click="create_friend_invitation()" id="submit-invitation-sending" class="btn btn-primary success-button">Inviter</button>
               <button type="button" class="btn btn-secondary cancel-button" data-dismiss="modal">Fermer</button>
             </div>
           </div>
@@ -141,6 +143,9 @@ let vuejs_view = new Vue({
           {% endfor %}
         ],
         friends: [
+          {% for friend in friends_list %}
+          {"name":"{{ friend.name }}", "id":"{{ friend.id }}", "is_online":"{{ friend.is_online }}"},
+          {% endfor %}
         ],
     },
     methods: {
@@ -217,7 +222,7 @@ let vuejs_view = new Vue({
       },
       create_friend_invitation: function(){
           let invite_code = $('#input-friend-name').val();
-          let url = ''
+          let url = "{% url 'create-friend-invitation' %}";
           $.ajax({
             url: url,
             async: false,
@@ -230,13 +235,32 @@ let vuejs_view = new Vue({
               'csrfmiddlewaretoken': '{{ csrf_token }}'
             },
             success: function (response_data) {
+              if(response_data.success){
+                $('.friend-invitation-success').show()
+                $('.friend-invitation-error, .friend-same-user-error, .friend-invitation-empty, .already-friend-error, .friend-invitation-already-sent').hide()
+              }else if(response_data.error_same_user){
+                $('.friend-same-user-error').show()
+                $('.friend-invitation-error, .friend-invitation-empty, .friend-invitation-success, .already-friend-error, .friend-invitation-already-sent').hide()
+              }else if(response_data.already_friend_error){
+                $('.already-friend-error').show()
+                $('.friend-invitation-error, .friend-invitation-empty, .friend-invitation-success, .friend-invitation-already-sent').hide()
+              }else if(response_data.empty){
+                $('.friend-invitation-empty').show()
+                $('.friend-invitation-error, .friend-invitation-success, .friend-same-user-error, .friend-invitation-already-sent').hide()
+              }else if(response_data.user_does_not_exists){
+                $('.friend-invitation-error').show()
+                $('.friend-invitation-success, .friend-invitation-empty, .friend-same-user-error, .already-friend-error, .friend-invitation-already-sent').hide()
+              }else if(response_data.invitation_already_sent){
+                $('.friend-invitation-already-sent').show()
+                $('.friend-invitation-success, .friend-invitation-empty, .friend-same-user-error, .already-friend-error').hide()
+              }
             },
             fail: function(response_data){
             }
           })
       },
       auto_update_friends_list: async function(){
-        let url = '{% url "display_friendlist" %}'
+        let url = '{% url "display-friend-list" %}'
         $.ajax({
           url: url,
           async: true,
@@ -246,20 +270,15 @@ let vuejs_view = new Vue({
           headers: { "X-CSRFToken": "" },
           data:{},
           success: function (response_data) {
-            let can_be_added = true;
-            let can_be_deleted = false;
+          vuejs_view.friends = []
             $.each(response_data['friends'], function(index){
-              $.each(vuejs_view.friends, function(friend_index){
-                if(response_data['friends'][index]['id'] === vuejs_view.friends[friend_index]['id']){
-                  can_be_added = false;
-                  if(response_data['friends'][index]['is_online'] != vuejs_view.friends[friend_index]['is_online']){
-                    vuejs_view.friends[friend_index]['is_online'] = response_data['friends'][index]['is_online']
-                  }
+                if(jQuery.inArray(response_data['friends'][index]['id'],vuejs_view.friends) === -1){
+                  vuejs_view.friends.push({
+                  "name": response_data['friends'][index]['name'],
+                  "id": response_data['friends'][index]['id'],
+                  "is_online": response_data['friends'][index]['is_online']
+                  })
                 }
-              })
-              if(can_be_added === true){
-                vuejs_view.friends.push({"name": response_data['friends'][index]['name'], "id": response_data['friends'][index]['id'], "is_online": response_data['friends'][index]['is_online']})
-              }
             });
           },
           fail: function(response_data){
@@ -279,19 +298,19 @@ let vuejs_view = new Vue({
     el: '#top-pannel-notification',
     delimiters: ['[[', ']]'],
     data: {
-      friend_invite_notification : '{{ friend_invitation_count }}',
+      friend_invite_notification : [],
       friend_invitation_list : [],
       game_invitation_list : [],
       game_invite_notification : 0,
     },
     methods:{
       auto_update_friend_notification: async function(){
-        let url = ""
+        let url = "{% url 'display-friend-invitation' %}";
         $.ajax({
           url: url,
           async: true,
           context: this,
-          type: 'POST',
+          type: 'GET',
           dataType : 'json',
           headers: { "X-CSRFToken": "{{ csrf_token }}" },
           data:{
@@ -300,77 +319,34 @@ let vuejs_view = new Vue({
           success: function (response_data) {
             if(response_data.success){
               notifications.friend_invite_notification = response_data['friend_invitation']
+              let can_be_added = true;
+              notifications.friend_invitation_list = [];
+              $.each(response_data['friend_invitation_list'], function(index){
+                can_be_added = true;
+                $.each(notifications.friend_invitation_list, function(friend_index){
+                  if(response_data['friend_invitation_list'][index]['id'] === notifications.friend_invitation_list[friend_index]['id']){
+                    can_be_added = false;
+                  }
+                });
+                if(can_be_added === true){
+                  notifications.friend_invitation_list.push({"name": response_data['friend_invitation_list'][index]['name'], "id": response_data['friend_invitation_list'][index]['id']})
+                }
+              });
             }
           },
           fail: function(response_data){
           }
         })
       },
-      auto_update_friend_menu: async function(){
-        let url = "";
-        $.ajax({
-          url: url,
-          async: true,
-          context: this,
-          type: 'POST',
-          dataType : 'json',
-          headers: { "X-CSRFToken": "{{ csrf_token }}" },
-          data:{
-            'csrfmiddlewaretoken': '{{ csrf_token }}'
-          },
-          success: function (response_data) {
-            let can_be_added = true;
-            notifications.friend_invitation_list = [];
-            $.each(response_data['friend_invitation_list'], function(index){
-              can_be_added = true;
-              $.each(notifications.friend_invitation_list, function(friend_index){
-                if(response_data['friend_invitation_list'][index]['id'] === notifications.friend_invitation_list[friend_index]['id']){
-                  can_be_added = false;
-                }
-              });
-              if(can_be_added === true){
-                notifications.friend_invitation_list.push({"name": response_data['friend_invitation_list'][index]['username_invite_code'], "id": response_data['friend_invitation_list'][index]['id']})
-              }
-            });
-          },
-          fail: function(response_data){
-          }
-        })
-      },
-      auto_update_game_menu: async function(){
-        let url = "";
-        $.ajax({
-          url: url,
-          async: true,
-          context: this,
-          type: 'POST',
-          dataType : 'json',
-          headers: { "X-CSRFToken": "{{ csrf_token }}" },
-          data:{
-            'csrfmiddlewaretoken': '{{ csrf_token }}'
-          },
-          success: function (response_data) {
-            let can_be_added = true;
-            $.each(response_data['game_invitation_list'], function(index){
-              can_be_added = true
-              $.each(notifications.game_invitation_list, function(game_index){
-                if(response_data['game_invitation_list'][index]['game_name'] === notifications.game_invitation_list[game_index]['game_name']){
-                  can_be_added = false;
-                }
-              })
-              if(can_be_added === true){
-                notifications.game_invitation_list.push({"contact_name": response_data['game_invitation_list'][index]['contact_name'], "game_name": response_data['game_invitation_list'][index]['game_name']})
-              }
-            });
-
-          },
-          fail: function(response_data){
-          },
-        })
-      },
-      accept_friend_invitation: async function(event){
+      accept_or_deny_friend_invitation: async function(event){
         let id = event.target.id
-        let url = "";
+        let choices = "";
+        if($(event.target).hasClass('accept-invitation')){
+          choices = "accept";
+        }else if($(event.target).hasClass('deny-invitation')){
+          choices = "deny";
+        }
+        let url = "{% url 'accept-or-deny-friend-invitation' %}";
         $.ajax({
           url: url,
           async: true,
@@ -380,6 +356,7 @@ let vuejs_view = new Vue({
           headers: { "X-CSRFToken": "{{ csrf_token }}" },
           data:{
             'contact_name' : id,
+            'choices' : choices,
             'csrfmiddlewaretoken': '{{ csrf_token }}'
           },
           success: function (response_data) {
@@ -390,30 +367,6 @@ let vuejs_view = new Vue({
                 notifications.friend_invite_notification--;
               }
             })
-          }
-        });
-      },
-      deny_friend_invitation: async function(){
-        let id = event.target.id
-        let url = "";
-        $.ajax({
-          url: url,
-          async: true,
-          context: this,
-          type: 'POST',
-          dataType : 'json',
-          headers: { "X-CSRFToken": "{{ csrf_token }}" },
-          data:{
-            'contact_name' : id,
-            'csrfmiddlewaretoken': '{{ csrf_token }}'
-          },
-          success: function (response_data) {
-            $.each(notifications.friend_invitation_list, function(index){
-              if(notifications.friend_invitation_list[index]['name'] == id){
-                notifications.friend_invitation_list.splice(index, 1)
-                notifications.friend_invite_notification--;
-              }
-            });
           }
         });
       },
@@ -503,45 +456,11 @@ let vuejs_view = new Vue({
     }
   });
 
-  $('#input-friend-name').on('keyup',function(){
-    let invite_code = $('#input-friend-name').val();
-    let url = ''
-    $.ajax({
-      url: url,
-      async: false,
-      context : this,
-      type: 'POST',
-      dataType : 'json',
-      headers: { "X-CSRFToken": "{{ csrf_token }}" },
-      data:{
-        'invite_code': invite_code,
-        'csrfmiddlewaretoken': '{{ csrf_token }}'
-      },
-      success: function (response_data) {
-        if(response_data.success){
-          $('#submit-invitation-sending, .friend-invitation-success').show()
-          $('.friend-invitation-error, .friend-same-user-error, .already-friend-error').hide()
-        }else if(response_data.error_same_user){
-          $('.friend-same-user-error').show()
-          $('#submit-invitation-sending, .friend-invitation-error, .friend-invitation-success, .already-friend-error').hide()
-        }else if(response_data.already_friend_error){
-          $('.already-friend-error').show()
-          $('#submit-invitation-sending, .friend-invitation-error, .friend-invitation-success').hide()
-        }else{
-          $('.friend-invitation-error').show()
-          $('#submit-invitation-sending, .friend-invitation-success, .friend-same-user-error, .already-friend-error').hide()
-        }
-      },
-      fail: function(response_data){
-      }
-    })
-  });
-
-
 
   function callEverything(){
     vuejs_view.auto_update_game_data();
     vuejs_view.auto_update_friends_list();
+    notifications.auto_update_friend_notification();
   }
 
   $(window).on('load',function(){
@@ -549,7 +468,7 @@ let vuejs_view = new Vue({
   });
 
   $(document).ready(function(){
-    $('.friend-invitation-error, .friend-invitation-success, .friend-same-user-error, .already-friend-error').hide()
+    $('.friend-invitation-error, .friend-invitation-empty, .friend-invitation-success, .friend-same-user-error, .already-friend-error, .friend-invitation-already-sent').hide()
     setInterval(callEverything, 3000)
   });
 </script>
