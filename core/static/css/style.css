@@ -282,7 +282,7 @@ select:-webkit-scrollbar {
     background-color: rgba(0, 0, 0, .75)
 }
 
-.url-path {
+.url-path, .login-input {
     text-decoration: none;
 }
 
@@ -578,4 +578,12 @@ body {
 
 li{
     list-style: none;
+}
+
+.simply-black-text {
+    color:black;
+}
+
+.fa-user-minus:hover{
+    color: red;
 }

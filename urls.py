@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from django.contrib.auth.views import LogoutView
+from django.contrib.auth import views as auth_views
 from core import views as core_views
 
 app_name = "core"
@@ -31,9 +31,34 @@ urlpatterns = [
         name="dashboard_view"
     ),
     path(
+        "new_game",
+        core_views.CreateNewGameAjaxView.as_view(),
+        name="create_game_view"
+    ),
+    path(
+        "friendlist",
+        core_views.DisplayAndAddFriendListView.as_view(),
+        name="display-friend-list"
+    ),
+    path(
+        "send-invitation-to-friend",
+        core_views.DisplayAndAddFriendListView.as_view(),
+        name="create-friend-invitation"
+    ),
+    path(
+        "display-friend-invitation",
+        core_views.FriendListInvitationView.as_view(),
+        name="display-friend-invitation"
+    ),
+    path(
+        "accept-or-deny-friend-invitation",
+        core_views.FriendListInvitationView.as_view(),
+        name="accept-or-deny-friend-invitation"
+    ),
+    path(
         'logout/',
-        LogoutView.as_view(next_page='index_view'),
-        name='user_logout'
+        auth_views.LogoutView.as_view(),
+        name='user_logout',
     ),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

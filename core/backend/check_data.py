@@ -12,7 +12,6 @@ from core.models import User
 
 
 class CheckEmail:
-
     def validate(self, email):
         if User.objects.filter(email=email).exists() is True:
             raise ValidationError(
@@ -41,9 +40,7 @@ class CheckPasswordPolicy:
     """docstring"""
 
     def __init__(self):
-        self.password_pattern = (
-            "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$"
-        )
+        self.password_pattern = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$"
 
     def validate(self, password):
         """

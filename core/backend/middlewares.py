@@ -1,6 +1,8 @@
 from django.http import JsonResponse, HttpResponseRedirect
-#Session model stores the session data
+
+# Session model stores the session data
 from django.contrib.sessions.models import Session
+
 
 class JsonableResponseMixin:
     def form_invalid(self, form):
@@ -24,9 +26,11 @@ class AuthRequiredMiddleware(object):
     def __call__(self, request):
         response = self.get_response(request)
         if not request.user.is_authenticated:
-            return HttpResponseRedirect('/')
+            return HttpResponseRedirect("/")
         return response
 
+
+# src :https://dev.to/fleepgeek/prevent-multiple-sessions-for-a-user-in-your-django-application-13oo
 class OneSessionPerUserMiddleware:
     # Called only once when the web server starts
     def __init__(self, get_response):
