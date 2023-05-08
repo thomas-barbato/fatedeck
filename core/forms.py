@@ -5,16 +5,13 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.exceptions import NON_FIELD_ERRORS
 
 import re
-from .models import (
-    User, Game, Ingameplayer, Cards, Ingamecards, Friendlist
-)
+from .models import User, Game, Ingameplayer, Cards, Ingamecards, Friendlist
 import datetime
 from core.backend.check_data import CheckPasswordPolicy, CheckImageExtension, CheckEmail
 import random
 
 
 class RegisterForm(ModelForm):
-
     email = forms.EmailField(
         widget=TextInput(
             attrs={
@@ -69,15 +66,19 @@ class RegisterForm(ModelForm):
         exclude = ["user_id"]
 
     def save(self, *args, **kwargs):
-        regexp_name = re.sub(r'([\$\!\#\_\&\"\£\*\%\?\^\ \=\[\]\{\}\(\)\:\=\<\>\;\§\%\~\|\_\^\@][\W]*)', '',self.instance.username.lower())
-        username = re.sub(r"(^-+)|(^_+)|(^'+)|(^\.+)|(-$)|(_$)|('\.$)", '', regexp_name)
+        regexp_name = re.sub(
+            r"([\$\!\#\_\&\"\£\*\%\?\^\ \=\[\]\{\}\(\)\:\=\<\>\;\§\%\~\|\_\^\@][\W]*)",
+            "",
+            self.instance.username.lower(),
+        )
+        username = re.sub(r"(^-+)|(^_+)|(^'+)|(^\.+)|(-$)|(_$)|('\.$)", "", regexp_name)
         self.instance.username = self.instance.username.lower()
         self.instance.email = self.instance.email
         self.instance.password = make_password(self.instance.password)
         self.instance.is_staff = False
         self.instance.is_active = True
         self.instance.date_joined = datetime.datetime.now()
-        self.instance.username_invite_code = f'{username}#{random.randint(99,9999)}'
+        self.instance.username_invite_code = f"{username}#{random.randint(99,9999)}"
         super().save()
 
 
@@ -124,12 +125,13 @@ class CreateGameForm(ModelForm):
         ),
         required=True,
     )
+
     class Meta:
         model = Game
         fields = ["name"]
 
-class FriendInvitationForm(ModelForm):
 
+class FriendInvitationForm(ModelForm):
     class Meta:
         model = Friendlist
         fields = []
