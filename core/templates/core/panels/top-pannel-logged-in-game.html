@@ -6,7 +6,7 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <div class="nav-item d-flex justify-content-start">
           <a class="navbar-brand" href=""><i class="fas fa-home navbar-text-color"></i></a>
-          <a class="navbar-brand justify-content-center" href="{% url 'frontend:display_dashboard_view' %}">Retourner au dashboard</a>
+          <a class="navbar-brand justify-content-center" href="{% url 'dashboard_view' %}">Retourner au dashboard</a>
         </div>
         <ul class="navbar-nav ms-auto d-flex">
             <li class="nav-item dropdown  dropstart d-flex justify-content-end">
@@ -17,9 +17,9 @@
                 <button type="button" class="dropdown-item dropdown-option-menu-color" data-toggle="modal" data-target="#character-sheet-modal"><i class="fas fa-user-graduate"><span class="p-2 align-middle navbar-text-color"></i>Ma fiche de personnage</span></button>
                 <div class="dropdown-divider"></div>
                 {% if request.user.id == game_owner %}
-                <a class="dropdown-item dropdown-option-menu-color" href="{% url 'backend:delete_game' game_id=game_informations.0.id %}"><i class="fas fa-cogs"><span class="p-2 align-middle navbar-text-color"></i>Supprimer ce jeu</span></a>
+                <a class="dropdown-item dropdown-option-menu-color" href=""><i class="fas fa-cogs"><span class="p-2 align-middle navbar-text-color"></i>Supprimer ce jeu</span></a>
                 {% else %}
-                <a class="dropdown-item dropdown-option-menu-color" href="{% url 'backend:leave_game' game_id=game_informations.0.id %}"><i class="fas fa-cogs"><span class="p-2 align-middle navbar-text-color"></i>Quitter la partie</span></a>
+                <a class="dropdown-item dropdown-option-menu-color" href=""><i class="fas fa-cogs"><span class="p-2 align-middle navbar-text-color"></i>Quitter la partie</span></a>
                 {% endif %}
                 <a class="dropdown-item" href=""><i class="fas fa-user-circle"><span class="p-2 align-middle"></i>Mon compte</span></a>
                 <div class="dropdown-divider"></div>

@@ -270,7 +270,7 @@ let vuejs_view = new Vue({
           headers: { "X-CSRFToken": "" },
           data:{},
           success: function (response_data) {
-          vuejs_view.friends = []
+            vuejs_view.friends = []
             $.each(response_data['friends'], function(index){
                 if(jQuery.inArray(response_data['friends'][index]['id'],vuejs_view.friends) === -1){
                   vuejs_view.friends.push({
@@ -287,8 +287,8 @@ let vuejs_view = new Vue({
       },
       go_in_game: function(event){
         let targetId = event.currentTarget.id;
-        let next_url = ''
-        window.location.replace(next_url);
+        let next_url = "/ingame/"
+        window.location.replace(next_url + targetId);
       }
     }
   })
@@ -419,37 +419,6 @@ let vuejs_view = new Vue({
                 notifications.game_invite_notification--;
               }
             })
-          }
-        });
-      },
-      deny_friend_invitation: async function(event){
-        let id = event.target.id;
-        let contact_name;
-        $.each(notifications.game_invitation_list, function(index){
-          if(notifications.game_invitation_list[index]['game_name'] == id){
-            contact_name = notifications.game_invitation_list[index]['contact_name']
-          }
-        });
-        let url = "";
-        $.ajax({
-          url: url,
-          async: true,
-          context: this,
-          type: 'POST',
-          dataType : 'json',
-          headers: { "X-CSRFToken": "{{ csrf_token }}" },
-          data:{
-            'game_name' : id,
-            'contact_name': contact_name,
-            'csrfmiddlewaretoken': '{{ csrf_token }}'
-          },
-          success: function (response_data) {
-            $.each(notifications.game_invitation_list, function(index){
-              if(notifications.game_invitation_list[index]['game_name'] == id){
-                notifications.game_invitation_list.splice(index, 1)
-                notifications.game_invite_notification--;
-              }
-            });
           }
         });
       },
