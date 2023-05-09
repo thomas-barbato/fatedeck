@@ -4,7 +4,7 @@ from datetime import datetime
 from django.shortcuts import render, redirect
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import TemplateView, FormView, ListView, CreateView
+from django.views.generic import TemplateView, FormView, ListView, CreateView, DetailView
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -280,3 +280,56 @@ class FriendListInvitationView(LoginRequiredMixin, JsonableResponseMixin, Templa
                 )
             Friendinviation.objects.get(owner_uuid_id=contact_id, player_id=user_id).delete()
             return JsonResponse({"success": True}, safe=False)
+
+
+class DisplayGame(LoginRequiredMixin, JsonableResponseMixin, DetailView):
+    login_url = settings.LOGIN_URL
+    model = Game
+    template_name = "display/ingame.html"
+    slug_url_kwarg = "slug"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_id = self.request.user.id
+        game_id = self.kwargs["pk"]
+
+        players_list = [
+            {
+                "owner_uuid_id": player["owner_uuid_id"],
+                "player_id": player["ingameplayer__player_id"],
+                "username_invite_code": player["owner_uuid_id__username_invite_code"],
+                "is_online": LoggedInUser.objects.filter(user_id=player["ingameplayer__player_id"]).exists()
+            }
+            for player in Game.objects.filter(id=game_id).values(
+                "owner_uuid_id",
+                "ingameplayer__player_id",
+                "owner_uuid_id__username_invite_code",
+            )
+        ]
+
+        cards_list = [
+            {
+                "state": card["ingamecards__current_state"],
+                "order": card["ingamecards__order"],
+                "card_id": card["ingamecards__card_id"],
+                "filename": card["ingamecards__card_id__filename"],
+                "last_picked_up_by": card["ingamecards__last_picked_up_by"]
+            }
+            for card in Game.objects.filter(ingamecards__game_id=game_id, ingamecards__current_state="PIOCHE").values(
+                "ingamecards__current_state",
+                "ingamecards__order",
+                "ingamecards__card_id",
+                "ingamecards__card_id__filename",
+                "ingamecards__last_picked_up_by",
+            ).order_by('ingamecards__order')
+        ]
+
+        game = get_object_or_404(Game, id=game_id)
+
+        context['players'] = players_list
+        context['cards'] = cards_list
+        context['game'] = game
+
+
+
+        return context
