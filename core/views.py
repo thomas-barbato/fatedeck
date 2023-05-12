@@ -4,14 +4,14 @@ from datetime import datetime
 from django.shortcuts import render, redirect
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import TemplateView, FormView, ListView, CreateView, DetailView
+from django.views.generic import TemplateView, FormView, ListView, CreateView, DetailView, DeleteView
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Value, Q
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 import random
@@ -280,6 +280,22 @@ class FriendListInvitationView(LoginRequiredMixin, JsonableResponseMixin, Templa
                 )
             Friendinviation.objects.get(owner_uuid_id=contact_id, player_id=user_id).delete()
             return JsonResponse({"success": True}, safe=False)
+
+
+class DeleteFriendView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
+    template_name = "display/dashboard.html"
+    login_url = settings.LOGIN_URL
+    model = Friendlist
+
+    def post(self, request, *args, **kwargs):
+        user_id = self.request.user.id
+        contact = get_object_or_404(User, username_invite_code=self.request.POST.get('contact_name'))
+        response = {}
+        if contact.id:
+            friend = get_object_or_404(Friendlist, owner_uuid_id=user_id, player_id=contact.id).delete()
+            friend = get_object_or_404(Friendlist, owner_uuid_id=contact.id, player_id=user_id).delete()
+            response = {"success": True}
+        return JsonResponse(response, safe=False)
 
 
 class DisplayGame(LoginRequiredMixin, JsonableResponseMixin, DetailView):
