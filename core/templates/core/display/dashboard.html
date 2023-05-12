@@ -60,7 +60,7 @@
     <div class="card-body">
       <ul class="list-group list-contact row list-group-flush">
         <li v-for="friend, name, id, owner_uuid_id in friends" class="list-group-item test-justify presentation-no-font-family d-flex friend-list" v-bind:id="[[ friend.id]]">
-          <i class="fas fa-user-minus mt-1 col-2"></i><span class="d-flex col-8 ">[[friend.name]]</span>
+          <i class="fas fa-user-minus mt-1 col-2 cursor-pointer" :id="[[friend.name]]" v-on:click="get_contact_name($event)" data-toggle="modal" data-target="#invite-delete-modal"></i><span class="d-flex col-8 contact-name">[[friend.name]]</span>
           <span v-if="friend.is_online" class="dot green-dot ms-auto mt-2 "></span>
           <span v-else class="dot red-dot ms-auto mt-2"></span>
         </li>
@@ -114,6 +114,24 @@
           </div>
         </div>
       </div>
+    <div class="modal fade" id="invite-delete-modal" tabindex="-1" role="dialog" aria-labelledby="invite-friend-modal-Label" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title modal-text-color">Suppression de contact</h5>
+          </div>
+          <div class="modal-body">
+            <p class="modal-text-color presentation-no-font-family">Êtes-vous sur de vouloir supprimer [[ selected_contact ]] ?</p>
+            <p class="alert alert-danger friend-delete-error">Cet utilisateur n'existe pas, ou vous n'êtes pas amis...</p>
+            <p class="alert alert-success friend-delete-success">Contact supprimé</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary success-button" v-on:click="delete_friend($event)">Supprimer</button>
+            <button type="button" class="btn btn-secondary cancel-button" data-dismiss="modal">Fermer</button>
+          </div>
+        </div>
+      </div>
+    </div>
     </div>
 </div>
 {% endblock %}
@@ -147,6 +165,7 @@ let vuejs_view = new Vue({
           {"name":"{{ friend.name }}", "id":"{{ friend.id }}", "is_online":"{{ friend.is_online }}"},
           {% endfor %}
         ],
+        selected_contact: '',
     },
     methods: {
       reRender(){
@@ -260,7 +279,7 @@ let vuejs_view = new Vue({
           })
       },
       auto_update_friends_list: async function(){
-        let url = '{% url "display-friend-list" %}'
+        let url = '{% url "display-friend-list" %}';
         $.ajax({
           url: url,
           async: true,
@@ -282,6 +301,34 @@ let vuejs_view = new Vue({
             });
           },
           fail: function(response_data){
+          },
+        })
+      },
+      get_contact_name: function(event){
+        let name = event.currentTarget.id;
+        vuejs_view.selected_contact = name
+      },
+      delete_friend: function(event){
+        let url = '{% url "delete-friend" %}';
+        $.ajax({
+          url: url,
+          async: false,
+          context : this,
+          type: 'POST',
+          dataType : 'json',
+          headers: { "X-CSRFToken": "{{ csrf_token }}" },
+          data:{
+              'contact_name': vuejs_view.selected_contact,
+              'csrfmiddlewaretoken': '{{ csrf_token }}',
+          },
+          success: function (response_data) {
+            if(response_data.success){
+             $('.friend-delete-error').hide()
+             $('.friend-delete-success').show()
+            }else{
+             $('.friend-delete-error').show()
+             $('.friend-delete-success').hide()
+            }
           },
         })
       },
@@ -312,10 +359,8 @@ let vuejs_view = new Vue({
           context: this,
           type: 'GET',
           dataType : 'json',
-          headers: { "X-CSRFToken": "{{ csrf_token }}" },
-          data:{
-            'csrfmiddlewaretoken': '{{ csrf_token }}'
-          },
+          headers: { "X-CSRFToken": "" },
+          data:{},
           success: function (response_data) {
             if(response_data.success){
               notifications.friend_invite_notification = response_data['friend_invitation']
@@ -437,7 +482,7 @@ let vuejs_view = new Vue({
   });
 
   $(document).ready(function(){
-    $('.friend-invitation-error, .friend-invitation-empty, .friend-invitation-success, .friend-same-user-error, .already-friend-error, .friend-invitation-already-sent').hide()
+    $('.friend-invitation-error, .friend-invitation-empty, .friend-invitation-success, .friend-same-user-error, .already-friend-error, .friend-invitation-already-sent, .friend-delete-error, .friend-delete-success').hide()
     setInterval(callEverything, 3000)
   });
 </script>
