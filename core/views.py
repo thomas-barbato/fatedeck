@@ -298,7 +298,7 @@ class DeleteFriendView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
         return JsonResponse(response, safe=False)
 
 
-class DisplayGame(LoginRequiredMixin, JsonableResponseMixin, DetailView):
+class DisplayGame(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
     login_url = settings.LOGIN_URL
     model = Game
     template_name = "display/ingame.html"
@@ -306,46 +306,98 @@ class DisplayGame(LoginRequiredMixin, JsonableResponseMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user_id = self.request.user.id
         game_id = self.kwargs["pk"]
+        game = get_object_or_404(Game, id=game_id)
+        player_id = self.request.user.id
 
         players_list = [
             {
                 "owner_uuid_id": player["owner_uuid_id"],
-                "player_id": player["ingameplayer__player_id"],
+                "player_id": player["player_id"],
                 "username_invite_code": player["owner_uuid_id__username_invite_code"],
-                "is_online": LoggedInUser.objects.filter(user_id=player["ingameplayer__player_id"]).exists()
+                "is_online": LoggedInUser.objects.filter(user_id=player["player_id"]).exists()
             }
-            for player in Game.objects.filter(id=game_id).values(
+            for player in Ingameplayer.objects.filter(game_id=game.id).values(
                 "owner_uuid_id",
-                "ingameplayer__player_id",
+                "player_id",
                 "owner_uuid_id__username_invite_code",
             )
         ]
 
-        cards_list = [
+        friends_list = [
             {
-                "state": card["ingamecards__current_state"],
-                "order": card["ingamecards__order"],
-                "card_id": card["ingamecards__card_id"],
-                "filename": card["ingamecards__card_id__filename"],
-                "last_picked_up_by": card["ingamecards__last_picked_up_by"]
+                "player_id": friend["player_id"],
+                "username_invite_code": friend["owner_uuid_id__username_invite_code"],
             }
-            for card in Game.objects.filter(ingamecards__game_id=game_id, ingamecards__current_state="PIOCHE").values(
-                "ingamecards__current_state",
-                "ingamecards__order",
-                "ingamecards__card_id",
-                "ingamecards__card_id__filename",
-                "ingamecards__last_picked_up_by",
-            ).order_by('ingamecards__order')
+            for friend in Friendlist.objects.filter(
+                owner_uuid_id=player_id
+            ).exclude(
+                player_id__in=[l['player_id'] for l in players_list],
+                player_id__game__id=game.id,
+            ).values(
+                "owner_uuid_id",
+                "player_id",
+                "owner_uuid_id__username_invite_code",
+            )
         ]
 
-        game = get_object_or_404(Game, id=game_id)
+        deck = Ingamecards.objects.select_related('card').filter(game_id=game.id).values(
+            'card__filename',
+            'card_id',
+            'last_picked_up_by',
+            'current_state').order_by('?')
 
-        context['players'] = players_list
-        context['cards'] = cards_list
+        deck_count = Ingamecards.objects.filter(game_id=game.id, current_state="PIOCHE").count()
+
         context['game'] = game
-
-
-
+        context['players'] = players_list
+        context['friends'] = friends_list
+        context['cards'] = deck
+        context['deck_count'] = deck_count
         return context
+
+
+class DisplayFriendsAndPlayers(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
+    login_url = settings.LOGIN_URL
+    template_name = "display/ingame.html"
+
+    def get(self, request, *args, **kwargs):
+        game_id = self.request.GET["game_id"]
+        game = get_object_or_404(Game, id=game_id)
+        player_id = self.request.user.id
+
+        players_list = [
+            {
+                "owner_uuid_id": player["owner_uuid_id"],
+                "player_id": player["player_id"],
+                "username_invite_code": player["owner_uuid_id__username_invite_code"],
+                "is_online": LoggedInUser.objects.filter(user_id=player["player_id"]).exists()
+            }
+            for player in Ingameplayer.objects.filter(game_id=game.id).values(
+                "owner_uuid_id",
+                "player_id",
+                "owner_uuid_id__username_invite_code",
+            )
+        ]
+
+        friends_list = [
+            {
+                "player_id": friend["player_id"],
+                "username_invite_code": friend["owner_uuid_id__username_invite_code"],
+            }
+            for friend in Friendlist.objects.filter(
+                owner_uuid_id=player_id
+            ).exclude(
+                player_id__in=[l['player_id'] for l in players_list],
+            ).values(
+                "player_id",
+                "owner_uuid_id__username_invite_code",
+            )
+        ]
+
+        response_data = {
+            "friends" : friends_list,
+            "players" : players_list
+        }
+
+        return JsonResponse(response_data, safe=False)

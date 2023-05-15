@@ -1,5 +1,6 @@
 {% extends 'generalist_template.html' %}
 {% load static %}
+{% load customtags %}
 {% block content %}
 
 <div class="container-fluid" id="game-container">
@@ -86,7 +87,7 @@
       </ul>
     </div>
     <div class="card-footer">
-      {% if request.user.id == game_owner %}
+      {% if request.user.id == game.owner_uuid_id %}
       <div class="row no-gutters col-12">
         <h5 class="text-center cursor-pointer presentation-no-font-family col-5 ms-auto" data-toggle="modal" data-target="#invite-friend-modal"><i class="fas fa-user-friends fa-2x"></i>
         <h5 class="text-center cursor-pointer presentation-no-font-family col-5 ms-auto" data-toggle="modal" data-target="#add-contact-modal"><i class="fas fa-address-book fa-2x"></i>
@@ -127,7 +128,7 @@
         <div class="modal-body form-group">
           <select class="form-select" aria-label="select-example" name="friend-select" id="friend-select">
             <option value=''>Selectionnez un contact</option>
-            <option v-for="friend in friend_list" :value='[[ friend ]]'>[[ friend ]]</option>
+            <option v-for="friend in friend_list" :value='[[ friend.id ]]'>[[ friend.name ]]</option>
           </select>
         </div>
         <div class="modal-footer mx-auto">
@@ -138,6 +139,8 @@
     </div>
   </div>
 </div>
+
+
 <!-- Character Sheet modal -->
 <div class="modal fade" id="character-sheet-modal" tabindex="-1" role="dialog" aria-labelledby="add-contact-modal-Label" aria-hidden="true">
   <div class="modal-dialog modal-fullscreen " role="document">
@@ -151,7 +154,7 @@
             <button type="button " class="btn-close col-1 d-flex justify-content-end" data-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="col-6 d-flex justify-content-end button-page-1">
-            <h5 class="mx-auto character-sheet-category-title cursor-pointer character-sheet-button">Page 1</h5> 
+            <h5 class="mx-auto character-sheet-category-title cursor-pointer character-sheet-button">Page 1</h5>
           </div>
           <div class="col-6 d-flex justify-content-start button-page-2">
             <h5 class="mx-auto character-sheet-category-title cursor-pointer character-sheet-button">Page 2</h5>
@@ -498,288 +501,22 @@
                   <span class="character-sheet-category-title">VA</span>
                 </div>
               </div>
-
-
-              <div v-for="(item) in 20" :id="['skill-data-' + index]">
+              {% for i in 1|range:21 %}
+              <div class="row mt-1 skill-data"  id="skill-data-{{ i }}">
                 <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="competence-1" value="{{ character_sheet.9.skill.competence }}" name="competence1"></input>
+                  <input type="text" class="competence form-control" id="competence-{{ i }}" value="{{ character_sheet.i.skill.competence }}" name="competence{{ i }}"></input>
                 </div>
                 <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="aspect-1"  value="{{ character_sheet.9.skill.aspect }}" name="aspect1"></input>
+                  <input type="text" class="competence form-control" id="aspect-{{ i }}"  value="{{ character_sheet.i.skill.aspect }}" name="aspect{{ i }}"></input>
                 </div>
                 <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="rang-1"  value="{{ character_sheet.9.skill.rang }}" name="rang1"></input>
+                  <input type="text" class="competence form-control" id="rang-{{ i }}"  value="{{ character_sheet.i.skill.rang }}" name="rang{{ i }}"></input>
                 </div>
                 <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control"id="va-1"  value="{{ character_sheet.9.skill.va }}" name="va1"></input>
-                </div>
-              </div> 
-              <div class="row mt-1 skill-data" id="skill-data-2">
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="competence-2"  value="{{ character_sheet.10.skill.competence }}" name="competence1"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="aspect-2" value="{{ character_sheet.10.skill.aspect }}" name="aspect1"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="rang-2" value="{{ character_sheet.10.skill.rang }}" name="rang1"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="va-2" value="{{ character_sheet.10.skill.va }}" name="va1"></input>
+                  <input type="text" class="competence form-control"id="va-{{ i }}"  value="{{ character_sheet.i.skill.va }}" name="va{{ i }}"></input>
                 </div>
               </div>
-              <div class="row mt-1 skill-data" id="skill-data-3">
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="competence-3" value="{{ character_sheet.11.skill.competence }}" name="competence3"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="aspect-3" value="{{ character_sheet.11.skill.aspect }}" name="competence3"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="rang-3" value="{{ character_sheet.11.skill.rang }}" name="rang3"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="va-3" value="{{ character_sheet.11.skill.va }}" name="va3"></input>
-                </div>
-              </div>
-              <div class="row mt-1 skill-data" id="skill-data-4">
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="competence-4" value="{{ character_sheet.12.skill.competence }}" name="competence4"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="aspect-4" value="{{ character_sheet.12.skill.aspect }}" name="competence4"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="rang-4" value="{{ character_sheet.12.skill.rang }}" name="rang4"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="va-4" value="{{ character_sheet.12.skill.va }}" name="va4"></input>
-                </div>
-              </div>
-              <div class="row mt-1 skill-data" id="skill-data-5">
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="competence-5" value="{{ character_sheet.13.skill.competence }}" name="competence5"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="aspect-5" value="{{ character_sheet.13.skill.aspect }}" name="competence5"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="rang-5" value="{{ character_sheet.13.skill.rang }}" name="rang5"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="va-5" value="{{ character_sheet.13.skill.va }}" name="va5"></input>
-                </div>
-              </div>
-              <div class="row mt-1 skill-data" id="skill-data-6">
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="competence-6" value="{{ character_sheet.14.skill.competence }}" name="competence6"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="aspect-6" value="{{ character_sheet.14.skill.aspect }}" name="competence6"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="rang-6" value="{{ character_sheet.14.skill.rang }}" name="rang6"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="va-6" value="{{ character_sheet.14.skill.va }}" name="va6"></input>
-                </div>
-              </div>
-              <div class="row mt-1 skill-data" id="skill-data-7">
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="competence-7" value="{{ character_sheet.15.skill.competence }}" name="competence7"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="aspect-7" value="{{ character_sheet.15.skill.aspect }}" name="competence7"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="rang-7" value="{{ character_sheet.15.skill.rang }}" name="rang7"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="va-7" value="{{ character_sheet.15.skill.va }}" name="va7"></input>
-                </div>
-              </div>
-              <div class="row mt-1 skill-data" id="skill-data-8">
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="competence-8" value="{{ character_sheet.16.skill.competence }}" name="competence8"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="aspect-8" value="{{ character_sheet.16.skill.aspect }}" name="competence8"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="rang-8" value="{{ character_sheet.16.skill.rang }}" name="rang8"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="va-8" value="{{ character_sheet.16.skill.va }}" name="va8"></input>
-                </div>
-              </div>
-              <div class="row mt-1 skill-data" id="skill-data-9">
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="competence-9" value="{{ character_sheet.17.skill.competence }}" name="competence9"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="aspect-9" value="{{ character_sheet.17.skill.aspect }}" name="competence9"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="rang-9" value="{{ character_sheet.17.skill.rang }}" name="rang9"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="va-9" value="{{ character_sheet.17.skill.va }}" name="va9"></input>
-                </div>
-              </div>
-              <div class="row mt-1 skill-data" id="skill-data-10">
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="competence-10" value="{{ character_sheet.18.skill.competence }}" name="competence10"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="aspect-10" value="{{ character_sheet.18.skill.aspect }}" name="competence10"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="rang-10" value="{{ character_sheet.18.skill.rang }}" name="rang10"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="va-10" value="{{ character_sheet.18.skill.va }}" name="va10"></input>
-                </div>
-              </div>
-              <div class="row mt-1 skill-data" id="skill-data-11">
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="competence-11" value="{{ character_sheet.19.skill.competence }}" name="competence11"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="aspect-11" value="{{ character_sheet.19.skill.aspect }}" name="competence11"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="rang-11" value="{{ character_sheet.19.skill.rang }}" name="rang11"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="va-11" value="{{ character_sheet.19.skill.va }}" name="va11"></input>
-                </div>
-              </div>
-              <div class="row mt-1 skill-data" id="skill-data-12">
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="competence-12" value="{{ character_sheet.20.skill.competence }}" name="competence12"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="aspect-12" value="{{ character_sheet.20.skill.aspect }}" name="competence12"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="rang-12" value="{{ character_sheet.20.skill.rang }}" name="rang12"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="va-12" value="{{ character_sheet.20.skill.va }}" name="va12"></input>
-                </div>
-              </div>
-              <div class="row mt-1 skill-data" id="skill-data-13">
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="competence-13" value="{{ character_sheet.21.skill.competence }}" name="competence13"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="aspect-13" value="{{ character_sheet.21.skill.aspect }}" name="competence13"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="rang-13" value="{{ character_sheet.21.skill.rang }}" name="rang13"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="va-13" value="{{ character_sheet.21.skill.va }}" name="va13"></input>
-                </div>
-              </div>
-              <div class="row mt-1 skill-data" id="skill-data-14">
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="competence-14" value="{{ character_sheet.22.skill.competence }}" name="competence14"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="aspect-14" value="{{ character_sheet.22.skill.aspect }}" name="competence14"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="rang-14" value="{{ character_sheet.22.skill.rang }}" name="rang14"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="va-14" value="{{ character_sheet.22.skill.va }}" name="va14"></input>
-                </div>
-              </div>
-              <div class="row mt-1 skill-data" id="skill-data-15">
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="competence-15" value="{{ character_sheet.23.skill.competence }}" name="competence15"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="aspect-15" value="{{ character_sheet.23.skill.aspect }}" name="competence15"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="rang-15" value="{{ character_sheet.23.skill.rang }}" name="rang15"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="va-15" value="{{ character_sheet.23.skill.va }}" name="va15"></input>
-                </div>
-              </div>
-              <div class="row mt-1 skill-data" id="skill-data-16">
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="competence-16" value="{{ character_sheet.24.skill.competence }}" name="competence16"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="aspect-16" value="{{ character_sheet.24.skill.aspect }}" name="competence16"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="rang-16" value="{{ character_sheet.24.skill.rang }}" name="rang16"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="va-16" value="{{ character_sheet.24.skill.va }}" name="va16"></input>
-                </div>
-              </div>
-              <div class="row mt-1 skill-data" id="skill-data-17">
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="competence-17" value="{{ character_sheet.25.skill.competence }}" name="competence17"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="aspect-17" value="{{ character_sheet.25.skill.aspect }}" name="competence17"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="rang-17" value="{{ character_sheet.25.skill.rang }}" name="rang17"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="va-17" value="{{ character_sheet.25.skill.va }}" name="va17"></input>
-                </div>
-              </div>
-              <div class="row mt-1 skill-data" id="skill-data-18">
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="competence-18" value="{{ character_sheet.26.skill.competence }}" name="competence18"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="aspect-18" value="{{ character_sheet.26.skill.aspect }}" name="competence18"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="rang-18" value="{{ character_sheet.26.skill.rang }}" name="rang18"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="va-18" value="{{ character_sheet.26.skill.va }}" name="va18"></input>
-                </div>
-              </div>
-              <div class="row mt-1 skill-data" id="skill-data-19">
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="competence-19" value="{{ character_sheet.27.skill.competence }}" name="competence19"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="aspect-19" value="{{ character_sheet.27.skill.aspect }}" name="competence19"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="rang-19" value="{{ character_sheet.27.skill.rang }}" name="rang19"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="va-19" value="{{ character_sheet.27.skill.va }}" name="va19"></input>
-                </div>
-              </div>
-              <div class="row mt-1 skill-data" id="skill-data-20">
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="competence-20" value="{{ character_sheet.28.skill.competence }}" name="competence20"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="aspect-20" value="{{ character_sheet.28.skill.aspect }}" name="competence20"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                  <input type="text" class="competence form-control" id="rang-20" value="{{ character_sheet.28.skill.rang }}" name="rang20"></input>
-                </div>
-                <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center mb-2">
-                  <input type="text" class="competence form-control" id="va-20" value="{{ character_sheet.28.skill.va }}" name="va20"></input>
-                </div>
-              </div>
+              {% endfor %}
             </div>
           </div>
         </div>
@@ -815,7 +552,7 @@
               <div class="form-group col-12 character-sheet-border character-sheet-title-color">
                 <h5 class="text-center mx-auto col-12 character-sheet-title-color mt-2">DESTINES</h5>
               </div>
-              
+
               <div class="input-group align-items-center col-12 mt-2 destiny">
                 <label for="destiny1" class="col-12">Destin d'effort :</label>
                 <textarea class="form-control d-flex justify-content-center col-9" id="destiny1" rows="1">{{ character_sheet.29.destiny.text }}</textarea>
@@ -930,6 +667,7 @@
     </form>
     </div>
   </div>
+
 </div>
 {% endblock %}
 {% block javascript %}
@@ -1093,7 +831,7 @@ $('#submit-character-sheet').on('click',function(){
       'game_id': '{{ game_id }}',
       'character_information' : JSON.stringify(character_informations),
       'occupation': JSON.stringify(occupation), 
-      'origine' : JSON.stringify(origine),// fait
+      'origine' : JSON.stringify(origine),
       'aspect': JSON.stringify(aspect), 
       'sub_aspect': JSON.stringify(sub_aspect), 
       'attack': JSON.stringify(attack),
@@ -1116,7 +854,6 @@ let ingame_view = new Vue({
   delimiters: ['[[', ']]'],
   data: {
     game_owner : '{{ game.owner_uuid_id }}',
-    deck_current_len : '{{ cards|length }}',
     game_id: '{{ game.id }}',
     game_invitation_code: '{{ game.game_invite_code }}',
     players: [
@@ -1125,47 +862,44 @@ let ingame_view = new Vue({
       {% endfor %}
     ],
     friend_list: [
-      {% for friend in friends_not_in_game_list %}
-        "{{ friend.username_invite_code }}",
+      {% for friend in friends %}
+        {"name":"{{ friend.username_invite_code }}","id":"{{ friend.player_id }}"},
       {% endfor %}
     ],
     count_card_in_hands: 0,
-    deck: [
-    ],
-    cemetery:[
-    ],
-    cards_drawn:[
-    ]
+    deck: [],
+    cemetery:[],
+    cards_drawn:[],
+    deck_current_len : 54,
   },
   methods: {
     auto_update_players_list: async function(){
-      let url = ''
+      let url = '{% url "display_friends_and_players_view" %}';
       $.ajax({
         url: url,
         async: true,
         context : this,
-        type: 'POST',
+        type: 'GET',
         dataType : 'json',
-        headers: {"X-CSRFToken":"{{ csrf_token }}" },
+        headers: {"X-CSRFToken":"" },
         data:{
-          'game_id': this.game_id,
-          'csrfmiddlewaretoken': '{{ csrf_token }}'
+          'game_id': '{{ game.id }}',
         },
         success: function (response_data) {
-          let can_be_added = true;
-          let can_be_deleted = false;
+          ingame_view.players = []
+          ingame_view.friends = []
           $.each(response_data['players'], function(index){
-            $.each(ingame_view.players, function(friend_index){
-              if(response_data['players'][index]['id'] === ingame_view.players[friend_index]['id']){
-                can_be_added = false;
-                if(response_data['players'][index]['is_online'] != ingame_view.players[friend_index]['is_online']){
-                  ingame_view.players[friend_index]['is_online'] = response_data['players'][index]['is_online']
-                }
-              }
-            })
-            if(can_be_added === true){
-              ingame_view.players.push({"name": response_data['players'][index]['username_invite_code'],"id": response_data['players'][index]['id'],"is_online": response_data['players'][index]['is_online']})
-            }
+              ingame_view.players.push({
+                "name": response_data['players'][index]['username_invite_code'],
+                "id": response_data['players'][index]['player_id'],
+                "is_online": response_data['players'][index]['is_online'],
+              })
+          });
+          $.each(response_data['friends'], function(index){
+              ingame_view.friend_list.push({
+                "name": response_data['friends'][index]['username_invite_code'],
+                "id": response_data['friends'][index]['player_id'],
+              })
           });
         },
         fail: function(response_data){
