@@ -30,8 +30,10 @@
             {% if request.user.is_authenticated %}
                     {% if path == '/' %}
                         {% include "top-pannel-logged-in-index.html" %}
-                    {% elif 'ingame' in path %}
+                    {% elif 'ingame' in path and 'sheet' not in path %}
                         {% include "top-pannel-logged-in-game.html" %}
+                    {% elif 'sheet' in path %}
+                        {# pass #}
                     {% else %}
                         {% include "top-pannel-logged-in.html" %}
                     {% endif %}
