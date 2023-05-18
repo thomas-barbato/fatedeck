@@ -5,13 +5,14 @@
 <title> fiche {{ request.user.username_invite_code }}</title>
 {% endblock %}
 
+
 {% block content%}
 <div class="container-fluid">
   <form action="" class="modal-content" id="character-sheet-modal-content" method="POST">
     {% csrf_token %}
     <div class="modal-header row no-gutters d-flex character-sheet-color">
       <h2 class="d-flex justify-content-center col-11 character-sheet-category-title" id="">A travers la brèche</h2>
-      <h3 class="d-flex justify-content-center col-12 mt-2 pr-5 character-sheet-category-title">Bienvenue à Malifaux</h3>
+      <h3 class="d-flex justify-content-center col-12 mt-2 pr-5 character-sheet-category-title">Bienvenue à Malifaux </h3>
       <div class="row">
         <div class="col-6 d-flex justify-content-end button-page-1">
           <h5 class="mx-auto character-sheet-category-title cursor-pointer character-sheet-button">Page 1</h5>
@@ -33,15 +34,15 @@
             <div class="row">
               <div class="form-group align-items-center col-4">
                 <label for="age">Age:</label>
-                <input type="text" class="form-control " step="1" id="age" value="{{character_sheet.0.charinfo.age}}" placeholder="0" min="0"/>
+                <input type="text" class="form-control " id="age" value="{{character_sheet.0.charinfo.age}}" placeholder="0"/>
               </div>
               <div class="form-group align-items-center col-4">
-                <label for="lenght">Taille:</label>
-                <input type="text" class="form-control " step=".01" id="length" value="{{character_sheet.0.charinfo.lenght}}" placeholder="0" min="0"/>
+                <label for="length">Taille:</label>
+                <input type="text" class="form-control " id="length" value="{{character_sheet.0.charinfo.length}}" placeholder="0"/>
               </div>
               <div class="form-group align-items-center col-4">
                 <label for="weight">Poid:</label>
-                <input type="text" class="form-control " id="weight" value="{{character_sheet.0.charinfo.weight}}" placeholder="0" min="0"/>
+                <input type="text" class="form-control " id="weight" value="{{character_sheet.0.charinfo.weight}}" placeholder="0"/>
               </div>
             </div>
             <div class="form-group align-items-center col-12">
@@ -364,16 +365,16 @@
             {% for i in 1|range:21 %}
             <div class="row mt-1 skill-data"  id="skill-data-{{ i }}">
               <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                <input type="text" class="competence form-control" id="competence-{{ i }}" value="{{ character_sheet.i.skill.competence }}" name="competence{{ i }}"></input>
+                <input type="text" class="competence form-control" id="competence-{{ i }}" value="" name="competence{{ i }}"></input>
               </div>
               <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                <input type="text" class="competence form-control" id="aspect-{{ i }}"  value="{{ character_sheet.i.skill.aspect }}" name="aspect{{ i }}"></input>
+                <input type="text" class="competence form-control" id="aspect-{{ i }}"  value="" name="aspect{{ i }}"></input>
               </div>
               <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                <input type="text" class="competence form-control" id="rang-{{ i }}"  value="{{ character_sheet.i.skill.rang }}" name="rang{{ i }}"></input>
+                <input type="text" class="competence form-control" id="rang-{{ i }}"  value="" name="rang{{ i }}"></input>
               </div>
               <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                <input type="text" class="competence form-control"id="va-{{ i }}"  value="{{ character_sheet.i.skill.va }}" name="va{{ i }}"></input>
+                <input type="text" class="competence form-control"id="va-{{ i }}"  value="" name="va{{ i }}"></input>
               </div>
             </div>
             {% endfor %}
@@ -572,7 +573,7 @@ $(window).on('load',function(){
 });
 
 $('#submit-character-sheet').on('click',function(){
-  let url = "";
+  let url = "{% url 'save_character_sheet' %}";
   let character_informations = [];
   let occupation = [];
   let origine = origine_editor.getData();
@@ -688,12 +689,14 @@ $('#submit-character-sheet').on('click',function(){
   })
 
   $.ajax({
+
     url: url,
     type: 'POST',
     dataType : 'json',
     headers: {"X-CSRFToken":"{{ csrf_token }}" },
     data:{
-      'game_id': '{{ game_id }}',
+      'game_id': '{{ request.resolver_match.kwargs.pk}}',
+      'player_id': '{{ request.resolver_match.kwargs.player_id }}',
       'character_information' : JSON.stringify(character_informations),
       'occupation': JSON.stringify(occupation),
       'origine' : JSON.stringify(origine),
