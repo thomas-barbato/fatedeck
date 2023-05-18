@@ -56,6 +56,25 @@ urlpatterns = [
         name="accept-or-deny-friend-invitation"
     ),
     path(
+        "delete-friend",
+        core_views.DeleteFriendView.as_view(),
+        name="delete-friend"
+    ),
+    path(
+        "ingame/<uuid:pk>",
+        core_views.DisplayGame.as_view(template_name="display/ingame.html"),
+        name="display_game_view"
+    ),
+    path(
+        "ingame/players",
+        core_views.DisplayFriendsAndPlayers.as_view(),
+        name="display_friends_and_players_view"
+    ),path(
+        "ingame/sheet/<uuid:user_id>",
+        core_views.DisplayPlayerCharacterSheet.as_view(template_name="display/character_sheet.html"),
+        name="display_player_character_sheet"
+    ),
+    path(
         'logout/',
         auth_views.LogoutView.as_view(),
         name='user_logout',

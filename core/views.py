@@ -401,3 +401,8 @@ class DisplayFriendsAndPlayers(LoginRequiredMixin, JsonableResponseMixin, Templa
         }
 
         return JsonResponse(response_data, safe=False)
+
+
+class DisplayPlayerCharacterSheet(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
+    login_url = settings.LOGIN_URL
+    template_name = "display/character_sheet.html"
