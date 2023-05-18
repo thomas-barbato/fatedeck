@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
 
+import pytz
 from django.shortcuts import render, redirect
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -17,7 +18,7 @@ from django.utils.decorators import method_decorator
 import random
 from django.shortcuts import get_object_or_404
 from django.contrib.sessions.backends.base import SessionBase
-
+import json
 import settings
 from core.backend.middlewares import JsonableResponseMixin, AuthRequiredMiddleware
 
@@ -406,3 +407,79 @@ class DisplayFriendsAndPlayers(LoginRequiredMixin, JsonableResponseMixin, Templa
 class DisplayPlayerCharacterSheet(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
     login_url = settings.LOGIN_URL
     template_name = "display/character_sheet.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        game = get_object_or_404(Game, id=kwargs['pk'])
+        player = get_object_or_404(Ingameplayer, game_id=game.id, player_id=kwargs['player_id'])
+        character_sheet = [element for element in Ingamecharactersheet.objects.filter(game_id=game.id, owner_uuid_id=player.player_id).values(
+            'charinfo',
+            'occupation',
+            'aspect',
+            'sub_aspect',
+            'attack',
+            'attack2',
+            'skill',
+            'destiny',
+            'spellbook',
+            'twist_deck')]
+        sheet_inventory_and_origins = [element for element in Ingamecharactersheet.objects.filter(game_id=game.id, owner_uuid_id=player.player_id).values(
+            'origin', 'inventory')]
+        sheet_inventory_talent = [element for element in Ingamecharactersheet.objects.filter(game_id=game.id, owner_uuid_id=player.player_id).order_by('id').values('talent')]
+
+        sheet = list()
+        for x in list(character_sheet):
+            for key, value in x.items():
+                for main_value in value:
+                    sheet.append({key: {sub_key: sub_value for sub_key, sub_value in main_value.items()}, }, )
+
+        context['character_sheet'] = sheet
+        context['character_inventory_and_origins'] = sheet_inventory_and_origins
+        context['sheet_inventory_talent'] = sheet_inventory_talent,
+        return context
+
+    def post(self, request):
+        game_id = request.POST.get('game_id')
+        owner_uuid_id = request.POST.get('player_id')
+        char_info = json.loads(request.POST.get('character_information'))
+        origin = json.loads(request.POST.get('origine'))
+        occupation = json.loads(request.POST.get('occupation'))
+        aspect = json.loads(request.POST.get('aspect'))
+        sub_aspect = json.loads(request.POST.get('sub_aspect'))
+        attack = json.loads(request.POST.get('attack'))
+        attack2 = json.loads(request.POST.get('attack2'))
+        skill = json.loads(request.POST.get('skill'))
+        destiny = json.loads(request.POST.get('destiny'))
+        talent = json.loads(request.POST.get('talent'))
+        inventory = json.loads(request.POST.get('inventory'))
+        spellbook = json.loads(request.POST.get('spellbook'))
+        twist_deck = json.loads(request.POST.get('twist_deck'))
+
+        tz_FR = pytz.timezone('Europe/Paris')
+        datetime_FR = datetime.now(tz_FR)
+
+        Ingamecharactersheet.objects.update_or_create(
+            game_id=game_id,
+            owner_uuid_id=owner_uuid_id,
+            defaults={
+                'game_id': game_id,
+                'owner_uuid_id': owner_uuid_id,
+                'charinfo': char_info,
+                'origin': origin,
+                'occupation': occupation,
+                'aspect': aspect,
+                'sub_aspect': sub_aspect,
+                'attack': attack,
+                'attack2': attack2,
+                'skill': skill,
+                'destiny': destiny,
+                'talent': talent,
+                'inventory': inventory,
+                'spellbook': spellbook,
+                'twist_deck': twist_deck,
+                'created_at': datetime_FR,
+                'updated_at': datetime_FR
+            })
+        response_data = {'success': True}
+        return JsonResponse(response_data)
+
