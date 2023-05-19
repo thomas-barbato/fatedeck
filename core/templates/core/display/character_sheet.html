@@ -29,27 +29,27 @@
           <div class="form-row col-12 character-sheet-border ">
             <div class="form-group align-items-center col-12">
               <label for="name">Nom de votre personnage:</label>
-              <input type="text" class="form-control" id="name" value="{{character_sheet.0.charinfo.name }}" placeholder="Nom de votre personnage..."/>
+              <input type="text" class="form-control" id="name" value="{{character_sheet.charinfo.0.name }}" placeholder="Nom de votre personnage..."/>
             </div>
             <div class="row">
               <div class="form-group align-items-center col-4">
                 <label for="age">Age:</label>
-                <input type="text" class="form-control " id="age" value="{{character_sheet.0.charinfo.age}}" placeholder="0"/>
+                <input type="text" class="form-control " id="age" value="{{character_sheet.charinfo.0.age}}" placeholder="0"/>
               </div>
               <div class="form-group align-items-center col-4">
                 <label for="length">Taille:</label>
-                <input type="text" class="form-control " id="length" value="{{character_sheet.0.charinfo.length}}" placeholder="0"/>
+                <input type="text" class="form-control " id="length" value="{{character_sheet.charinfo.0.length}}" placeholder="0"/>
               </div>
               <div class="form-group align-items-center col-4">
                 <label for="weight">Poid:</label>
-                <input type="text" class="form-control " id="weight" value="{{character_sheet.0.charinfo.weight}}" placeholder="0"/>
+                <input type="text" class="form-control " id="weight" value="{{character_sheet.charinfo.0.weight}}" placeholder="0"/>
               </div>
             </div>
             <div class="form-group align-items-center col-12">
               <label for="Description">Description:</label>
               <div class="form-group" id="description-textarea" style="color:black;">
                 {% autoescape off %}
-                {{ character_sheet.0.charinfo.description|safe }}
+                {{ character_sheet.charinfo.0.description|safe }}
                 {% endautoescape %}
               </div>
             </div>
@@ -62,20 +62,20 @@
               <h5 class="text-center mx-auto col-12 character-sheet-title-color mt-2">OCCUPATIONS</h5>
             </div>
             <div class="input-group align-items-center col-12 mt-2 occupation">
-              <span class="input-group-addon"><input type="checkbox" id="occupation1-checkbox" {% if character_sheet.1.occupation.is_checked %} checked {% endif %}></span>
-              <input type="text" class="form-control col-10" id="occupation1" value="{{ character_sheet.1.occupation.text }}" placeholder="occupation1..."/>
+              <span class="input-group-addon"><input type="checkbox" id="occupation1-checkbox" {% if character_sheet.occupation.0.is_checked %} checked {% endif %}></span>
+              <input type="text" class="form-control col-10" id="occupation1" value="{{ character_sheet.occupation.0.text }}" placeholder="occupation1..."/>
             </div>
             <div class="input-group align-items-center col-12 mt-1 occupation">
-              <span class="input-group-addon"><input type="checkbox" id="occupation2-checkbox" {% if character_sheet.2.occupation.is_checked %} checked {% endif %}> </span>
-              <input type="text" class="form-control col-10" id="occupation2" value="{{ character_sheet.2.occupation.text }}" placeholder="occupation2..."/>
+              <span class="input-group-addon"><input type="checkbox" id="occupation2-checkbox" {% if character_sheet.occupation.1.is_checked %} checked {% endif %}> </span>
+              <input type="text" class="form-control col-10" id="occupation2" value="{{ character_sheet.occupation.1.text }}" placeholder="occupation2..."/>
             </div>
             <div class="input-group align-items-center col-12 mt-1 occupation">
-              <span class="input-group-addon"><input type="checkbox" id="occupation3-checkbox" {% if character_sheet.3.occupation.is_checked %} checked {% endif %}> </span>
-              <input type="text" class="form-control col-10" id="occupation3" value="{{ character_sheet.3.occupation.text }}" placeholder="occupation3..."/>
+              <span class="input-group-addon"><input type="checkbox" id="occupation3-checkbox" {% if character_sheet.occupation.2.is_checked %} checked {% endif %}> </span>
+              <input type="text" class="form-control col-10" id="occupation3" value="{{ character_sheet.occupation.2.text }}" placeholder="occupation3..."/>
             </div>
             <div class="input-group align-items-center col-12 mt-1 mb-2 occupation">
-              <span class="input-group-addon"><input type="checkbox" id="occupation4-checkbox" {% if character_sheet.4.occupation.is_checked %} checked {% endif %}> </span>
-              <input type="text" class="form-control col-10" id="occupation4" value="{{ character_sheet.4.occupation.text }}" placeholder="occupation4..."/>
+              <span class="input-group-addon"><input type="checkbox" id="occupation4-checkbox" {% if character_sheet.occupation.3.is_checked %} checked {% endif %}> </span>
+              <input type="text" class="form-control col-10" id="occupation4" value="{{ character_sheet.occupation.3.text }}" placeholder="occupation4..."/>
             </div>
           </div>
         </div>
@@ -99,13 +99,13 @@
               <div class="col-6">
                 <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
                   <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12 mx-auto">Puissance</span>
-                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="power" name="power" value="{{ character_sheet.5.aspect.power }}" aria-describedby="basic-addon3">
+                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="power" name="power" value="{{ character_sheet.aspect.0.power }}" aria-describedby="basic-addon3">
                 </div>
               </div>
               <div class="col-6">
                 <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
                   <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Intellect</span>
-                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="intel" name="intel" value="{{ character_sheet.5.aspect.intel }}" aaria-describedby="basic-addon3">
+                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="intel" name="intel" value="{{ character_sheet.aspect.0.intel }}" aaria-describedby="basic-addon3">
                 </div>
               </div>
             </div>
@@ -113,13 +113,13 @@
               <div class="col-6">
                 <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
                   <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Agilité</span>
-                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="agility" name="agility" value="{{ character_sheet.5.aspect.agility }}" aaria-describedby="basic-addon3">
+                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="agility" name="agility" value="{{ character_sheet.aspect.0.agility }}" aaria-describedby="basic-addon3">
                 </div>
               </div>
               <div class="col-6">
                 <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
                   <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Charme</span>
-                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="charisma" name="charisma" value="{{ character_sheet.5.aspect.charisma }}" aaria-describedby="basic-addon3">
+                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="charisma" name="charisma" value="{{ character_sheet.aspect.0.charisma }}" aaria-describedby="basic-addon3">
                 </div>
               </div>
             </div>
@@ -127,13 +127,13 @@
               <div class="col-6">
                 <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
                   <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Vitesse</span>
-                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="speed" name="speed" value="{{ character_sheet.5.aspect.speed }}" aaria-describedby="basic-addon3">
+                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="speed" name="speed" value="{{ character_sheet.aspect.0.speed }}" aaria-describedby="basic-addon3">
                 </div>
               </div>
               <div class="col-6">
                 <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
                   <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Ruse</span>
-                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="cunning" name="cunning" value="{{ character_sheet.5.aspect.cunning }}" aaria-describedby="basic-addon3">
+                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="cunning" name="cunning" value="{{ character_sheet.aspect.0.cunning }}" aaria-describedby="basic-addon3">
                 </div>
               </div>
             </div>
@@ -141,13 +141,13 @@
               <div class="col-6">
                 <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
                   <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Résilience</span>
-                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="resilience" name="resilience" value="{{ character_sheet.5.aspect.resilience }}" aaria-describedby="basic-addon3">
+                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="resilience" name="resilience" value="{{ character_sheet.aspect.0.resilience }}" aaria-describedby="basic-addon3">
                 </div>
               </div>
               <div class="col-6 mb-2">
                 <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
                   <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Ténacité</span>
-                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="steadiness" name="steadiness" value="{{ character_sheet.5.aspect.steadiness }}" aaria-describedby="basic-addon3">
+                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="steadiness" name="steadiness" value="{{ character_sheet.aspect.0.steadiness }}" aaria-describedby="basic-addon3">
                 </div>
               </div>
             </div>
@@ -174,13 +174,13 @@
               <div class="col-6">
                 <div class="input-group col-4 mt-2 pl-1 pr-1">
                   <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12 mx-auto">Défense</span>
-                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="defense" name="defense" value="{{ character_sheet.6.sub_aspect.defense }}" aria-describedby="basic-addon3">
+                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="defense" name="defense" value="{{ character_sheet.sub_aspect.0.defense }}" aria-describedby="basic-addon3">
                 </div>
               </div>
               <div class="col-6">
                 <div class="input-group col-4 mt-2 pl-1 pr-1">
                   <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Marche</span>
-                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="walk" name="walk" value="{{ character_sheet.6.sub_aspect.walk }}" aria-describedby="basic-addon3">
+                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="walk" name="walk" value="{{ character_sheet.sub_aspect.0.walk }}" aria-describedby="basic-addon3">
                 </div>
               </div>
             </div>
@@ -188,13 +188,13 @@
               <div class="col-6">
                 <div class="input-group col-4 mb-1 pl-1 pr-1">
                   <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Armure</span>
-                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="armor" name="armor" value="{{ character_sheet.6.sub_aspect.armor }}" aria-describedby="basic-addon3">
+                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="armor" name="armor" value="{{ character_sheet.sub_aspect.0.armor }}" aria-describedby="basic-addon3">
                 </div>
               </div>
               <div class="col-6">
                 <div class="input-group col-4 mb-1 pl-1 pr-1">
                   <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Charge</span>
-                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="charge" name="charge" value="{{ character_sheet.6.sub_aspect.charge }}" aria-describedby="basic-addon3">
+                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="charge" name="charge" value="{{ character_sheet.sub_aspect.0.charge }}" aria-describedby="basic-addon3">
                 </div>
               </div>
             </div>
@@ -202,13 +202,13 @@
               <div class="col-6">
                 <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
                   <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Volonté</span>
-                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="will" name="will" value="{{ character_sheet.6.sub_aspect.will }}" aria-describedby="basic-addon3">
+                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="will" name="will" value="{{ character_sheet.sub_aspect.0.will }}" aria-describedby="basic-addon3">
                 </div>
               </div>
               <div class="col-6">
                 <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
                   <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Initiative</span>
-                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="initiative" name="initiative" value="{{ character_sheet.6.sub_aspect.initiative }}" aria-describedby="basic-addon3">
+                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="initiative" name="initiative" value="{{ character_sheet.sub_aspect.0.initiative }}" aria-describedby="basic-addon3">
                 </div>
               </div>
             </div>
@@ -216,13 +216,13 @@
               <div class="col-6">
                 <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
                   <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Blessures</span>
-                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="wound" name="wound" value="{{ character_sheet.6.sub_aspect.wound }}" aria-describedby="basic-addon3">
+                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="wound" name="wound" value="{{ character_sheet.sub_aspect.0.wound }}" aria-describedby="basic-addon3">
                 </div>
               </div>
               <div class="col-6 mb-2">
                 <div class="input-group col-4 mb-1 mt-1 pl-1 pr-1">
                   <span class="input-group-text col-xl-4 col-md-4 col-12 col-sm-12" id="basic-addon3">Taille</span>
-                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="height" name="height" value="{{ character_sheet.6.sub_aspect.height }}" aria-describedby="basic-addon3">
+                  <input type="text" class="form-control col-xl-2 col-md-2 col-12 col-sm-12" id="height" name="height" value="{{ character_sheet.sub_aspect.0.height }}" aria-describedby="basic-addon3">
                 </div>
               </div>
             </div>
@@ -235,7 +235,7 @@
                   <div class="col-xl-12">
                     <div class="input-group col-12 mb-1 mt-1 pl-1 pr-1">
                       <span class="input-group-text col-md-2 col-4 col-sm-4" id="basic-addon3">Nom</span>
-                      <input type="text" class="form-control col-md-2 col-8 col-sm-8" id="attack-name-1" name="attack-name-1" value="{{ character_sheet.7.attack.name }}" aria-describedby="basic-addon3">
+                      <input type="text" class="form-control col-md-2 col-8 col-sm-8" id="attack-name-1" name="attack-name-1" value="{{ character_sheet.attack.0.name }}" aria-describedby="basic-addon3">
                     </div>
                     <div class="input-group col-2">
                       <div class="col-4 mb-1 mt-1 pl-1 pr-1">
@@ -250,18 +250,18 @@
                     </div>
                     <div class="input-group col-2">
                       <div class="col-4 mb-1 mt-1 pl-1 pr-1">
-                        <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-va-1" name="attack-va-1" value="{{ character_sheet.7.attack.va }}" aria-describedby="basic-addon3">
+                        <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-va-1" name="attack-va-1" value="{{ character_sheet.attack.0.va }}" aria-describedby="basic-addon3">
                       </div>
                       <div class="col-4 mb-1 mt-1 pl-1 pr-1">
-                        <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-range-1" name="attack-range-1" value="{{ character_sheet.7.attack.range }}" aria-describedby="basic-addon3">
+                        <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-range-1" name="attack-range-1" value="{{ character_sheet.attack.0.range }}" aria-describedby="basic-addon3">
                       </div>
                       <div class="col-4 mb-1 mt-1 pl-1 pr-1">
-                        <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-damage-1" name="attack-damage-1" value="{{ character_sheet.7.attack.damage }}" aria-describedby="basic-addon3">
+                        <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-damage-1" name="attack-damage-1" value="{{ character_sheet.attack.0.damage }}" aria-describedby="basic-addon3">
                       </div>
                     </div>
                     <div class="input-group col-12 mb-1 mt-1 pl-1 pr-1">
                       <span class="input-group-text col-md-2 col-4 col-sm-4" id="basic-addon3">Spécial</span>
-                      <input type="text" class="form-control col-md-2 col-8 col-sm-8" id="attack-special-1" name="attack-special-1" value="{{ character_sheet.7.attack.special }}" aria-describedby="basic-addon3">
+                      <input type="text" class="form-control col-md-2 col-8 col-sm-8" id="attack-special-1" name="attack-special-1" value="{{ character_sheet.attack.0.special }}" aria-describedby="basic-addon3">
                     </div>
                     <div class="input-group col-2">
                       <div class="col-6 mb-1 mt-1 pl-1 pr-1">
@@ -273,10 +273,10 @@
                     </div>
                     <div class="input-group col-2">
                       <div class="col-6 mb-1 mt-1 pl-1 pr-1">
-                        <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-skill-1" name="attack-skill-1" value="{{ character_sheet.7.attack.skill }}" aria-describedby="basic-addon3">
+                        <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-skill-1" name="attack-skill-1" value="{{ character_sheet.attack.0.skill }}" aria-describedby="basic-addon3">
                       </div>
                       <div class="col-6 mb-1 mt-1 pl-1 pr-1">
-                        <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-reload-1" name="attack-reload-1" value="{{ character_sheet.7.attack.reload }}" aria-describedby="basic-addon3">
+                        <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-reload-1" name="attack-reload-1" value="{{ character_sheet.attack.0.reload }}" aria-describedby="basic-addon3">
                       </div>
                     </div>
                   </div>
@@ -292,7 +292,7 @@
                   <div class="col-xl-12">
                     <div class="input-group col-12 mb-1 mt-1 pl-1 pr-1">
                       <span class="input-group-text col-4 col-sm-4" id="basic-addon3">Nom</span>
-                      <input type="text" class="form-control col-md-4 col-8 col-sm-8" id="attack-name-2" name="attack-name-2" value="{{ character_sheet.8.attack2.name }}" aria-describedby="basic-addon3">
+                      <input type="text" class="form-control col-md-4 col-8 col-sm-8" id="attack-name-2" name="attack-name-2" value="{{ character_sheet.attack2.0.name }}" aria-describedby="basic-addon3">
                     </div>
                     <div class="input-group col-2">
                       <div class="col-4 mb-1 mt-1 pl-1 pr-1">
@@ -307,18 +307,18 @@
                     </div>
                     <div class="input-group col-2">
                       <div class="col-4 mb-1 mt-1 pl-1 pr-1">
-                        <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-va-2" name="attack-va-2" value="{{ character_sheet.8.attack2.va }}" aria-describedby="basic-addon3">
+                        <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-va-2" name="attack-va-2" value="{{ character_sheet.attack2.0.va }}" aria-describedby="basic-addon3">
                       </div>
                       <div class="col-4 mb-1 mt-1 pl-1 pr-1">
-                        <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-range-2" name="attack-range-2" value="{{ character_sheet.8.attack2.range }}" aria-describedby="basic-addon3">
+                        <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-range-2" name="attack-range-2" value="{{ character_sheet.attack2.0.range }}" aria-describedby="basic-addon3">
                       </div>
                       <div class="col-4 mb-1 mt-1 pl-1 pr-1">
-                        <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-damage-2" name="attack-damage-2" value="{{ character_sheet.8.attack2.damage }}" aria-describedby="basic-addon3">
+                        <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-damage-2" name="attack-damage-2" value="{{ character_sheet.attack2.0.damage }}" aria-describedby="basic-addon3">
                       </div>
                     </div>
                     <div class="input-group col-12 mb-1 mt-1 pl-1 pr-1">
                       <span class="input-group-text col-md-2 col-4 col-sm-4" id="basic-addon3">Spécial</span>
-                      <input type="text" class="form-control col-md-2 col-8 col-sm-8" id="attack-special-2" name="attack-name-2" value="{{ character_sheet.8.attack2.special }}" aria-describedby="basic-addon3">
+                      <input type="text" class="form-control col-md-2 col-8 col-sm-8" id="attack-special-2" name="attack-name-2" value="{{ character_sheet.attack2.0.special }}" aria-describedby="basic-addon3">
                     </div>
                     <div class="input-group col-2">
                       <div class="col-6 mb-1 mt-1 pl-1 pr-1">
@@ -330,10 +330,10 @@
                     </div>
                     <div class="input-group col-2">
                       <div class="col-6 mb-1 mt-1 pl-1 pr-1">
-                        <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-skill-2" name="attack-skill-2" value="{{ character_sheet.8.attack2.skill }}" aria-describedby="basic-addon3">
+                        <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-skill-2" name="attack-skill-2" value="{{ character_sheet.attack2.0.skill }}" aria-describedby="basic-addon3">
                       </div>
                       <div class="col-6 mb-1 mt-1 pl-1 pr-1">
-                        <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-reload-2" name="attack-reload-2" value="{{ character_sheet.8.attack2.reload }}" aria-describedby="basic-addon3">
+                        <input type="text" class="form-control col-xl-2 col-md-2 col-2 col-sm-12" id="attack-reload-2" name="attack-reload-2" value="{{ character_sheet.attack2.0.reload }}" aria-describedby="basic-addon3">
                       </div>
                     </div>
                   </div>
@@ -362,22 +362,286 @@
                 <span class="character-sheet-category-title">VA</span>
               </div>
             </div>
-            {% for i in 1|range:21 %}
-            <div class="row mt-1 skill-data"  id="skill-data-{{ i }}">
+            <div class="row mt-1 skill-data " id="skill-data-1">
               <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                <input type="text" class="competence form-control" id="competence-{{ i }}" value="" name="competence{{ i }}"></input>
+                <input type="text" class="competence form-control" id="competence-1" value="{{ character_sheet.skill.0.competence }}" name="competence1"></input>
               </div>
               <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                <input type="text" class="competence form-control" id="aspect-{{ i }}"  value="" name="aspect{{ i }}"></input>
+                <input type="text" class="competence form-control" id="aspect-1"  value="{{ character_sheet.skill.0.aspect }}" name="aspect1"></input>
               </div>
               <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                <input type="text" class="competence form-control" id="rang-{{ i }}"  value="" name="rang{{ i }}"></input>
+                <input type="text" class="competence form-control" id="rang-1"  value="{{ character_sheet.skill.0.rang }}" name="rang1"></input>
               </div>
               <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
-                <input type="text" class="competence form-control"id="va-{{ i }}"  value="" name="va{{ i }}"></input>
+                <input type="text" class="competence form-control"id="va-1"  value="{{ character_sheet.skill.0.va }}" name="va1"></input>
               </div>
             </div>
-            {% endfor %}
+            <div class="row mt-1 skill-data" id="skill-data-2">
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="competence-2"  value="{{ character_sheet.skill.1.competence }}" name="competence1"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="aspect-2" value="{{ character_sheet.skill.1.aspect }}" name="aspect1"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="rang-2" value="{{ character_sheet.skill.1.rang }}" name="rang1"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="va-2" value="{{ character_sheet.skill.1.va }}" name="va1"></input>
+              </div>
+            </div>
+            <div class="row mt-1 skill-data" id="skill-data-3">
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="competence-3" value="{{ character_sheet.skill.2.competence }}" name="competence3"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="aspect-3" value="{{ character_sheet.skill.2.aspect }}" name="competence3"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="rang-3" value="{{ character_sheet.skill.2.rang }}" name="rang3"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="va-3" value="{{ character_sheet.skill.2.va }}" name="va3"></input>
+              </div>
+            </div>
+            <div class="row mt-1 skill-data" id="skill-data-4">
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="competence-4" value="{{ character_sheet.skill.3.competence }}" name="competence4"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="aspect-4" value="{{ character_sheet.skill.3.aspect }}" name="competence4"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="rang-4" value="{{ character_sheet.skill.3.rang }}" name="rang4"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="va-4" value="{{ character_sheet.skill.3.va }}" name="va4"></input>
+              </div>
+            </div>
+            <div class="row mt-1 skill-data" id="skill-data-5">
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="competence-5" value="{{ character_sheet.skill.4.competence }}" name="competence5"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="aspect-5" value="{{ character_sheet.skill.4.aspect }}" name="competence5"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="rang-5" value="{{ character_sheet.skill.4.rang }}" name="rang5"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="va-5" value="{{ character_sheet.skill.4.va }}" name="va5"></input>
+              </div>
+            </div>
+            <div class="row mt-1 skill-data" id="skill-data-6">
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="competence-6" value="{{ character_sheet.skill.5.competence }}" name="competence6"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="aspect-6" value="{{ character_sheet.skill.5.aspect }}" name="competence6"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="rang-6" value="{{ character_sheet.skill.5.rang }}" name="rang6"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="va-6" value="{{ character_sheet.skill.5.va }}" name="va6"></input>
+              </div>
+            </div>
+            <div class="row mt-1 skill-data" id="skill-data-7">
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="competence-7" value="{{ character_sheet.skill.6.competence }}" name="competence7"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="aspect-7" value="{{ character_sheet.skill.6.aspect }}" name="competence7"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="rang-7" value="{{ character_sheet.skill.6.rang }}" name="rang7"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="va-7" value="{{ character_sheet.skill.6.va }}" name="va7"></input>
+              </div>
+            </div>
+            <div class="row mt-1 skill-data" id="skill-data-8">
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="competence-8" value="{{ character_sheet.skill.7.competence }}" name="competence8"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="aspect-8" value="{{ character_sheet.skill.7.aspect }}" name="competence8"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="rang-8" value="{{ character_sheet.skill.7.rang }}" name="rang8"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="va-8" value="{{ character_sheet.skill.7.va }}" name="va8"></input>
+              </div>
+            </div>
+            <div class="row mt-1 skill-data" id="skill-data-9">
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="competence-9" value="{{ character_sheet.skill.8.competence }}" name="competence9"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="aspect-9" value="{{ character_sheet.skill.8.aspect }}" name="competence9"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="rang-9" value="{{ character_sheet.skill.8.rang }}" name="rang9"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="va-9" value="{{ character_sheet.skill.8.va }}" name="va9"></input>
+              </div>
+            </div>
+            <div class="row mt-1 skill-data" id="skill-data-10">
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="competence-10" value="{{ character_sheet.skill.9.competence }}" name="competence10"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="aspect-10" value="{{ character_sheet.skill.9.aspect }}" name="competence10"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="rang-10" value="{{ character_sheet.skill.9.rang }}" name="rang10"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="va-10" value="{{ character_sheet.skill.9.va }}" name="va10"></input>
+              </div>
+            </div>
+            <div class="row mt-1 skill-data" id="skill-data-11">
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="competence-11" value="{{ character_sheet.skill.10.competence }}" name="competence11"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="aspect-11" value="{{ character_sheet.skill.10.aspect }}" name="competence11"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="rang-11" value="{{ character_sheet.skill.10.rang }}" name="rang11"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="va-11" value="{{ character_sheet.skill.10.va }}" name="va11"></input>
+              </div>
+            </div>
+            <div class="row mt-1 skill-data" id="skill-data-12">
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="competence-12" value="{{ character_sheet.skill.11.competence }}" name="competence12"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="aspect-12" value="{{ character_sheet.skill.11.aspect }}" name="competence12"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="rang-12" value="{{ character_sheet.skill.11.rang }}" name="rang12"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="va-12" value="{{ character_sheet.skill.11.va }}" name="va12"></input>
+              </div>
+            </div>
+            <div class="row mt-1 skill-data" id="skill-data-13">
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="competence-13" value="{{ character_sheet.skill.12.competence }}" name="competence13"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="aspect-13" value="{{ character_sheet.skill.12.aspect }}" name="competence13"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="rang-13" value="{{ character_sheet.skill.12.rang }}" name="rang13"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="va-13" value="{{ character_sheet.skill.12.va }}" name="va13"></input>
+              </div>
+            </div>
+            <div class="row mt-1 skill-data" id="skill-data-14">
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="competence-14" value="{{ character_sheet.skill.13.competence }}" name="competence14"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="aspect-14" value="{{ character_sheet.skill.13.aspect }}" name="competence14"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="rang-14" value="{{ character_sheet.skill.13.rang }}" name="rang14"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="va-14" value="{{ character_sheet.skill.13.va }}" name="va14"></input>
+              </div>
+            </div>
+            <div class="row mt-1 skill-data" id="skill-data-15">
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="competence-15" value="{{ character_sheet.skill.14.competence }}" name="competence15"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="aspect-15" value="{{ character_sheet.skill.14.aspect }}" name="competence15"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="rang-15" value="{{ character_sheet.skill.14.rang }}" name="rang15"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="va-15" value="{{ character_sheet.skill.14.va }}" name="va15"></input>
+              </div>
+            </div>
+            <div class="row mt-1 skill-data" id="skill-data-16">
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="competence-16" value="{{ character_sheet.skill.15.competence }}" name="competence16"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="aspect-16" value="{{ character_sheet.skill.15.aspect }}" name="competence16"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="rang-16" value="{{ character_sheet.skill.15.rang }}" name="rang16"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="va-16" value="{{ character_sheet.skill.15.va }}" name="va16"></input>
+              </div>
+            </div>
+            <div class="row mt-1 skill-data" id="skill-data-17">
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="competence-17" value="{{ character_sheet.skill.16.competence }}" name="competence17"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="aspect-17" value="{{ character_sheet.skill.16.aspect }}" name="competence17"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="rang-17" value="{{ character_sheet.skill.16.rang }}" name="rang17"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="va-17" value="{{ character_sheet.skill.16.va }}" name="va17"></input>
+              </div>
+            </div>
+            <div class="row mt-1 skill-data" id="skill-data-18">
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="competence-18" value="{{ character_sheet.skill.17.competence }}" name="competence18"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="aspect-18" value="{{ character_sheet.skill.17.aspect }}" name="competence18"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="rang-18" value="{{ character_sheet.skill.17.rang }}" name="rang18"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="va-18" value="{{ character_sheet.skill.17.va }}" name="va18"></input>
+              </div>
+            </div>
+            <div class="row mt-1 skill-data" id="skill-data-19">
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="competence-19" value="{{ character_sheet.skill.18.competence }}" name="competence19"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="aspect-19" value="{{ character_sheet.skill.18.aspect }}" name="competence19"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="rang-19" value="{{ character_sheet.skill.18.rang }}" name="rang19"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="va-19" value="{{ character_sheet.skill.18.va }}" name="va19"></input>
+              </div>
+            </div>
+            <div class="row mt-1 skill-data" id="skill-data-20">
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="competence-20" value="{{ character_sheet.skill.19.competence }}" name="competence20"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="aspect-20" value="{{ character_sheet.skill.19.aspect }}" name="competence20"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center">
+                <input type="text" class="competence form-control" id="rang-20" value="{{ character_sheet.skill.19.rang }}" name="rang20"></input>
+              </div>
+              <div class="col-xl-3 col-md-3 col-12 col-sm-12 text-center mb-2">
+                <input type="text" class="competence form-control" id="va-20" value="{{ character_sheet.skill.19.va }}" name="va20"></input>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -399,7 +663,7 @@
               </div>
             </div>
             <div class="row mt-2 talent-row">
-              {% for row in sheet_inventory_talent.0.talent %}
+              {% for row in character_sheet.talent %}
               <div class="col-xl-6 col-md-6 col-12 col-sm-12 text-center mb-1 talent-subrow">
                 <textarea id="{{ row.id }}" class="col-12 talent" name="{{ row.id }}">{{ row.value }}</textarea>
               </div>
@@ -416,28 +680,28 @@
 
             <div class="input-group align-items-center col-12 mt-2 destiny">
               <label for="destiny1" class="col-12">Destin d'effort :</label>
-              <textarea class="form-control d-flex justify-content-center col-9" id="destiny1" rows="1">{{ character_sheet.29.destiny.text }}</textarea>
-              <span class="input-group-addon"><input type="checkbox" id="destiny1-checkbox"{% if character_sheet.29.destiny.is_check%} checked {% endif %}> </span>
+              <textarea class="form-control d-flex justify-content-center col-9" id="destiny1" rows="1">{{ character_sheet.destiny.0.text }}</textarea>
+              <span class="input-group-addon"><input type="checkbox" id="destiny1-checkbox"{% if character_sheet.destiny.0.is_checked %} checked {% endif %}> </span>
             </div>
             <div class="input-group align-items-center col-12 mt-2 destiny">
               <label for="destiny2" class="col-12">Destin d'esprit :</label>
-              <textarea class="form-control d-flex justify-content-center col-9" id="destiny2" rows="1">{{ character_sheet.30.destiny.text }}</textarea>
-              <span class="input-group-addon"><input type="checkbox" id="destiny2-checkbox"{% if character_sheet.30.destiny.is_check%} checked {% endif %}> </span>
+              <textarea class="form-control d-flex justify-content-center col-9" id="destiny2" rows="1">{{ character_sheet.destiny.1.text }}</textarea>
+              <span class="input-group-addon"><input type="checkbox" id="destiny2-checkbox"{% if character_sheet.destiny.1.is_checked %} checked {% endif %}> </span>
             </div>
             <div class="input-group align-items-center col-12 mt-2 destiny">
               <label for="destiny3" class="col-12">Destin racine :</label>
-              <textarea class="form-control d-flex justify-content-center col-9" id="destiny3" rows="1">{{ character_sheet.31.destiny.text }}</textarea>
-              <span class="input-group-addon"><input type="checkbox" id="destiny3-checkbox"{% if character_sheet.31.destiny.is_check%} checked {% endif %}> </span>
+              <textarea class="form-control d-flex justify-content-center col-9" id="destiny3" rows="1">{{ character_sheet.destiny.2.text }}</textarea>
+              <span class="input-group-addon"><input type="checkbox" id="destiny3-checkbox"{% if character_sheet.destiny.2.is_checked %} checked {% endif %}> </span>
             </div>
             <div class="input-group align-items-center col-12 mt-2 mb-2 destiny">
               <label for="destiny4" class="col-12">Destin de corps :</label>
-              <textarea class="form-control d-flex justify-content-center col-9" id="destiny4" rows="1">{{ character_sheet.32.destiny.text }}</textarea>
-              <span class="input-group-addon"><input type="checkbox" id="destiny4-checkbox"{% if character_sheet.32.destiny.is_check%} checked {% endif %}> </span>
+              <textarea class="form-control d-flex justify-content-center col-9" id="destiny4" rows="1">{{ character_sheet.destiny.3.text }}</textarea>
+              <span class="input-group-addon"><input type="checkbox" id="destiny4-checkbox"{% if character_sheet.destiny.3.is_checked %} checked {% endif %}> </span>
             </div>
             <div class="input-group align-items-center col-12 mt-2 mb-2 destiny">
               <label for="destiny4" class="col-12">Destin des origines :</label>
-              <textarea class="form-control d-flex justify-content-center col-9" id="destiny5" rows="1">{{ character_sheet.33.destiny.text }}</textarea>
-              <span class="input-group-addon"><input type="checkbox" id="destiny5-checkbox"{% if character_sheet.33.destiny.is_check%} checked {% endif %}> </span>
+              <textarea class="form-control d-flex justify-content-center col-9" id="destiny5" rows="1">{{ character_sheet.destiny.4.text }}</textarea>
+              <span class="input-group-addon"><input type="checkbox" id="destiny5-checkbox"{% if character_sheet.destiny.4.is_checked %} checked {% endif %}> </span>
             </div>
           </div>
         </div>
@@ -451,17 +715,17 @@
               <div class="col-xl-6 col-md-6 col-12 col-sm-12 text-center">
                 <label for="destiny4" class="col-12">Magies :</label>
                 <div class="form-control" id="magic">
-                  {% autoescape off %}{{ character_sheet.34.spellbook.magic|safe }}{% endautoescape %}</div>
+                  {% autoescape off %}{{ character_sheet.spellbook.0.magic|safe }}{% endautoescape %}</div>
               </div>
               <div class="col-xl-6 col-md-6 col-12 col-sm-12 text-center">
                 <label for="destiny4" class="col-12">Immuto :</label>
                 <div class="form-control" id="immuto">
-                  {% autoescape off %}{{ character_sheet.34.spellbook.immuto|safe }}{% endautoescape %}</div>
+                  {% autoescape off %}{{ character_sheet.spellbook.0.immuto|safe }}{% endautoescape %}</div>
               </div>
             </div>
             <div class="col-12 text-center mb-2">
               <label for="destiny5" class="col-12">Spécial :</label>
-              <div class="form-control" id="special">{% autoescape off %}{{ character_sheet.34.spellbook.special|safe }}{% endautoescape %}</div>
+              <div class="form-control" id="special">{% autoescape off %}{{ character_sheet.spellbook.0.special|safe }}{% endautoescape %}</div>
             </div>
           </div>
         </div>
@@ -475,37 +739,37 @@
               <div class="col-xl-6 col-md-6 col-12 col-sm-12 text-center">
                 <img src="{% static '/icons/light/Icone_Belier.png'%}" class="col-xl-7 col-md-7 col-sm-10 col-10 picture-font-color"></img>
                 <select name="twist-deck-ram" id="twist-deck-ram" class="col-xl-7 col-md-7 col-sm-10 col-10 twist-deck-data">
-                  <option value="choice_1" {% if character_sheet.35.twist_deck.is_selected %}selected=selected{% endif %}>4, 8, 12</option>
-                  <option value="choice_2" {% if character_sheet.36.twist_deck.is_selected %}selected=selected{% endif %}>1, 5, 9, 13</option>
-                  <option value="choice_3" {% if character_sheet.37.twist_deck.is_selected %}selected=selected{% endif %}>3, 7, 11</option>
-                  <option value="choice_4" {% if character_sheet.38.twist_deck.is_selected %}selected=selected{% endif %}>2, 6, 10</option>
+                  <option value="choice_1" {% if character_sheet.twist_deck.0.is_selected %}selected=selected{% endif %}>4, 8, 12</option>
+                  <option value="choice_2" {% if character_sheet.twist_deck.1.is_selected %}selected=selected{% endif %}>1, 5, 9, 13</option>
+                  <option value="choice_3" {% if character_sheet.twist_deck.2.is_selected %}selected=selected{% endif %}>3, 7, 11</option>
+                  <option value="choice_4" {% if character_sheet.twist_deck.3.is_selected %}selected=selected{% endif %}>2, 6, 10</option>
                 </select>
               </div>
               <div class="col-xl-6 col-md-6 col-12 col-sm-12 text-center">
                 <img src="{% static '/icons/light/Icone_Corbeau.png'%}" class="col-xl-7 col-md-7 col-sm-10 col-10 picture-font-color"></img>
                 <select name="twist-deck-raven" id="twist-deck-raven" class="col-xl-7 col-md-7 col-sm-10 col-10 twist-deck-data">
-                  <option value="choice_1" {% if character_sheet.39.twist_deck.is_selected %}selected{% endif %}>4, 8, 12</option>
-                  <option value="choice_2" {% if character_sheet.40.twist_deck.is_selected %}selected{% endif %}>1, 5, 9, 13</option>
-                  <option value="choice_3" {% if character_sheet.41.twist_deck.is_selected %}selected{% endif %}>3, 7, 11</option>
-                  <option value="choice_4" {% if character_sheet.42.twist_deck.is_selected %}selected{% endif %}>2, 6, 10</option>
+                  <option value="choice_1" {% if character_sheet.twist_deck.4.is_selected %}selected{% endif %}>4, 8, 12</option>
+                  <option value="choice_2" {% if character_sheet.twist_deck.5.is_selected %}selected{% endif %}>1, 5, 9, 13</option>
+                  <option value="choice_3" {% if character_sheet.twist_deck.6.is_selected %}selected{% endif %}>3, 7, 11</option>
+                  <option value="choice_4" {% if character_sheet.twist_deck.7.is_selected %}selected{% endif %}>2, 6, 10</option>
                 </select>
               </div>
               <div class="col-xl-6 col-md-6 col-12 col-sm-12 text-center mt-1">
                 <img src="{% static '/icons/light/Icone_Livre.png'%}" class="col-xl-7 col-md-7 col-sm-10 col-10 picture-font-color"></img>
                 <select name="twist-deck-book" id="twist-deck-book" class="col-xl-7 col-md-7 col-sm-10 col-10 twist-deck-data">
-                  <option value="choice_1" {% if character_sheet.43.twist_deck.is_selected %}selected{% endif %}>4, 8, 12</option>
-                  <option value="choice_2" {% if character_sheet.44.twist_deck.is_selected %}selected{% endif %}>1, 5, 9, 13</option>
-                  <option value="choice_3" {% if character_sheet.45.twist_deck.is_selected %}selected{% endif %}>3, 7, 11</option>
-                  <option value="choice_4" {% if character_sheet.46.twist_deck.is_selected %}selected{% endif %}>2, 6, 10</option>
+                  <option value="choice_1" {% if character_sheet.twist_deck.8.is_selected %}selected{% endif %}>4, 8, 12</option>
+                  <option value="choice_2" {% if character_sheet.twist_deck.9.is_selected %}selected{% endif %}>1, 5, 9, 13</option>
+                  <option value="choice_3" {% if character_sheet.twist_deck.10.is_selected %}selected{% endif %}>3, 7, 11</option>
+                  <option value="choice_4" {% if character_sheet.twist_deck.11.is_selected %}selected{% endif %}>2, 6, 10</option>
                 </select>
               </div>
               <div class="col-xl-6 col-md-6 col-12 col-sm-12 text-center mt-1">
                 <img src="{% static '/icons/light/Icone_Masque.png'%}" class="col-xl-7 col-md-7 col-sm-10 col-10 picture-font-color"></img>
                 <select name="twist-deck-mask" id="twist-deck-mask" class="col-xl-7 col-md-7 col-sm-10 col-10 twist-deck-data">
-                  <option value="choice_1" {% if character_sheet.47.twist_deck.is_selected %}selected{% endif %}>4, 8, 12</option>
-                  <option value="choice_2" {% if character_sheet.48.twist_deck.is_selected %}selected{% endif %}>1, 5, 9, 13</option>
-                  <option value="choice_3" {% if character_sheet.49.twist_deck.is_selected %}selected{% endif %}>3, 7, 11</option>
-                  <option value="choice_4" {% if character_sheet.50.twist_deck.is_selected %}selected{% endif %}>2, 6, 10</option>
+                  <option value="choice_1" {% if character_sheet.twist_deck.12.is_selected %}selected{% endif %}>4, 8, 12</option>
+                  <option value="choice_2" {% if character_sheet.twist_deck.13.is_selected %}selected{% endif %}>1, 5, 9, 13</option>
+                  <option value="choice_3" {% if character_sheet.twist_deck.14.is_selected %}selected{% endif %}>3, 7, 11</option>
+                  <option value="choice_4" {% if character_sheet.twist_deck.15.is_selected %}selected{% endif %}>2, 6, 10</option>
                 </select>
               </div>
             </div>
@@ -517,7 +781,7 @@
             <div class="form-group col-12 character-sheet-border character-sheet-title-color">
               <h5 class="text-center mx-auto col-12 character-sheet-title-color mt-2">EQUIPEMENT</h5>
             </div>
-            <div class="form-control" id="inventory-textarea" >{% autoescape off %} {{character_inventory_and_origins.0.inventory|safe }} {% endautoescape %}</div>
+            <div class="form-control" id="inventory-textarea" >{% autoescape off %} {{character_sheet.inventory|safe }} {% endautoescape %}</div>
           </div>
         </div>
       </div>
@@ -564,10 +828,40 @@ $(window).on('load',function(){
     height: '10vh'
   })
 
+  $('#page-2').addClass('d-none');
+
+  $('.button-page-1').on('click', function(){
+    $('#page-1').removeClass('d-none');
+    $('#page-2').addClass('d-none');
+  })
+
+  $('.button-page-2').on('click', function(){
+    $('#page-2').removeClass('d-none');
+    $('#page-1').addClass('d-none');
+  });
+
+  let len = 0;
+  $('.add-talent').on('click', function(){
+    len = $('.talent').length
+    $('\
+    <div class="row mt-1 talent-row">\
+      <div class="col-xl-6 col-md-5 col-12 col-sm-12 text-center talent-subrow">\
+        <textarea id="talent-'+ (len++) +'" value="" class="col-12 talent" name="talent-'+ (len++) +'"></textarea>\
+      </div>\
+      <div class="col-xl-6 col-md-5 col-12 col-sm-12 text-center talent-subrow">\
+        <textarea id="talent-'+ (len+=2) +'" value="" class="col-12 talent" name="talent-'+ (len+=2) +'"></textarea>\
+      </div>\
+    </div>').insertAfter($('.talent-row:last'));
+  });
+
+  $('.remove-talent').on('click', function(){
+    $('.talent-subrow>textarea:last').remove()
+  });
+
   {% autoescape on %}
-  description_editor.setData(`{{ character_sheet.0.charinfo.description|safe }}`)
-  inventory_editor.setData(`{{ character_inventory_and_origins.0.inventory|safe }}`)
-  origine_editor.setData(`{{ character_inventory_and_origins.0.origin|safe }}`)
+  description_editor.setData(`{{ character_sheet.charinfo.0.description|safe }}`)
+  inventory_editor.setData(`{{ character_sheet.inventory|safe }}`)
+  origine_editor.setData(`{{ character_sheet.origin|safe }}`)
   {% endautoescape %}
 
 });
@@ -591,18 +885,11 @@ $('#submit-character-sheet').on('click',function(){
   character_informations.push({
     'name': $('#name').val(),
     'age': $('#age').val(),
-    'lenght': $('#length').val(),
+    'length': $('#length').val(),
     'weight': $('#weight').val(),
     'description': description_editor.getData()
   });
 
-  $('.occupation').each(function(){
-    let id = $(this).children('input').attr('id');
-    occupation.push({
-      'is_checked': $('#'+id+'-checkbox').is(':checked'),
-      'text': $('#'+id).val()
-    })
-  })
 
   aspect.push({
     'power' : $('#power').val(),
@@ -688,6 +975,16 @@ $('#submit-character-sheet').on('click',function(){
     });
   })
 
+
+  $('.occupation').each(function(){
+    let id = $(this).children('input').attr('id');
+    occupation.push({
+      'is_checked': $('#'+id+'-checkbox').is(':checked'),
+      'text': $('#'+id).val()
+    })
+  })
+
+
   $.ajax({
 
     url: url,
@@ -716,40 +1013,6 @@ $('#submit-character-sheet').on('click',function(){
     fail: function(response_data){},
   });
 })
-
-$(document).ready(function(){
-
-  $('#page-2').addClass('d-none');
-
-  $('.button-page-1').on('click', function(){
-    $('#page-1').removeClass('d-none');
-    $('#page-2').addClass('d-none');
-  })
-
-  $('.button-page-2').on('click', function(){
-    $('#page-2').removeClass('d-none');
-    $('#page-1').addClass('d-none');
-  });
-
-  let len = 0;
-  $('.add-talent').on('click', function(){
-    len = $('.talent').length
-    $('\
-    <div class="row mt-1 talent-row">\
-      <div class="col-xl-6 col-md-5 col-12 col-sm-12 text-center talent-subrow">\
-        <textarea id="talent-'+ (len++) +'" value="" class="col-12 talent" name="talent-'+ (len++) +'"></textarea>\
-      </div>\
-      <div class="col-xl-6 col-md-5 col-12 col-sm-12 text-center talent-subrow">\
-        <textarea id="talent-'+ (len+=2) +'" value="" class="col-12 talent" name="talent-'+ (len+=2) +'"></textarea>\
-      </div>\
-    </div>').insertAfter($('.talent-row:last'));
-  });
-
-  $('.remove-talent').on('click', function(){
-    $('.talent-subrow:last').remove()
-  });
-
-});
 
 </script>
 {% endblock %}

@@ -412,30 +412,24 @@ class DisplayPlayerCharacterSheet(LoginRequiredMixin, JsonableResponseMixin, Tem
         context = super().get_context_data(**kwargs)
         game = get_object_or_404(Game, id=kwargs['pk'])
         player = get_object_or_404(Ingameplayer, game_id=game.id, player_id=kwargs['player_id'])
-        character_sheet = [element for element in Ingamecharactersheet.objects.filter(game_id=game.id, owner_uuid_id=player.player_id).values(
-            'charinfo',
-            'occupation',
-            'aspect',
-            'sub_aspect',
-            'attack',
-            'attack2',
-            'skill',
-            'destiny',
-            'spellbook',
-            'twist_deck')]
-        sheet_inventory_and_origins = [element for element in Ingamecharactersheet.objects.filter(game_id=game.id, owner_uuid_id=player.player_id).values(
-            'origin', 'inventory')]
-        sheet_inventory_talent = [element for element in Ingamecharactersheet.objects.filter(game_id=game.id, owner_uuid_id=player.player_id).order_by('id').values('talent')]
+        char = get_object_or_404(Ingamecharactersheet, game_id=game.id, owner_uuid_id=player.player_id)
+        char_sheet = dict({
+            'charinfo': char.charinfo,
+            'occupation': char.occupation,
+            'aspect': char.aspect,
+            'sub_aspect': char.sub_aspect,
+            'attack': char.attack,
+            'attack2': char.attack2,
+            'skill': char.skill,
+            'destiny': char.destiny,
+            'spellbook': char.spellbook,
+            'twist_deck': char.twist_deck,
+            'origin': char.origin,
+            'inventory': char.inventory,
+            'talent': char.talent
+        })
 
-        sheet = list()
-        for x in list(character_sheet):
-            for key, value in x.items():
-                for main_value in value:
-                    sheet.append({key: {sub_key: sub_value for sub_key, sub_value in main_value.items()}, }, )
-
-        context['character_sheet'] = sheet
-        context['character_inventory_and_origins'] = sheet_inventory_and_origins
-        context['sheet_inventory_talent'] = sheet_inventory_talent,
+        context['character_sheet'] = char_sheet
         return context
 
     def post(self, request):
