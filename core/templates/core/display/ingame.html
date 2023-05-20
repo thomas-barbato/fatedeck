@@ -73,15 +73,15 @@
       </div>
     </div>
   </div>
-  <!-- friend's list -->
+  <!-- player's list -->
   <div class="row d-flex background-transparency-color card-border-style col-xl-2 col-md-10 col-lg-10 mx-auto col-sm-1s0 d-flex align-self-start justify-content-start mt-4 mb-5">
     <div class="card-title"><h5 class="text-center">Joueurs</h5></div>
     <div class="card-body">
       <ul class="list-group list-contact row list-group-flush">
         <li v-for="player, name, id, owner_uuid_id in players" class="list-group-item test-justify presentation-no-font-family d-flex friend-list" v-bind:id="[[ player.id]]">
-          <span v-if="player.id === game_owner" class="presentation-no-font-family">[[ player.name ]] <i class="fas fa-crown me-auto"></i></span>
+          <span v-if="player.id == game_owner" class="presentation-no-font-family player-size-name">[[ player.name ]] <i class="fas fa-crown me-auto"></i></span>
           <span v-else class="presentation-no-font-family player-size-name">[[ player.name ]]</span>
-          <span v-if="player.is_online" class="dot green-dot ms-auto mt-2"></span>
+          <span v-if="player.is_online == 'True'" class="dot green-dot ms-auto mt-2"></span>
           <span v-else class="dot red-dot ms-auto mt-2"></span>
         </li>
       </ul>
@@ -203,17 +203,20 @@ let ingame_view = new Vue({
       })
     },
     create_player_invitation: function(event){
-        let url = '';
+        let url = '{% url "create-player-invitation" %}';
         let id = event.target.id;
         let player_invitation_code;
+        let invitation_by_select;
         if( event.target.id === "submit-contact"){
           $('#friend-select option').each(function(i) {
             if (this.selected == true) {
               player_invitation_code = this.value;
+              invitation_by_select = 'True';
             }
           });
         }else{
           player_invitation_code = $('#input-friend-name').val();
+          invitation_by_select = 'False';
         }
         if(player_invitation_code != ''){
           $.ajax({
@@ -224,8 +227,10 @@ let ingame_view = new Vue({
             dataType : 'json',
             headers: {"X-CSRFToken":"{{ csrf_token }}" },
             data:{
-              'player_invite_code': player_invitation_code,
-              'game_invite_code': ingame_view.game_invitation_code,
+              'player_id': player_invitation_code,
+              'game_id': '{{ game.id }}',
+              'game_owner': '{{ game.owner_uuid_id }}',
+              'invitation_by_select': invitation_by_select,
               'csrfmiddlewaretoken': '{{ csrf_token }}'
             },
             success: function (response_data) {

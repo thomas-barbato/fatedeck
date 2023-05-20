@@ -141,7 +141,7 @@ class Friendlist(models.Model):
     created_at = models.DateTimeField("creation date", auto_now_add=True, null=True, blank=True)
 
 
-class Gameinviation(models.Model):
+class Gameinvitation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner_uuid = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name="game_owner_id")
     player = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name="game_other_player_id")

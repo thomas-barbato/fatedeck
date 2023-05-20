@@ -75,7 +75,7 @@
           <div class="modal-dialog" role="document">
             <div class="modal-content">
               <div class="modal-header">
-                <h5 class="modal-title modal-text-color mx-auto" id="exampleModalLabel">Créer une nouvelle partie</h5>
+                <h5 class="modal-title modal-text-color mx-auto" id="game-modal">Créer une nouvelle partie</h5>
               </div>
               <div class="modal-body form-group">
                 <label for="input-game-name">Nom du jeu :</label>
@@ -94,7 +94,7 @@
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title modal-text-color mx-auto" id="exampleModalLabel">Ajouter ce contact</h5>
+              <h5 class="modal-title modal-text-color mx-auto" id="contact-modal">Ajouter ce contact</h5>
             </div>
             <div class="modal-body form-group">
               <label for="input-invitation-name">Nom du contact :</label>
@@ -416,35 +416,40 @@ let vuejs_view = new Vue({
         });
       },
       auto_update_game_notification: async function(){
-        let url = ""
+        let url = "{% url 'display-player-invitation' %}";
         $.ajax({
           url: url,
           async: true,
           context: this,
-          type: 'POST',
+          type: 'GET',
           dataType : 'json',
-          headers: { "X-CSRFToken": "{{ csrf_token }}" },
-          data:{
-            'csrfmiddlewaretoken': '{{ csrf_token }}'
-          },
+          headers: { "X-CSRFToken": "" },
+          data:{},
           success: function (response_data) {
             if(response_data.success){
               notifications.game_invite_notification = response_data['game_invitation']
+              notifications.game_invitation_list = response_data['game_invitation_list']
             }
           },
           fail: function(response_data){
           }
         })
       },
-      accept_game_invitation: async function(event){
+      accept_or_deny_game_invitation: async function(event){
         let id = event.target.id;
         let contact_name;
+        let choices = "";
+        if($(event.target).hasClass('accept-invitation')){
+          choices = "accept";
+        }else if($(event.target).hasClass('deny-invitation')){
+          choices = "deny";
+        }
         $.each(notifications.game_invitation_list, function(index){
           if(notifications.game_invitation_list[index]['game_name'] == id){
             contact_name = notifications.game_invitation_list[index]['contact_name']
           }
         })
-        let url = "";
+        let url = "{% url 'accept-or-deny-player-invitation' %}";
         $.ajax({
           url: url,
           async: true,
@@ -453,6 +458,7 @@ let vuejs_view = new Vue({
           dataType : 'json',
           headers: { "X-CSRFToken": "{{ csrf_token }}" },
           data:{
+            'choices' : choices,
             'game_name' : id,
             'contact_name': contact_name,
             'csrfmiddlewaretoken': '{{ csrf_token }}'
@@ -475,6 +481,7 @@ let vuejs_view = new Vue({
     vuejs_view.auto_update_game_data();
     vuejs_view.auto_update_friends_list();
     notifications.auto_update_friend_notification();
+    notifications.auto_update_game_notification();
   }
 
   $(window).on('load',function(){
