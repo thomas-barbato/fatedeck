@@ -13,9 +13,6 @@
             <span class="navbar-text-color navbar-brand"><i class="fas fa-cog rotated-cog"></i></span>
           </a>
           <div class="dropdown-menu dropdown-option-menu-color" id="dropdown" aria-labelledby="options-dropdown">
-            <a class="dropdown-item dropdown-option-menu-color" data-toggle="modal" data-target="#ThemeModal" href=""><i class="fas fa-cogs"><span class="p-2 align-middle navbar-text-color"></i>Themes</span></a>
-            <a class="dropdown-item" href=""><i class="fas fa-user-circle"><span class="p-2 align-middle"></i>Mon compte</span></a>
-            <div class="dropdown-divider"></div>
             <a class="dropdown-item logout" href="{% url 'user_logout' %}"><i class="fas fa-sign-out-alt"><span class="p-2 align-middle"></i>Deconnexion</span></a>
           </div>
         </li>
@@ -66,10 +63,10 @@
               <p class="text-break text-justify card-text"><span class="list-invite-name presentation-no-font-family">[[game.contact_name]]</span> souhaite vous inviter dans sa partie</p>
               <div class="row">
                 <div class="col-6 d-flex justify-content-end">
-                  <i class="fas fa-check cursor-pointer accept-invitation add-game" @click="accept_game_invitation($event)" :id="[[game.game_name]]"></i>
+                  <i class="fas fa-check cursor-pointer accept-invitation add-game" @click="accept_or_deny_game_invitation($event)" :id="[[game.game_name]]"></i>
                 </div>
                 <div class="col-6 d-flex justify-content-start">
-                  <i class="fas fa-ban cursor-pointer deny-invitation denied-game" @click="deny_game_invitation($event)" :id="[[game.game_name]]"></i>
+                  <i class="fas fa-ban cursor-pointer deny-invitation denied-game" @click="accept_or_deny_game_invitation($event)" :id="[[game.game_name]]"></i>
                 </div>
               </div>
             </div>

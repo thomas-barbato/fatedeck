@@ -61,6 +61,21 @@ urlpatterns = [
         name="delete-friend"
     ),
     path(
+        "display-player-invitation",
+        core_views.PlayerInvitationView.as_view(),
+        name="display-player-invitation"
+    ),
+    path(
+        "create-player-invitation",
+        core_views.PlayerInvitationView.as_view(),
+        name="create-player-invitation"
+    ),
+    path(
+        "accept-or-deny-player-invitation",
+        core_views.AcceptOrDenyGameInvitation.as_view(),
+        name="accept-or-deny-player-invitation"
+    ),
+    path(
         "ingame/<uuid:pk>",
         core_views.DisplayGame.as_view(template_name="display/ingame.html"),
         name="display_game_view"
@@ -70,9 +85,17 @@ urlpatterns = [
         core_views.DisplayFriendsAndPlayers.as_view(),
         name="display_friends_and_players_view"
     ),path(
-        "ingame/sheet/<uuid:user_id>",
+        "ingame/<uuid:pk>/sheet/<uuid:player_id>",
         core_views.DisplayPlayerCharacterSheet.as_view(template_name="display/character_sheet.html"),
         name="display_player_character_sheet"
+    ),path(
+        "ingame/sheet/save",
+        core_views.DisplayPlayerCharacterSheet.as_view(),
+        name="save_character_sheet"
+    ),path(
+        "ingame/leave",
+        core_views.LeaveGameRedirectView.as_view(),
+        name="leave_game"
     ),
     path(
         'logout/',

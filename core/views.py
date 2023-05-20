@@ -5,7 +5,7 @@ import pytz
 from django.shortcuts import render, redirect
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import TemplateView, FormView, ListView, CreateView, DetailView, DeleteView
+from django.views.generic import TemplateView, FormView, ListView, CreateView, DetailView, DeleteView, RedirectView
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -30,7 +30,7 @@ from .models import (
     Ingamecards,
     Ingamecharactersheet,
     Friendlist,
-    Gameinviation,
+    Gameinvitation,
     Friendinviation,
     LoggedInUser,
 )
@@ -315,30 +315,31 @@ class DisplayGame(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
             {
                 "owner_uuid_id": player["owner_uuid_id"],
                 "player_id": player["player_id"],
-                "username_invite_code": player["owner_uuid_id__username_invite_code"],
-                "is_online": LoggedInUser.objects.filter(user_id=player["player_id"]).exists()
+                "username_invite_code": player["player_id__username_invite_code"],
+                "is_online": LoggedInUser.objects.filter(user_id=player["player_id"]).exists(),
             }
             for player in Ingameplayer.objects.filter(game_id=game.id).values(
                 "owner_uuid_id",
                 "player_id",
-                "owner_uuid_id__username_invite_code",
+                "player_id__username_invite_code",
             )
         ]
+
+        print(players_list)
 
         friends_list = [
             {
                 "player_id": friend["player_id"],
-                "username_invite_code": friend["owner_uuid_id__username_invite_code"],
+                "username_invite_code": friend["player_id__username_invite_code"],
             }
             for friend in Friendlist.objects.filter(
                 owner_uuid_id=player_id
             ).exclude(
                 player_id__in=[l['player_id'] for l in players_list],
-                player_id__game__id=game.id,
             ).values(
                 "owner_uuid_id",
                 "player_id",
-                "owner_uuid_id__username_invite_code",
+                "player_id__username_invite_code",
             )
         ]
 
@@ -402,6 +403,71 @@ class DisplayFriendsAndPlayers(LoginRequiredMixin, JsonableResponseMixin, Templa
         }
 
         return JsonResponse(response_data, safe=False)
+
+
+class PlayerInvitationView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
+    template_name = "display/dashboard.html"
+    login_url = settings.LOGIN_URL
+
+    def get(self, request, *args, **kwargs):
+        user_id = self.request.user.id
+        player_invitation = [
+            {
+                "contact_name": elem["owner_uuid_id__username_invite_code"],
+                "game_name": elem["game_id__game_invite_code"],
+                "id": elem["id"],
+                "game_id": elem["game_id"]
+            }
+            for elem in Gameinvitation.objects.select_related("owner_uuid_id")
+            .filter(player_id=user_id)
+            .values("id", "game_id", "owner_uuid_id", "owner_uuid_id__username_invite_code", "game_id__game_invite_code")
+        ]
+
+        response_data = {
+            "success": True,
+            "game_invitation": len(player_invitation),
+            "game_invitation_list": player_invitation,
+        }
+        return JsonResponse(response_data)
+
+    def post(self, request, *args, **kwargs):
+        game = get_object_or_404(Game, id=request.POST.get('game_id'))
+        invitation_by_select = request.POST.get('invitation_by_select')
+        response_data = {}
+        if invitation_by_select in ['True', 'False']:
+            if invitation_by_select == 'True':
+                player = get_object_or_404(User, id=request.POST.get('player_id'))
+            else:
+                player = get_object_or_404(User, username_invite_code=request.POST.get('player_id'))
+            if game.id and player.id:
+                Gameinvitation.objects.create(
+                    game_id=game.id,
+                    player_id=player.id,
+                    owner_uuid_id=request.POST.get('game_owner')
+                )
+            response_data = {"success": True}
+        return JsonResponse(response_data, safe=False)
+
+
+class AcceptOrDenyGameInvitation(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
+    template_name = "display/dashboard.html"
+    login_url = settings.LOGIN_URL
+
+    def post(self, request, *args, **kwargs):
+        if request.POST.get("choices") and request.POST.get("choices") in ["accept", "deny"]:
+            choices = request.POST.get("choices")
+            user_id = request.user.id
+            contact_id = get_object_or_404(User, username_invite_code=request.POST.get("contact_name")).id
+            game_id = get_object_or_404(Game, game_invite_code=request.POST.get('game_name')).id
+            print(request.POST)
+            if choices == "accept":
+                Ingameplayer.objects.create(
+                    player_id=user_id,
+                    owner_uuid_id=contact_id,
+                    game_id=game_id
+                )
+            Gameinvitation.objects.get(owner_uuid_id=contact_id, player_id=user_id).delete()
+            return JsonResponse({"success": True}, safe=False)
 
 
 class DisplayPlayerCharacterSheet(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
@@ -477,3 +543,13 @@ class DisplayPlayerCharacterSheet(LoginRequiredMixin, JsonableResponseMixin, Tem
         response_data = {'success': True}
         return JsonResponse(response_data)
 
+
+class LeaveGameRedirectView(LoginRequiredMixin, JsonableResponseMixin, RedirectView):
+    permanent = False
+    query_string = True
+    pattern_name = "dashboard_view"
+
+    def get_redirect_url(self, *args, **kwargs):
+        player = get_object_or_404(Ingameplayer, player_id=self.request.user.id)
+        player.delete()
+        return super().get_redirect_url(*args, **kwargs)
