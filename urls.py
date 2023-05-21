@@ -84,18 +84,41 @@ urlpatterns = [
         "ingame/players",
         core_views.DisplayFriendsAndPlayers.as_view(),
         name="display_friends_and_players_view"
-    ),path(
+    ),
+    path(
         "ingame/<uuid:pk>/sheet/<uuid:player_id>",
         core_views.DisplayPlayerCharacterSheet.as_view(template_name="display/character_sheet.html"),
         name="display_player_character_sheet"
-    ),path(
+    ),
+    path(
         "ingame/sheet/save",
         core_views.DisplayPlayerCharacterSheet.as_view(),
         name="save_character_sheet"
-    ),path(
+    ),
+    path(
+        "ingame/pickacard",
+        core_views.PickACardView.as_view(),
+        name="pick_a_card"
+    ),
+    path(
         "ingame/leave",
         core_views.LeaveGameRedirectView.as_view(),
         name="leave_game"
+    ),
+    path(
+        "ingame/get_deck_and_cemetery",
+        core_views.GetCardsInformationsView.as_view(),
+        name="get_cards_informations"
+    ),
+    path(
+        "ingame/clean_drawn_cards",
+        core_views.CleanDrawnCardsView.as_view(),
+        name="clean_drawn_cards"
+    ),
+    path(
+        "ingame/reset_deck",
+        core_views.ResetDeckView.as_view(),
+        name="reset_deck"
     ),
     path(
         'logout/',
