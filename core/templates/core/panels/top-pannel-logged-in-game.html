@@ -16,7 +16,9 @@
                 <div class="dropdown-menu dropdown-option-menu-color" id="dropdown" aria-labelledby="options-dropdown">
                 {% if request.user.id == game.owner_uuid_id %}
                     {% for player in players %}
-                    <a href="{% url 'display_player_character_sheet' pk=game.id player_id=player.player_id %}" class="dropdown-item dropdown-option-menu-color" target="_blank"><i class="fas fa-user-graduate"><span class="p-2 align-middle navbar-text-color"></i>Fiche de {{ player.username_invite_code }}</span></a>
+                        {% if player.player_id != game.owner_uuid_id %}
+                        <a href="{% url 'display_player_character_sheet' pk=game.id player_id=player.player_id %}" class="dropdown-item dropdown-option-menu-color" target="_blank"><i class="fas fa-user-graduate"><span class="p-2 align-middle navbar-text-color"></i>Fiche de {{ player.username_invite_code }}</span></a>
+                        {% endif %}
                     {% endfor %}
                 <a class="dropdown-item dropdown-option-menu-color" href=""><i class="fas fa-cogs"><span class="p-2 align-middle navbar-text-color"></i>Supprimer ce jeu</span></a>
                 {% else %}

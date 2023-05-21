@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0005_loggedinuser'),
+        ("core", "0005_loggedinuser"),
     ]
 
     operations = [
         migrations.RenameModel(
-            old_name='Gameinviation',
-            new_name='Gameinvitation',
+            old_name="Gameinviation",
+            new_name="Gameinvitation",
         ),
     ]

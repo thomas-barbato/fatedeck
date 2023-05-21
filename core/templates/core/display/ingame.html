@@ -20,7 +20,7 @@
             <img v-if="count_card_in_hands < 5"  v-on:click="pick_a_card()" class="card-img card-size action-cursor" src="{% static '/cards/dos.svg' %}"></img>
             <img v-else class="card-img unallowed-cursor-and-disable" src="{% static '/cards/dos.svg' %}" disabled></img>
             <div class="card-footer game-card-style text-center action-cursor col-12">
-              {% if request.user.id == game_owner%}
+              {% if request.user.id == game.owner_uuid_id%}
               <div class="btn shuffle-deck mx-auto" v-on:click='reset_all_cards()'>
                 <i class="fas fa-random"></i>
               </div>
@@ -37,7 +37,7 @@
           <div class="card-body col-12 game-card-style">
             <img class="card-img unallowed-cursor-and-disable game-card-style" src="{% static '/cards/dos.svg' %}"></img>
             <div class="card-footer game-card-style text-center action-cursor col-12">
-              {% if request.user.id == game_owner%}
+              {% if request.user.id == game.owner_uuid_id%}
               <div class="btn shuffle-cemetery mx-auto " v-on:click="clean_inhand_cards()">
                 <i class="fas fa-broom"></i>
               </div>
@@ -81,7 +81,7 @@
         <li v-for="player, name, id, owner_uuid_id in players" class="list-group-item test-justify presentation-no-font-family d-flex friend-list" v-bind:id="[[ player.id]]">
           <span v-if="player.id == game_owner" class="presentation-no-font-family player-size-name">[[ player.name ]] <i class="fas fa-crown me-auto"></i></span>
           <span v-else class="presentation-no-font-family player-size-name">[[ player.name ]]</span>
-          <span v-if="player.is_online == 'True'" class="dot green-dot ms-auto mt-2"></span>
+          <span v-if="player.is_online == true" class="dot green-dot ms-auto mt-2"></span>
           <span v-else class="dot red-dot ms-auto mt-2"></span>
         </li>
       </ul>
@@ -247,51 +247,9 @@ let ingame_view = new Vue({
           });
         }
       },
-      get_cards_informations: async function(){
-        let game_id = '{{ game_id }}';
-        let url = '';
-        $.ajax({
-          url: url,
-          async: true,
-          context : this,
-          type: 'POST',
-          dataType : 'json',
-          headers: {"X-CSRFToken":"{{ csrf_token }}" },
-          data:{
-            'csrfmiddlewaretoken': '{{ csrf_token }}',
-            'game_id':game_id
-          },
-          success: function (response_data) {
-            ingame_view.deck_current_len = response_data['deck_current_len']
-            if(response_data['success']){
-              ingame_view.deck = [];
-              $.each(response_data['deck'], function(index){
-                ingame_view.deck.push({
-                  'id': response_data['deck'][index]['id']
-                });
-              });
-              ingame_view.cemetery = [];
-              $.each(response_data['deck_cemetery'], function(index){
-                ingame_view.cemetery.push({
-                  'id': response_data['deck_cemetery'][index]['id']
-                });
-              });
-              ingame_view.cards_drawn = [];
-              $.each(response_data['cards_drawn'], function(index){
-                ingame_view.cards_drawn.push({
-                  'id': response_data['cards_drawn'][index]['card_id'],
-                  'filename': '/static/cards/'+response_data['cards_drawn'][index]['filename'],
-                  'last_picked_up_by': response_data['cards_drawn'][index]['last_picked_up_by'],
-                });
-                ingame_view.count_card_in_hands++;
-              });
-            }
-          }
-        });
-      },
       pick_a_card: async function(){
-        let game_id = '{{ game_id }}';
-        let url = '';
+        let game_id = '{{ game.id }}';
+        let url = '{% url "pick_a_card" %}';
         $.ajax({
           url: url,
           async: true,
@@ -316,8 +274,8 @@ let ingame_view = new Vue({
                 if(can_be_added === true){
                   ingame_view.cards_drawn.push({
                     'id': response_data['picked_card'][index]['card_id'],
-                    'filename': '/static/cards/'+response_data['picked_card'][index]['filename'],
-                    'last_picked_up_by': response_data['picked_card'][index]['ingamecards__last_picked_up_by'],
+                    'filename': '/static/cards/'+response_data['picked_card'][index]['card_id__filename'],
+                    'last_picked_up_by': response_data['picked_card'][index]['last_picked_up_by'],
                   });
                   ingame_view.count_card_in_hands++;
                 }
@@ -328,8 +286,8 @@ let ingame_view = new Vue({
         });
       },
       clean_inhand_cards: async function(){
-        let game_id = '{{ game_id }}';
-        let url = '';
+        let game_id = '{{ game.id }}';
+        let url = '{% url "clean_drawn_cards" %}';
         $.ajax({
           url: url,
           async: true,
@@ -341,93 +299,47 @@ let ingame_view = new Vue({
             'csrfmiddlewaretoken': '{{ csrf_token }}',
             'game_id':game_id
           },
-          success: function (response_data) {
-            if(response_data['success']){
-              ingame_view.cards_drawn = []
-              ingame_view.count_card_in_hands = 0;
-              $.each(response_data['cemetery'], function(index){
-                can_be_added = true;
-                $.each(ingame_view.cemetery, function(card_index){
-                  if(response_data['cemetery'][index]['id'] === ingame_view.cemetery[card_index]['id']){
-                    can_be_added = false;
-                  }
-                });
-                if(can_be_added === true){
-                  ingame_view.cemetery.push({
-                    "id": response_data['cemetery'][index]['card_id'],
-                  });
-                }
-              });
-            }
-          }
+          success: function (response_data) {}
         });
       },
-      auto_update_cards_deck_and_cemetery_list: async function(){
-        let game_id = '{{ game_id }}';
-        let url = '';
+      auto_update_cards_informations: async function(){
+        let game_id = '{{ game.id }}';
+        let url = '{% url "get_cards_informations" %}';
         $.ajax({
           url: url,
           async: true,
           context : this,
-          type: 'POST',
+          type: 'GET',
           dataType : 'json',
-          headers: {"X-CSRFToken":"{{ csrf_token }}" },
+          headers: {"X-CSRFToken":"" },
           data:{
-            'csrfmiddlewaretoken': '{{ csrf_token }}',
+            'csrfmiddlewaretoken': '',
             'game_id':game_id
           },
           success: function (response_data) {
             if(response_data['success']){
               ingame_view.deck = [];
               ingame_view.cemetery = [];
+              ingame_view.cards_drawn = [];
+              ingame_view.count_card_in_hands = response_data['picked_card'].length;
+              ingame_view.deck_current_len = response_data['deck'].length;
               $.each(response_data['deck'], function(index){
                   ingame_view.deck.push({
-                    'id': response_data['deck'][index]['id']
+                    'id': response_data['deck'][index]
                   });
               });
-              $.each(response_data['deck_cemetery'], function(index){
+              $.each(response_data['cemetery'], function(index){
                 ingame_view.cemetery.push({
-                  'id': response_data['deck_cemetery'][index]['id']
+                  'id': response_data['cemetery'][index]
                 });
               });
-              ingame_view.deck_current_len = response_data['deck_current_len'];
-            }
-          }
-        });
-      },
-      auto_update_cards_drawn: async function(){
-        let game_id = '{{ game_id }}';
-        let url = '';
-        $.ajax({
-          url: url,
-          async: true,
-          context : this,
-          type: 'POST',
-          dataType : 'json',
-          headers: {"X-CSRFToken":"{{ csrf_token }}" },
-          data:{
-            'csrfmiddlewaretoken': '{{ csrf_token }}',
-            'game_id':game_id
-          },
-          success: function (response_data) {
-            if(response_data['success']){
-              let can_be_added = true;
               if(response_data['picked_card'].length > 0){
                 $.each(response_data['picked_card'], function(index){
-                  can_be_added = true;
-                  $.each(ingame_view.cards_drawn, function(card_index){
-                    if(response_data['picked_card'][index]['card_id'] === ingame_view.cards_drawn[card_index]['id']){
-                      can_be_added = false;
-                    }
+                  ingame_view.cards_drawn.push({
+                    "id": response_data['picked_card'][index]['id'],
+                    "filename": '/static/cards/'+response_data['picked_card'][index]['card_id__filename'],
+                    "last_picked_up_by": response_data['picked_card'][index]['last_picked_up_by'],
                   });
-                  if(can_be_added === true){
-                    ingame_view.cards_drawn.push({
-                      "id": response_data['picked_card'][index]['card_id'],
-                      "filename": '/static/cards/'+response_data['picked_card'][index]['filename'],
-                      "last_picked_up_by": response_data['picked_card'][index]['ingamecards__last_picked_up_by'], 
-                    });
-                    ingame_view.count_card_in_hands++;
-                  }
                 });
               }else{
                 ingame_view.cards_drawn = [];
@@ -438,8 +350,8 @@ let ingame_view = new Vue({
         });
       },
       reset_all_cards: async function(){
-        let game_id = '{{ game_id }}';
-        let url = '';
+        let game_id = '{{ game.id }}';
+        let url = '{% url "reset_deck" %}';
         $.ajax({
           url: url,
           async: true,
@@ -470,19 +382,16 @@ let ingame_view = new Vue({
   });
 
 
-function firstCall(){
-  ingame_view.get_cards_informations();
-  ingame_view.auto_update_players_list();
-}
-
 function callEverything(){
   ingame_view.auto_update_players_list();
-  ingame_view.auto_update_cards_drawn();
-  ingame_view.auto_update_cards_deck_and_cemetery_list();
+  ingame_view.auto_update_cards_informations();
 }
 
-$(document).ready(function(){
+$(window).on('load',function(){
+  callEverything();
   $('.friend-invitation-error, .friend-invitation-success, .friend-same-user-error, .already-friend-error').hide();
+  setInterval(callEverything, 2000)
 });
+
 </script>
 {% endblock %}

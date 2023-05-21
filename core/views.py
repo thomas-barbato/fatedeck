@@ -5,7 +5,16 @@ import pytz
 from django.shortcuts import render, redirect
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import TemplateView, FormView, ListView, CreateView, DetailView, DeleteView, RedirectView
+from django.views.generic import (
+    TemplateView,
+    FormView,
+    ListView,
+    CreateView,
+    DetailView,
+    DeleteView,
+    RedirectView,
+    UpdateView,
+)
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -290,7 +299,7 @@ class DeleteFriendView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         user_id = self.request.user.id
-        contact = get_object_or_404(User, username_invite_code=self.request.POST.get('contact_name'))
+        contact = get_object_or_404(User, username_invite_code=self.request.POST.get("contact_name"))
         response = {}
         if contact.id:
             friend = get_object_or_404(Friendlist, owner_uuid_id=user_id, player_id=contact.id).delete()
@@ -332,30 +341,31 @@ class DisplayGame(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
                 "player_id": friend["player_id"],
                 "username_invite_code": friend["player_id__username_invite_code"],
             }
-            for friend in Friendlist.objects.filter(
-                owner_uuid_id=player_id
-            ).exclude(
-                player_id__in=[l['player_id'] for l in players_list],
-            ).values(
+            for friend in Friendlist.objects.filter(owner_uuid_id=player_id)
+            .exclude(
+                player_id__in=[l["player_id"] for l in players_list],
+            )
+            .values(
                 "owner_uuid_id",
                 "player_id",
                 "player_id__username_invite_code",
             )
         ]
 
-        deck = Ingamecards.objects.select_related('card').filter(game_id=game.id).values(
-            'card__filename',
-            'card_id',
-            'last_picked_up_by',
-            'current_state').order_by('?')
+        deck = (
+            Ingamecards.objects.select_related("card")
+            .filter(game_id=game.id)
+            .values("card__filename", "card_id", "last_picked_up_by", "current_state")
+            .order_by("?")
+        )
 
         deck_count = Ingamecards.objects.filter(game_id=game.id, current_state="PIOCHE").count()
 
-        context['game'] = game
-        context['players'] = players_list
-        context['friends'] = friends_list
-        context['cards'] = deck
-        context['deck_count'] = deck_count
+        context["game"] = game
+        context["players"] = players_list
+        context["friends"] = friends_list
+        context["cards"] = deck
+        context["deck_count"] = deck_count
         return context
 
 
@@ -364,7 +374,7 @@ class DisplayFriendsAndPlayers(LoginRequiredMixin, JsonableResponseMixin, Templa
     template_name = "display/ingame.html"
 
     def get(self, request, *args, **kwargs):
-        game_id = self.request.GET["game_id"]
+        game_id = self.request.GET.get("game_id")
         game = get_object_or_404(Game, id=game_id)
         player_id = self.request.user.id
 
@@ -372,35 +382,32 @@ class DisplayFriendsAndPlayers(LoginRequiredMixin, JsonableResponseMixin, Templa
             {
                 "owner_uuid_id": player["owner_uuid_id"],
                 "player_id": player["player_id"],
-                "username_invite_code": player["owner_uuid_id__username_invite_code"],
-                "is_online": LoggedInUser.objects.filter(user_id=player["player_id"]).exists()
+                "username_invite_code": player["player_id__username_invite_code"],
+                "is_online": LoggedInUser.objects.filter(user_id=player["player_id"]).exists(),
             }
             for player in Ingameplayer.objects.filter(game_id=game.id).values(
                 "owner_uuid_id",
                 "player_id",
-                "owner_uuid_id__username_invite_code",
+                "player_id__username_invite_code",
             )
         ]
 
         friends_list = [
             {
                 "player_id": friend["player_id"],
-                "username_invite_code": friend["owner_uuid_id__username_invite_code"],
+                "username_invite_code": friend["player_id__username_invite_code"],
             }
-            for friend in Friendlist.objects.filter(
-                owner_uuid_id=player_id
-            ).exclude(
-                player_id__in=[l['player_id'] for l in players_list],
-            ).values(
+            for friend in Friendlist.objects.filter(owner_uuid_id=player_id)
+            .exclude(
+                player_id__in=[l["player_id"] for l in players_list],
+            )
+            .values(
                 "player_id",
-                "owner_uuid_id__username_invite_code",
+                "player_id__username_invite_code",
             )
         ]
 
-        response_data = {
-            "friends" : friends_list,
-            "players" : players_list
-        }
+        response_data = {"friends": friends_list, "players": players_list}
 
         return JsonResponse(response_data, safe=False)
 
@@ -416,11 +423,13 @@ class PlayerInvitationView(LoginRequiredMixin, JsonableResponseMixin, TemplateVi
                 "contact_name": elem["owner_uuid_id__username_invite_code"],
                 "game_name": elem["game_id__game_invite_code"],
                 "id": elem["id"],
-                "game_id": elem["game_id"]
+                "game_id": elem["game_id"],
             }
             for elem in Gameinvitation.objects.select_related("owner_uuid_id")
             .filter(player_id=user_id)
-            .values("id", "game_id", "owner_uuid_id", "owner_uuid_id__username_invite_code", "game_id__game_invite_code")
+            .values(
+                "id", "game_id", "owner_uuid_id", "owner_uuid_id__username_invite_code", "game_id__game_invite_code"
+            )
         ]
 
         response_data = {
@@ -431,19 +440,17 @@ class PlayerInvitationView(LoginRequiredMixin, JsonableResponseMixin, TemplateVi
         return JsonResponse(response_data)
 
     def post(self, request, *args, **kwargs):
-        game = get_object_or_404(Game, id=request.POST.get('game_id'))
-        invitation_by_select = request.POST.get('invitation_by_select')
+        game = get_object_or_404(Game, id=request.POST.get("game_id"))
+        invitation_by_select = request.POST.get("invitation_by_select")
         response_data = {}
-        if invitation_by_select in ['True', 'False']:
-            if invitation_by_select == 'True':
-                player = get_object_or_404(User, id=request.POST.get('player_id'))
+        if invitation_by_select in ["True", "False"]:
+            if invitation_by_select == "True":
+                player = get_object_or_404(User, id=request.POST.get("player_id"))
             else:
-                player = get_object_or_404(User, username_invite_code=request.POST.get('player_id'))
+                player = get_object_or_404(User, username_invite_code=request.POST.get("player_id"))
             if game.id and player.id:
                 Gameinvitation.objects.create(
-                    game_id=game.id,
-                    player_id=player.id,
-                    owner_uuid_id=request.POST.get('game_owner')
+                    game_id=game.id, player_id=player.id, owner_uuid_id=request.POST.get("game_owner")
                 )
             response_data = {"success": True}
         return JsonResponse(response_data, safe=False)
@@ -458,14 +465,11 @@ class AcceptOrDenyGameInvitation(LoginRequiredMixin, JsonableResponseMixin, Temp
             choices = request.POST.get("choices")
             user_id = request.user.id
             contact_id = get_object_or_404(User, username_invite_code=request.POST.get("contact_name")).id
-            game_id = get_object_or_404(Game, game_invite_code=request.POST.get('game_name')).id
+            game_id = get_object_or_404(Game, game_invite_code=request.POST.get("game_name")).id
             print(request.POST)
             if choices == "accept":
-                Ingameplayer.objects.create(
-                    player_id=user_id,
-                    owner_uuid_id=contact_id,
-                    game_id=game_id
-                )
+                Ingameplayer.objects.create(player_id=user_id, owner_uuid_id=contact_id, game_id=game_id)
+                Ingamecharactersheet.objects.create(owner_uuid_id=user_id, game_id=game_id)
             Gameinvitation.objects.get(owner_uuid_id=contact_id, player_id=user_id).delete()
             return JsonResponse({"success": True}, safe=False)
 
@@ -476,72 +480,180 @@ class DisplayPlayerCharacterSheet(LoginRequiredMixin, JsonableResponseMixin, Tem
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        game = get_object_or_404(Game, id=kwargs['pk'])
-        player = get_object_or_404(Ingameplayer, game_id=game.id, player_id=kwargs['player_id'])
+        game = get_object_or_404(Game, id=kwargs["pk"])
+        player = get_object_or_404(Ingameplayer, game_id=game.id, player_id=kwargs["player_id"])
         char = get_object_or_404(Ingamecharactersheet, game_id=game.id, owner_uuid_id=player.player_id)
-        char_sheet = dict({
-            'charinfo': char.charinfo,
-            'occupation': char.occupation,
-            'aspect': char.aspect,
-            'sub_aspect': char.sub_aspect,
-            'attack': char.attack,
-            'attack2': char.attack2,
-            'skill': char.skill,
-            'destiny': char.destiny,
-            'spellbook': char.spellbook,
-            'twist_deck': char.twist_deck,
-            'origin': char.origin,
-            'inventory': char.inventory,
-            'talent': char.talent
-        })
+        char_sheet = dict(
+            {
+                "charinfo": char.charinfo,
+                "occupation": char.occupation,
+                "aspect": char.aspect,
+                "sub_aspect": char.sub_aspect,
+                "attack": char.attack,
+                "attack2": char.attack2,
+                "skill": char.skill,
+                "destiny": char.destiny,
+                "spellbook": char.spellbook,
+                "twist_deck": char.twist_deck,
+                "origin": char.origin,
+                "inventory": char.inventory,
+                "talent": char.talent,
+            }
+        )
 
-        context['character_sheet'] = char_sheet
+        context["character_sheet"] = char_sheet
+        context["is_admin"] = bool(game.owner_uuid_id == self.request.user.id)
         return context
 
     def post(self, request):
-        game_id = request.POST.get('game_id')
-        owner_uuid_id = request.POST.get('player_id')
-        char_info = json.loads(request.POST.get('character_information'))
-        origin = json.loads(request.POST.get('origine'))
-        occupation = json.loads(request.POST.get('occupation'))
-        aspect = json.loads(request.POST.get('aspect'))
-        sub_aspect = json.loads(request.POST.get('sub_aspect'))
-        attack = json.loads(request.POST.get('attack'))
-        attack2 = json.loads(request.POST.get('attack2'))
-        skill = json.loads(request.POST.get('skill'))
-        destiny = json.loads(request.POST.get('destiny'))
-        talent = json.loads(request.POST.get('talent'))
-        inventory = json.loads(request.POST.get('inventory'))
-        spellbook = json.loads(request.POST.get('spellbook'))
-        twist_deck = json.loads(request.POST.get('twist_deck'))
+        game_id = request.POST.get("game_id")
+        owner_uuid_id = request.POST.get("player_id")
+        char_info = json.loads(request.POST.get("character_information"))
+        origin = json.loads(request.POST.get("origine"))
+        occupation = json.loads(request.POST.get("occupation"))
+        aspect = json.loads(request.POST.get("aspect"))
+        sub_aspect = json.loads(request.POST.get("sub_aspect"))
+        attack = json.loads(request.POST.get("attack"))
+        attack2 = json.loads(request.POST.get("attack2"))
+        skill = json.loads(request.POST.get("skill"))
+        destiny = json.loads(request.POST.get("destiny"))
+        talent = json.loads(request.POST.get("talent"))
+        inventory = json.loads(request.POST.get("inventory"))
+        spellbook = json.loads(request.POST.get("spellbook"))
+        twist_deck = json.loads(request.POST.get("twist_deck"))
 
-        tz_FR = pytz.timezone('Europe/Paris')
+        tz_FR = pytz.timezone("Europe/Paris")
         datetime_FR = datetime.now(tz_FR)
 
         Ingamecharactersheet.objects.update_or_create(
             game_id=game_id,
             owner_uuid_id=owner_uuid_id,
             defaults={
-                'game_id': game_id,
-                'owner_uuid_id': owner_uuid_id,
-                'charinfo': char_info,
-                'origin': origin,
-                'occupation': occupation,
-                'aspect': aspect,
-                'sub_aspect': sub_aspect,
-                'attack': attack,
-                'attack2': attack2,
-                'skill': skill,
-                'destiny': destiny,
-                'talent': talent,
-                'inventory': inventory,
-                'spellbook': spellbook,
-                'twist_deck': twist_deck,
-                'created_at': datetime_FR,
-                'updated_at': datetime_FR
-            })
-        response_data = {'success': True}
+                "game_id": game_id,
+                "owner_uuid_id": owner_uuid_id,
+                "charinfo": char_info,
+                "origin": origin,
+                "occupation": occupation,
+                "aspect": aspect,
+                "sub_aspect": sub_aspect,
+                "attack": attack,
+                "attack2": attack2,
+                "skill": skill,
+                "destiny": destiny,
+                "talent": talent,
+                "inventory": inventory,
+                "spellbook": spellbook,
+                "twist_deck": twist_deck,
+                "created_at": datetime_FR,
+                "updated_at": datetime_FR,
+            },
+        )
+        response_data = {"success": True}
         return JsonResponse(response_data)
+
+
+class PickACardView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
+    login_url = settings.LOGIN_URL
+    template_name = "display/ingame.html"
+
+    def post(self, request):
+        print(request.POST)
+        game = get_object_or_404(Game, id=request.POST.get("game_id"))
+        username = request.user.username_invite_code
+        pick_order = Ingamecards.objects.filter(game_id=game.id, current_state="MAIN").count() + 1
+
+        if pick_order < 6:
+            cards_drawn_id_list = Ingamecards.objects.filter(
+                game_id=game.id, current_state="PIOCHE", order__isnull=True
+            ).values_list("card_id", flat=True)
+
+            update_card_id = (
+                Ingamecards.objects.filter(
+                    card_id__in=cards_drawn_id_list,
+                    game_id=game.id,
+                    current_state="PIOCHE",
+                    order__isnull=True,
+                    last_picked_up_by__isnull=True,
+                )
+                .order_by("?")
+                .values("id")
+                .first()
+            )
+
+            tz_FR = pytz.timezone("Europe/Paris")
+            datetime_FR = datetime.now(tz_FR)
+
+            Ingamecards.objects.filter(id=update_card_id["id"]).update(
+                current_state=str("MAIN"), order=pick_order, last_picked_up_by=username, updated_at=datetime_FR
+            )
+            pick_card = [
+                card
+                for card in Ingamecards.objects.filter(
+                    id=update_card_id["id"], game_id=game.id, current_state="MAIN", last_picked_up_by=username
+                )
+                .order_by("order")
+                .values("card_id__filename", "card_id", "order", "last_picked_up_by", "id")
+            ]
+
+            response_data = {"success": True, "picked_card": pick_card, "deck_current_len": len(cards_drawn_id_list)}
+        else:
+            response_data = {
+                "fail": True,
+                "error_msg": "Vous ne pouvez pas tirer de cartes, votre zone de tirage est déjà pleine...",
+            }
+        return JsonResponse(response_data)
+
+
+class GetCardsInformationsView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
+    login_url = settings.LOGIN_URL
+    template_name = "display/ingame.html"
+
+    def get(self, request, *args, **kwargs):
+        game = get_object_or_404(Game, id=request.GET.get("game_id"))
+        cards = [
+            card
+            for card in Ingamecards.objects.filter(game_id=game.id)
+            .exclude(current_state="SPECIAL")
+            .order_by("order")
+            .values("id", "last_picked_up_by", "current_state", "card_id__filename")
+        ]
+        deck = [card["id"] for card in cards if card["current_state"] == "PIOCHE"]
+        cemetery = [card["id"] for card in cards if card["current_state"] == "DEFAUSSE"]
+        picked_card = [card for card in cards if card["current_state"] == "MAIN"]
+        response_data = {"success": True, "cemetery": cemetery, "deck": deck, "picked_card": picked_card}
+        return JsonResponse(response_data)
+
+
+class CleanDrawnCardsView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
+    login_url = settings.LOGIN_URL
+    template_name = "display/ingame.html"
+
+    def post(self, request, *args, **kwargs):
+        game = get_object_or_404(Game, id=request.POST.get("game_id"))
+        tz_FR = pytz.timezone("Europe/Paris")
+        datetime_FR = datetime.now(tz_FR)
+        print(game.id)
+        Ingamecards.objects.filter(game_id=game.id, current_state="MAIN").update(
+            current_state="DEFAUSSE", order=None, last_picked_up_by=None, updated_at=datetime_FR
+        )
+        response_data = {"success": True}
+        return JsonResponse(response_data, safe=False)
+
+
+class ResetDeckView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
+    login_url = settings.LOGIN_URL
+    template_name = "display/ingame.html"
+
+    def post(self, request, *args, **kwargs):
+        game = get_object_or_404(Game, id=request.POST.get("game_id"))
+        tz_FR = pytz.timezone("Europe/Paris")
+        datetime_FR = datetime.now(tz_FR)
+        Ingamecards.objects.filter(game_id=game.id).exclude(current_state__in=["PIOCHE", "SPECIAL"]).update(
+            current_state="PIOCHE", order=None, last_picked_up_by=None, updated_at=datetime_FR
+        )
+        deck = Ingamecards.objects.filter(game_id=game.id).exclude(current_state="SPECIAL").order("?").values("id")
+        response_data = {"success": True, "deck": deck}
+        return JsonResponse(response_data, safe=False)
 
 
 class LeaveGameRedirectView(LoginRequiredMixin, JsonableResponseMixin, RedirectView):

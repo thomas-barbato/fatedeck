@@ -854,6 +854,12 @@ $(window).on('load',function(){
     </div>').insertAfter($('.talent-row:last'));
   });
 
+  {% if is_admin is True %}
+    $('input').prop("readonly", true);
+    $('#submit-character-sheet').hide();
+    CKEDITOR.config.readOnly = true;
+  {% endif %}
+
   $('.remove-talent').on('click', function(){
     $('.talent-subrow>textarea:last').remove()
   });
@@ -983,6 +989,7 @@ $('#submit-character-sheet').on('click',function(){
       'text': $('#'+id).val()
     })
   })
+
 
 
   $.ajax({
