@@ -64,14 +64,19 @@ class CreateAccount(FormView, JsonableResponseMixin, SuccessMessageMixin):
         "</div>"
     )
 
+    # TODO: This should not be necessary
     def get_success_message(self, cleaned_data=""):
         return self.success_message
 
     def form_valid(self, form):
+        # TODO: I think that this is depreacated in the last version of Django
         if self.request.is_ajax():
+            # TODO: You could do this logic in the form, that's part of the validation
+            #   Here it would just be if form.is_valid()
             if form.cleaned_data["password"] == form.cleaned_data["password2"]:
                 form.save()
                 response = {"status": 1}
+                # TODO: Not sure this is necessary since you are using the mixin
                 messages.success(self.request, self.get_success_message())
                 return JsonResponse(response, status=200)
         return super().form_valid(form)
@@ -93,6 +98,7 @@ class LoginAjaxView(LoginView, JsonableResponseMixin, SuccessMessageMixin):
         "</div>"
     )
 
+    # TODO: This should not be necessary
     def get_success_message(self, cleaned_data=""):
         return self.success_message
 
@@ -100,13 +106,16 @@ class LoginAjaxView(LoginView, JsonableResponseMixin, SuccessMessageMixin):
         return reverse_lazy("dashboard_view")
 
     def post(self, request, *args, **kwargs):
+        # TODO: Could use a LoginRequiredMixin here?
         user = authenticate(
             self.request,
             username=self.request.POST.get("email").lower(),
             password=self.request.POST.get("password"),
         )
         response = ""
+
         if user is not None:
+            # TODO: Why do you need to login and login back if user found?
             logout(request)
             login(self.request, user)
             response = {"status": 1}
@@ -128,6 +137,8 @@ class DisplayDashboardView(LoginRequiredMixin, ListView):
         context["max_game_per_user"] = 7
         context["game_list_count"] = Ingameplayer.objects.filter(player_id=user_id).count()
         context["CreateGameForm"] = CreateGameForm
+
+        # TODO: This could go in a utils method to reduce the complexitiy in this view
         context["game_list"] = [
             {
                 "name": elem["game_id__name"],
@@ -138,6 +149,8 @@ class DisplayDashboardView(LoginRequiredMixin, ListView):
             .filter(player_id=self.request.user.id)
             .values("game_id", "game_id__name", "owner_uuid_id")
         ]
+        # TODO: This could go in a utils method to reduce the complexitiy in this view
+        #   Why do you need to create a list of dictionary from values 🤔
         context["friends_list"] = [
             {
                 "name": elem["player_id__username_invite_code"],
@@ -157,6 +170,9 @@ class CreateNewGameAjaxView(LoginRequiredMixin, JsonableResponseMixin, FormView)
 
     def get(self, request, *args, **kwargs):
         user_id = self.request.user.id
+
+        # TODO: Looks like a big copy/paste, DRY: Do not repeat yourself
+        #   Can find an alternative to avoid code duplicate
         cleaned_game_data = [
             {
                 "name": elem["game_id__name"],
@@ -171,11 +187,17 @@ class CreateNewGameAjaxView(LoginRequiredMixin, JsonableResponseMixin, FormView)
         return JsonResponse(response_data)
 
     def post(self, request, *args, **kwarg):
+
+        # TODO: Could you reverse this condition
+        #   Like that you check this count and if >= 7 you raise an error
+        #   I think this game_name, else sansnom could be in a clean in a form
         if Ingameplayer.objects.filter(player_id=self.request.user.id).count() < 7:
             if request.POST.get("game_name"):
                 name = request.POST.get("game_name")
             else:
                 name = "sansnom"
+
+            # TODO: This block to generate a unique game code could in a util
             regexp_name = re.sub(r"[0-9][A-Z][a-z]", "", name)
             user_id = self.request.user.id
             game_invite_code = f"{regexp_name}#{random.randint(99, 9999)}"
@@ -208,6 +230,7 @@ class DisplayAndAddFriendListView(LoginRequiredMixin, JsonableResponseMixin, Tem
 
     def get(self, request, *args, **kwargs):
         user_id = self.request.user.id
+        # TODO: Copy/Pasta?
         cleaned_friend_list = [
             {
                 "name": elem["player_id__username_invite_code"],
@@ -226,6 +249,7 @@ class DisplayAndAddFriendListView(LoginRequiredMixin, JsonableResponseMixin, Tem
             user = self.request.user
             friend_invitation_code = self.request.POST.get("invite_code")
             friend = get_object_or_404(User, username_invite_code=friend_invitation_code)
+            # TODO: All of this looks like something to validate the data, form?
             if not friend.id:
                 response_data = {"user_does_not_exists": True}
             elif user.username_invite_code == friend_invitation_code:
@@ -252,16 +276,18 @@ class FriendListInvitationView(LoginRequiredMixin, JsonableResponseMixin, Templa
 
     def get(self, request, *args, **kwargs):
         user_id = self.request.user.id
+        # TODO: Duplicates?
         friend_invitation = [
             {
                 "name": elem["owner_uuid_id__username_invite_code"],
                 "id": elem["id"],
             }
-            for elem in Friendinviation.objects.select_related("owner_uuid_id")
+            for elem in Friendinviation.objects.select_related("owner_uuid_id") # TODO: Typo
             .filter(player_id=user_id)
             .values("id", "owner_uuid_id", "owner_uuid_id__username_invite_code")
         ]
 
+        # TODO: I would rename the friend_invitation + _count to give it more sense
         response_data = {
             "success": True,
             "friend_invitation": len(friend_invitation),
@@ -318,7 +344,7 @@ class DisplayGame(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
         game_id = self.kwargs["pk"]
         game = get_object_or_404(Game, id=game_id)
         player_id = self.request.user.id
-
+        # TODO: Duplicates?
         players_list = [
             {
                 "owner_uuid_id": player["owner_uuid_id"],
@@ -332,7 +358,7 @@ class DisplayGame(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
                 "player_id__username_invite_code",
             )
         ]
-
+        # TODO: Duplicates?
         friends_list = [
             {
                 "player_id": friend["player_id"],
@@ -375,6 +401,7 @@ class DisplayFriendsAndPlayers(LoginRequiredMixin, JsonableResponseMixin, Templa
         game = get_object_or_404(Game, id=game_id)
         player_id = self.request.user.id
 
+        # TODO: Duplicates?
         players_list = [
             {
                 "owner_uuid_id": player["owner_uuid_id"],
@@ -388,7 +415,7 @@ class DisplayFriendsAndPlayers(LoginRequiredMixin, JsonableResponseMixin, Templa
                 "player_id__username_invite_code",
             )
         ]
-
+        # TODO: Duplicates?
         friends_list = [
             {
                 "player_id": friend["player_id"],
@@ -415,6 +442,7 @@ class PlayerInvitationView(LoginRequiredMixin, JsonableResponseMixin, TemplateVi
 
     def get(self, request, *args, **kwargs):
         user_id = self.request.user.id
+        # TODO: Remove duplicates when possible
         player_invitation = [
             {
                 "contact_name": elem["owner_uuid_id__username_invite_code"],
@@ -440,12 +468,14 @@ class PlayerInvitationView(LoginRequiredMixin, JsonableResponseMixin, TemplateVi
         game = get_object_or_404(Game, id=request.POST.get("game_id"))
         invitation_by_select = request.POST.get("invitation_by_select")
         response_data = {}
+        # TODO: Form :)
         if invitation_by_select in ["True", "False"]:
             if invitation_by_select == "True":
                 player = get_object_or_404(User, id=request.POST.get("player_id"))
             else:
                 player = get_object_or_404(User, username_invite_code=request.POST.get("player_id"))
             if game.id and player.id:
+                # TODO: Form save?
                 Gameinvitation.objects.create(
                     game_id=game.id, player_id=player.id, owner_uuid_id=request.POST.get("game_owner")
                 )
@@ -458,6 +488,7 @@ class AcceptOrDenyGameInvitation(LoginRequiredMixin, JsonableResponseMixin, Temp
     login_url = settings.LOGIN_URL
 
     def post(self, request, *args, **kwargs):
+        # TODO: This logic for me is doing validating so i could put that in a normal that
         if request.POST.get("choices") and request.POST.get("choices") in ["accept", "deny"]:
             choices = request.POST.get("choices")
             user_id = request.user.id
@@ -478,6 +509,7 @@ class DisplayPlayerCharacterSheet(LoginRequiredMixin, JsonableResponseMixin, Tem
         context = super().get_context_data(**kwargs)
         game = get_object_or_404(Game, id=kwargs["pk"])
         player = get_object_or_404(Ingameplayer, game_id=game.id, player_id=kwargs["player_id"])
+        # TODO: Could you just pass back the char in the context? or using values
         char = get_object_or_404(Ingamecharactersheet, game_id=game.id, owner_uuid_id=player.player_id)
         char_sheet = dict(
             {
@@ -501,6 +533,7 @@ class DisplayPlayerCharacterSheet(LoginRequiredMixin, JsonableResponseMixin, Tem
         context["is_admin"] = bool(game.owner_uuid_id == self.request.user.id)
         return context
 
+    # TODO: CreateView or UpdateView?
     def post(self, request):
         game_id = request.POST.get("game_id")
         owner_uuid_id = request.POST.get("player_id")
@@ -557,12 +590,15 @@ class PickACardView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
         username = request.user.username_invite_code
         pick_order = Ingamecards.objects.filter(game_id=game.id, current_state="MAIN").count() + 1
 
+        # TODO: Make it fail as soon as possible and the rest in the view will be the happy path
         if pick_order < 6:
             cards_drawn_id_list = Ingamecards.objects.filter(
                 game_id=game.id, current_state="PIOCHE", order__isnull=True
             ).values_list("card_id", flat=True)
 
             update_card_id = (
+                # TODO: Ingamecards.objects.filter(game_id=game.id) is used quite a lot
+                #   How can you prevent duplicatas?
                 Ingamecards.objects.filter(
                     card_id__in=cards_drawn_id_list,
                     game_id=game.id,
@@ -580,7 +616,7 @@ class PickACardView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
 
             Ingamecards.objects.filter(id=update_card_id["id"]).update(
                 current_state=str("MAIN"), order=pick_order, last_picked_up_by=username, updated_at=datetime_FR
-            )
+
             pick_card = [
                 card
                 for card in Ingamecards.objects.filter(
@@ -640,11 +676,16 @@ class ResetDeckView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         game = get_object_or_404(Game, id=request.POST.get("game_id"))
+        # TODO: SHould this be in your settings?
+        # TODO: Could create a utility method to isolate to do this, could be reusable somewhere else
         tz_FR = pytz.timezone("Europe/Paris")
         datetime_FR = datetime.now(tz_FR)
+        # TODO: We usually use an enum to avoid to put choice value direcly
+        # TODO: Can you reuse the first part of the request and prevent to do two request to DB here
         Ingamecards.objects.filter(game_id=game.id).exclude(current_state__in=["PIOCHE", "SPECIAL"]).update(
             current_state="PIOCHE", order=None, last_picked_up_by=None, updated_at=datetime_FR
         )
+        # TODO: We usually use an enum to avoid to put choice value direcly
         deck = Ingamecards.objects.filter(game_id=game.id).exclude(current_state="SPECIAL").order("?").values("id")
         response_data = {"success": True, "deck": deck}
         return JsonResponse(response_data, safe=False)
