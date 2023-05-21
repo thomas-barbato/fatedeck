@@ -854,7 +854,7 @@ $(window).on('load',function(){
     </div>').insertAfter($('.talent-row:last'));
   });
 
-  {% if is_admin is True %}
+  {% if is_admin %}
     $('input').prop("readonly", true);
     $('#submit-character-sheet').hide();
     CKEDITOR.config.readOnly = true;
