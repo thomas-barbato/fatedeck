@@ -78,7 +78,6 @@ class CreateAccount(FormView, JsonableResponseMixin, SuccessMessageMixin):
 
     def form_invalid(self, form):
         response = super().form_invalid(form)
-        print(form)
         if self.request.is_ajax():
             response = {"status": 0, "errors": dict(form.errors.items())}
         return JsonResponse(response, status=200)
@@ -334,8 +333,6 @@ class DisplayGame(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
             )
         ]
 
-        print(players_list)
-
         friends_list = [
             {
                 "player_id": friend["player_id"],
@@ -466,7 +463,6 @@ class AcceptOrDenyGameInvitation(LoginRequiredMixin, JsonableResponseMixin, Temp
             user_id = request.user.id
             contact_id = get_object_or_404(User, username_invite_code=request.POST.get("contact_name")).id
             game_id = get_object_or_404(Game, game_invite_code=request.POST.get("game_name")).id
-            print(request.POST)
             if choices == "accept":
                 Ingameplayer.objects.create(player_id=user_id, owner_uuid_id=contact_id, game_id=game_id)
                 Ingamecharactersheet.objects.create(owner_uuid_id=user_id, game_id=game_id)
@@ -557,7 +553,6 @@ class PickACardView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
     template_name = "display/ingame.html"
 
     def post(self, request):
-        print(request.POST)
         game = get_object_or_404(Game, id=request.POST.get("game_id"))
         username = request.user.username_invite_code
         pick_order = Ingamecards.objects.filter(game_id=game.id, current_state="MAIN").count() + 1
@@ -632,7 +627,6 @@ class CleanDrawnCardsView(LoginRequiredMixin, JsonableResponseMixin, TemplateVie
         game = get_object_or_404(Game, id=request.POST.get("game_id"))
         tz_FR = pytz.timezone("Europe/Paris")
         datetime_FR = datetime.now(tz_FR)
-        print(game.id)
         Ingamecards.objects.filter(game_id=game.id, current_state="MAIN").update(
             current_state="DEFAUSSE", order=None, last_picked_up_by=None, updated_at=datetime_FR
         )
