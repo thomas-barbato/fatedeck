@@ -650,6 +650,17 @@ class ResetDeckView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
         return JsonResponse(response_data, safe=False)
 
 
+class DeletePlayerView(LoginRequiredMixin, JsonableResponseMixin, DeleteView):
+    template_name = "display/ingame.html"
+    login_url = settings.LOGIN_URL
+    model = Ingameplayer
+
+    def delete(self, request, *args, **kwargs):
+        contact = get_object_or_404(User, username_invite_code=self.request.POST.get('contact_name'))
+        player_in_game = get_object_or_404(Ingameplayer, player_id=contact.id, game_id=self.request.POST.get('game_id'))
+        if player_in_game.id:
+            player_in_game.delete()
+
 class LeaveGameRedirectView(LoginRequiredMixin, JsonableResponseMixin, RedirectView):
     permanent = False
     query_string = True

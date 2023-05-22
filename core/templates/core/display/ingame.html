@@ -79,9 +79,10 @@
     <div class="card-body">
       <ul class="list-group list-contact row list-group-flush">
         <li v-for="player, name, id, owner_uuid_id in players" class="list-group-item test-justify presentation-no-font-family d-flex friend-list" v-bind:id="[[ player.id]]">
-          <span v-if="player.id == game_owner" class="presentation-no-font-family player-size-name">[[ player.name ]] <i class="fas fa-crown me-auto"></i></span>
-          <span v-else class="presentation-no-font-family player-size-name">[[ player.name ]]</span>
-          <span v-if="player.is_online == true" class="dot green-dot ms-auto mt-2"></span>
+          <i v-if="player.id == game_owner" class="presentation-no-font-family player-size-name mt-1 col-2"><i class="fas fa-crown me-auto"></i></i>
+          <i v-else-if="user_id == game_owner" :id="[[player.name]]" class="fas fa-user-minus mt-1 col-2 cursor-pointer" onclick="ingame_view.get_contact_name(event)" data-toggle="modal" data-target="#delete-player-modal"></i>
+          <span class="d-flex col-8 contact-name">[[ player.name ]]</span>
+          <span v-if="player.is_online" class="dot green-dot ms-auto mt-2"></span>
           <span v-else class="dot red-dot ms-auto mt-2"></span>
         </li>
       </ul>
@@ -138,6 +139,43 @@
       </div>
     </div>
   </div>
+  <!-- delete player from game confirmation modal -->
+  <div class="modal fade" id="delete-player-modal" tabindex="-1" role="dialog" aria-labelledby="delete-player-Label" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title modal-text-color">Suppression du joueur</h5>
+        </div>
+        <div class="modal-body">
+          <p class="modal-text-color presentation-no-font-family">Êtes-vous sur de vouloir supprimer <b class="presentation-no-font-family login-alert-text">[[ selected_contact ]]</b> ?</p>
+          <p class="alert alert-danger friend-delete-error">Cet utilisateur n'existe pas, ou vous n'êtes pas amis...</p>
+          <p class="alert alert-success friend-delete-success">Contact supprimé</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary success-button" v-on:click="delete_player()">Supprimer</button>
+          <button type="button" class="btn btn-secondary cancel-button" data-dismiss="modal">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- delete game confirmation modal -->
+  <div class="modal fade" id="invite-delete-modal" tabindex="-1" role="dialog" aria-labelledby="invite-friend-modal-Label" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title modal-text-color">Suppression de contact</h5>
+        </div>
+        <div class="modal-body">
+          <p class="modal-text-color presentation-no-font-family">Êtes-vous sur de vouloir supprimer [[ selected_contact ]] ?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary success-button" on_click="ingame_view.delete_player($event)" data-dismiss="modal">Supprimer</button>
+          <button type="button" class="btn btn-secondary cancel-button" data-dismiss="modal">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 {% endblock %}
 
@@ -149,6 +187,7 @@ let ingame_view = new Vue({
   el: '#game-container',
   delimiters: ['[[', ']]'],
   data: {
+    user_id: '{{ request.user.id }}',
     game_owner : '{{ game.owner_uuid_id }}',
     game_id: '{{ game.id }}',
     game_invitation_code: '{{ game.game_invite_code }}',
@@ -167,6 +206,7 @@ let ingame_view = new Vue({
     cemetery:[],
     cards_drawn:[],
     deck_current_len : 54,
+    selected_contact: '',
   },
   methods: {
     auto_update_players_list: async function(){
@@ -182,9 +222,10 @@ let ingame_view = new Vue({
           'game_id': '{{ game.id }}',
         },
         success: function (response_data) {
-          ingame_view.players = []
-          ingame_view.friends = []
+          ingame_view.players.splice(0)
+          ingame_view.friend_list = []
           $.each(response_data['players'], function(index){
+              console.log(response_data['players']);
               ingame_view.players.push({
                 "name": response_data['players'][index]['username_invite_code'],
                 "id": response_data['players'][index]['player_id'],
@@ -377,8 +418,30 @@ let ingame_view = new Vue({
             }
           }
         });
+      },
+      get_contact_name: function(event){
+        let name = event.currentTarget.id;
+        ingame_view.selected_contact = name
+      },
+      delete_player: function($event){
+        let url = '{% url "delete-player" %}';
+        game_id = '{{ game.id }}'
+        $.ajax({
+          url: url,
+          async: false,
+          context : this,
+          type: 'POST',
+          dataType : 'json',
+          headers: { "X-CSRFToken": "{{ csrf_token }}" },
+          data:{
+              'game_id': game_id,
+              'contact_name': ingame_view.selected_contact,
+              'csrfmiddlewaretoken': '{{ csrf_token }}',
+          },
+          success: function (response_data) {},
+        })
       }
-    }
+    },
   });
 
 
@@ -389,7 +452,7 @@ function callEverything(){
 
 $(window).on('load',function(){
   callEverything();
-  $('.friend-invitation-error, .friend-invitation-success, .friend-same-user-error, .already-friend-error').hide();
+  $('.friend-invitation-error, .friend-invitation-empty, .friend-invitation-success, .friend-same-user-error, .already-friend-error, .friend-invitation-already-sent, .friend-delete-error, .friend-delete-success').hide()
   setInterval(callEverything, 2000)
 });
 
