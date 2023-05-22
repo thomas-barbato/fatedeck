@@ -65,21 +65,23 @@ class RegisterForm(ModelForm):
         fields = ["username", "email", "password", "password2"]
         exclude = ["user_id"]
 
-    def save(self, *args, **kwargs):
+    def save(self, password2, *args, **kwargs):
+        s = super().save(password2)
         regexp_name = re.sub(
             r"([\$\!\#\_\&\"\£\*\%\?\^\ \=\[\]\{\}\(\)\:\=\<\>\;\§\%\~\|\_\^\@][\W]*)",
             "",
             self.instance.username.lower(),
         )
-        username = re.sub(r"(^-+)|(^_+)|(^'+)|(^\.+)|(-$)|(_$)|('\.$)", "", regexp_name)
-        self.instance.username = self.instance.username.lower()
-        self.instance.email = self.instance.email
-        self.instance.password = make_password(self.instance.password)
-        self.instance.is_staff = False
-        self.instance.is_active = True
-        self.instance.date_joined = datetime.datetime.now()
-        self.instance.username_invite_code = f"{username}#{random.randint(99,9999)}"
-        super().save()
+        if password2 == self.instance.password:
+            username = re.sub(r"(^-+)|(^_+)|(^'+)|(^\.+)|(-$)|(_$)|('\.$)", "", regexp_name)
+            self.instance.username = self.instance.username.lower()
+            self.instance.email = self.instance.email
+            self.instance.password = make_password(self.instance.password)
+            self.instance.is_staff = False
+            self.instance.is_active = True
+            self.instance.date_joined = datetime.datetime.now()
+            self.instance.username_invite_code = f"{username}#{random.randint(99,9999)}"
+            super().save()
 
 
 class LoginForm(ModelForm):
