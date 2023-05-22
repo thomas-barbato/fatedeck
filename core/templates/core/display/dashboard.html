@@ -486,9 +486,6 @@ let vuejs_view = new Vue({
 
   $(window).on('load',function(){
     callEverything();
-  });
-
-  $(document).ready(function(){
     $('.friend-invitation-error, .friend-invitation-empty, .friend-invitation-success, .friend-same-user-error, .already-friend-error, .friend-invitation-already-sent, .friend-delete-error, .friend-delete-success').hide()
     setInterval(callEverything, 2000)
   });

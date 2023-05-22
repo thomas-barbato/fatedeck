@@ -234,7 +234,7 @@ let ingame_view = new Vue({
           });
           $.each(response_data['friends'], function(index){
               ingame_view.friend_list.push({
-                "name": response_data['friends'][index]['username_invite_code'],
+                "name": response_data['friends'][index]['player_id.username_invite_code'],
                 "id": response_data['friends'][index]['player_id'],
               })
           });

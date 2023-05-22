@@ -5,7 +5,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.exceptions import NON_FIELD_ERRORS
 
 import re
-from .models import User, Game, Ingameplayer, Cards, Ingamecards, Friendlist
+from .models import User, Game, Ingameplayer, Cards, Ingamecards, Friendlist, Ingamecharactersheet
 import datetime
 from core.backend.check_data import CheckPasswordPolicy, CheckImageExtension, CheckEmail
 import random
@@ -135,3 +135,39 @@ class FriendInvitationForm(ModelForm):
     class Meta:
         model = Friendlist
         fields = []
+
+
+class CharacterSheetForm(ModelForm):
+    class Meta:
+        model = Ingamecharactersheet
+        fields = [
+            "charinfo",
+            "origin",
+            "occupation",
+            "aspect",
+            "sub_aspect",
+            "attack",
+            "attack2",
+            "skill",
+            "destiny",
+            "talent",
+            "inventory",
+            "spellbook",
+            "twist_deck",
+        ]
+
+    def save(self, *args, **kwargs):
+        self.instance.charinfo = kwargs["charinfo"]
+        self.instance.origin = kwargs["origin"]
+        self.instance.occupation = kwargs["occupation"]
+        self.instance.aspect = kwargs["aspect"]
+        self.instance.sub_aspect = kwargs["sub_aspect"]
+        self.instance.attack = kwargs["attack"]
+        self.instance.attack2 = kwargs["attack2"]
+        self.instance.skill = kwargs["skill"]
+        self.instance.destiny = kwargs["destiny"]
+        self.instance.talent = kwargs["talent"]
+        self.instance.inventory = kwargs["inventory"]
+        self.instance.spellbook = kwargs["spellbook"]
+        self.instance.twist_deck = kwargs["twist_deck"]
+        super().save()
