@@ -1,9 +1,6 @@
 import re
 from datetime import datetime
 
-import pytz
-from django.shortcuts import render, redirect
-from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import (
     TemplateView,
@@ -20,16 +17,15 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.contrib.messages.views import SuccessMessageMixin
-from django.db.models import Value, Q
-from django.http import JsonResponse, Http404
+from django.db.models import Q
+from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 import random
 from django.shortcuts import get_object_or_404
-from django.contrib.sessions.backends.base import SessionBase
 import json
 import settings
-from core.backend.middlewares import JsonableResponseMixin, AuthRequiredMiddleware
+from core.backend.middlewares import JsonableResponseMixin
 
 from .models import (
     User,
@@ -44,7 +40,12 @@ from .models import (
     LoggedInUser,
 )
 
-from .forms import LoginForm, RegisterForm, CreateGameForm, FriendInvitationForm
+from .utils import (
+    dbtalk,
+    FormatName,
+)
+
+from .forms import LoginForm, RegisterForm, CreateGameForm, FriendInvitationForm, CharacterSheetForm
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -64,16 +65,12 @@ class CreateAccount(FormView, JsonableResponseMixin, SuccessMessageMixin):
         "</div>"
     )
 
-    def get_success_message(self, cleaned_data=""):
-        return self.success_message
-
     def form_valid(self, form):
-        if self.request.is_ajax():
-            if form.cleaned_data["password"] == form.cleaned_data["password2"]:
-                form.save()
-                response = {"status": 1}
-                messages.success(self.request, self.get_success_message())
-                return JsonResponse(response, status=200)
+        if form.is_valid():
+            form.save()
+            response = {"status": 1}
+            messages.success(self.request, self.success_message)
+            return JsonResponse(response, status=200)
         return super().form_valid(form)
 
     def form_invalid(self, form):
@@ -93,9 +90,6 @@ class LoginAjaxView(LoginView, JsonableResponseMixin, SuccessMessageMixin):
         "</div>"
     )
 
-    def get_success_message(self, cleaned_data=""):
-        return self.success_message
-
     def get_success_url(self):
         return reverse_lazy("dashboard_view")
 
@@ -107,10 +101,9 @@ class LoginAjaxView(LoginView, JsonableResponseMixin, SuccessMessageMixin):
         )
         response = ""
         if user is not None:
-            logout(request)
             login(self.request, user)
             response = {"status": 1}
-            messages.success(self.request, self.get_success_message())
+            messages.success(self.request, self.success_message)
         return JsonResponse(response, safe=False)
 
     def form_invalid(self, form):
@@ -176,11 +169,10 @@ class CreateNewGameAjaxView(LoginRequiredMixin, JsonableResponseMixin, FormView)
                 name = request.POST.get("game_name")
             else:
                 name = "sansnom"
-            regexp_name = re.sub(r"[0-9][A-Z][a-z]", "", name)
-            user_id = self.request.user.id
-            game_invite_code = f"{regexp_name}#{random.randint(99, 9999)}"
-            game = Game.objects.create(name=regexp_name, game_invite_code=game_invite_code, owner_uuid_id=user_id)
 
+            regexp_name, game_invite_code = FormatName.RegexpFormat(name)
+            user_id = self.request.user.id
+            game = Game.objects.create(name=regexp_name, game_invite_code=game_invite_code, owner_uuid_id=user_id)
             Ingameplayer.objects.create(game_id=game.id, player_id=user_id, owner_uuid_id=user_id)
 
             for entry in Cards.objects.values("id", "name"):
@@ -270,7 +262,7 @@ class FriendListInvitationView(LoginRequiredMixin, JsonableResponseMixin, Templa
         return JsonResponse(response_data)
 
     def post(self, request, *args, **kwargs):
-        if request.POST.get("choices") and request.POST.get("choices") in ["accept", "deny"]:
+        if request.POST.get("choices") in ["accept", "deny"]:
             choices = request.POST.get("choices")
             user_id = request.user.id
             contact_id = get_object_or_404(User, username_invite_code=request.POST.get("contact_name")).id
@@ -458,7 +450,7 @@ class AcceptOrDenyGameInvitation(LoginRequiredMixin, JsonableResponseMixin, Temp
     login_url = settings.LOGIN_URL
 
     def post(self, request, *args, **kwargs):
-        if request.POST.get("choices") and request.POST.get("choices") in ["accept", "deny"]:
+        if request.POST.get("choices") in ["accept", "deny"]:
             choices = request.POST.get("choices")
             user_id = request.user.id
             contact_id = get_object_or_404(User, username_invite_code=request.POST.get("contact_name")).id
@@ -476,29 +468,25 @@ class DisplayPlayerCharacterSheet(LoginRequiredMixin, JsonableResponseMixin, Tem
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        game = get_object_or_404(Game, id=kwargs["pk"])
-        player = get_object_or_404(Ingameplayer, game_id=game.id, player_id=kwargs["player_id"])
-        char = get_object_or_404(Ingamecharactersheet, game_id=game.id, owner_uuid_id=player.player_id)
-        char_sheet = dict(
-            {
-                "charinfo": char.charinfo,
-                "occupation": char.occupation,
-                "aspect": char.aspect,
-                "sub_aspect": char.sub_aspect,
-                "attack": char.attack,
-                "attack2": char.attack2,
-                "skill": char.skill,
-                "destiny": char.destiny,
-                "spellbook": char.spellbook,
-                "twist_deck": char.twist_deck,
-                "origin": char.origin,
-                "inventory": char.inventory,
-                "talent": char.talent,
-            }
+        game_owner_id = get_object_or_404(Ingamecharactersheet, game_id=kwargs["pk"]).owner_uuid_id
+        context["character_sheet"] = get_object_or_404(
+            Ingamecharactersheet, game_id=kwargs["pk"], owner_uuid_id=kwargs["player_id"]
         )
+        context["is_admin"] = bool(game_owner_id == self.request.user.id)
+        return context
 
-        context["character_sheet"] = char_sheet
-        context["is_admin"] = bool(game.owner_uuid_id == self.request.user.id)
+
+class DisplayPlayerCharacterSheet(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
+    login_url = settings.LOGIN_URL
+    template_name = "display/character_sheet.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        game_owner = get_object_or_404(Game, id=kwargs["pk"]).owner_uuid_id
+        char = get_object_or_404(Ingamecharactersheet, game_id=kwargs["pk"], owner_uuid_id=kwargs["player_id"])
+
+        context["character_sheet"] = char
+        context["is_admin"] = bool(game_owner == self.request.user.id)
         return context
 
     def post(self, request):
@@ -517,9 +505,6 @@ class DisplayPlayerCharacterSheet(LoginRequiredMixin, JsonableResponseMixin, Tem
         inventory = json.loads(request.POST.get("inventory"))
         spellbook = json.loads(request.POST.get("spellbook"))
         twist_deck = json.loads(request.POST.get("twist_deck"))
-
-        tz_FR = pytz.timezone("Europe/Paris")
-        datetime_FR = datetime.now(tz_FR)
 
         Ingamecharactersheet.objects.update_or_create(
             game_id=game_id,
@@ -540,8 +525,6 @@ class DisplayPlayerCharacterSheet(LoginRequiredMixin, JsonableResponseMixin, Tem
                 "inventory": inventory,
                 "spellbook": spellbook,
                 "twist_deck": twist_deck,
-                "created_at": datetime_FR,
-                "updated_at": datetime_FR,
             },
         )
         response_data = {"success": True}
@@ -557,7 +540,12 @@ class PickACardView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
         username = request.user.username_invite_code
         pick_order = Ingamecards.objects.filter(game_id=game.id, current_state="MAIN").count() + 1
 
-        if pick_order < 6:
+        if pick_order > 5:
+            response_data = {
+                "fail": True,
+                "error_msg": "Vous ne pouvez pas tirer de cartes, votre zone de tirage est déjà pleine...",
+            }
+        else:
             cards_drawn_id_list = Ingamecards.objects.filter(
                 game_id=game.id, current_state="PIOCHE", order__isnull=True
             ).values_list("card_id", flat=True)
@@ -575,11 +563,8 @@ class PickACardView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
                 .first()
             )
 
-            tz_FR = pytz.timezone("Europe/Paris")
-            datetime_FR = datetime.now(tz_FR)
-
             Ingamecards.objects.filter(id=update_card_id["id"]).update(
-                current_state=str("MAIN"), order=pick_order, last_picked_up_by=username, updated_at=datetime_FR
+                current_state=str("MAIN"), order=pick_order, last_picked_up_by=username
             )
             pick_card = [
                 card
@@ -589,13 +574,7 @@ class PickACardView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
                 .order_by("order")
                 .values("card_id__filename", "card_id", "order", "last_picked_up_by", "id")
             ]
-
             response_data = {"success": True, "picked_card": pick_card, "deck_current_len": len(cards_drawn_id_list)}
-        else:
-            response_data = {
-                "fail": True,
-                "error_msg": "Vous ne pouvez pas tirer de cartes, votre zone de tirage est déjà pleine...",
-            }
         return JsonResponse(response_data)
 
 
@@ -605,13 +584,13 @@ class GetCardsInformationsView(LoginRequiredMixin, JsonableResponseMixin, Templa
 
     def get(self, request, *args, **kwargs):
         game = get_object_or_404(Game, id=request.GET.get("game_id"))
-        cards = [
-            card
-            for card in Ingamecards.objects.filter(game_id=game.id)
+        cards = (
+            Ingamecards.objects.filter(game_id=game.id)
             .exclude(current_state="SPECIAL")
             .order_by("order")
             .values("id", "last_picked_up_by", "current_state", "card_id__filename")
-        ]
+        )
+
         deck = [card["id"] for card in cards if card["current_state"] == "PIOCHE"]
         cemetery = [card["id"] for card in cards if card["current_state"] == "DEFAUSSE"]
         picked_card = [card for card in cards if card["current_state"] == "MAIN"]
@@ -625,10 +604,8 @@ class CleanDrawnCardsView(LoginRequiredMixin, JsonableResponseMixin, TemplateVie
 
     def post(self, request, *args, **kwargs):
         game = get_object_or_404(Game, id=request.POST.get("game_id"))
-        tz_FR = pytz.timezone("Europe/Paris")
-        datetime_FR = datetime.now(tz_FR)
         Ingamecards.objects.filter(game_id=game.id, current_state="MAIN").update(
-            current_state="DEFAUSSE", order=None, last_picked_up_by=None, updated_at=datetime_FR
+            current_state="DEFAUSSE", order=None, last_picked_up_by=None
         )
         response_data = {"success": True}
         return JsonResponse(response_data, safe=False)
@@ -640,14 +617,26 @@ class ResetDeckView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         game = get_object_or_404(Game, id=request.POST.get("game_id"))
-        tz_FR = pytz.timezone("Europe/Paris")
-        datetime_FR = datetime.now(tz_FR)
         Ingamecards.objects.filter(game_id=game.id).exclude(current_state__in=["PIOCHE", "SPECIAL"]).update(
-            current_state="PIOCHE", order=None, last_picked_up_by=None, updated_at=datetime_FR
+            current_state="PIOCHE", order=None, last_picked_up_by=None
         )
         deck = Ingamecards.objects.filter(game_id=game.id).exclude(current_state="SPECIAL").order("?").values("id")
         response_data = {"success": True, "deck": deck}
         return JsonResponse(response_data, safe=False)
+
+
+class DeletePlayerView(LoginRequiredMixin, JsonableResponseMixin, DeleteView):
+    template_name = "display/ingame.html"
+    login_url = settings.LOGIN_URL
+    model = Ingameplayer
+
+    def delete(self, request, *args, **kwargs):
+        contact = get_object_or_404(User, username_invite_code=self.request.POST.get("contact_name"))
+        player_in_game = get_object_or_404(
+            Ingameplayer, player_id=contact.id, game_id=self.request.POST.get("game_id")
+        )
+        if player_in_game.id:
+            player_in_game.delete()
 
 
 class LeaveGameRedirectView(LoginRequiredMixin, JsonableResponseMixin, RedirectView):
@@ -659,3 +648,7 @@ class LeaveGameRedirectView(LoginRequiredMixin, JsonableResponseMixin, RedirectV
         player = get_object_or_404(Ingameplayer, player_id=self.request.user.id)
         player.delete()
         return super().get_redirect_url(*args, **kwargs)
+
+
+class DeleteGameView(LoginRequiredMixin, DeleteView):
+    pass
