@@ -66,17 +66,13 @@ class CreateAccount(FormView, JsonableResponseMixin, SuccessMessageMixin):
     )
 
     def form_valid(self, form):
-        if form.is_valid():
-            form.save()
-            response = {"status": 1}
-            messages.success(self.request, self.success_message)
-            return JsonResponse(response, status=200)
-        return super().form_valid(form)
+        form.save(self.request.POST.get('password2'))
+        response = {"status": 1}
+        messages.success(self.request, self.success_message)
+        return JsonResponse(response, status=200)
 
     def form_invalid(self, form):
-        response = super().form_invalid(form)
-        if self.request.is_ajax():
-            response = {"status": 0, "errors": dict(form.errors.items())}
+        response = {"status": 0, "errors": dict(form.errors.items())}
         return JsonResponse(response, status=200)
 
 
@@ -460,20 +456,6 @@ class AcceptOrDenyGameInvitation(LoginRequiredMixin, JsonableResponseMixin, Temp
                 Ingamecharactersheet.objects.create(owner_uuid_id=user_id, game_id=game_id)
             Gameinvitation.objects.get(owner_uuid_id=contact_id, player_id=user_id).delete()
             return JsonResponse({"success": True}, safe=False)
-
-
-class DisplayPlayerCharacterSheet(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
-    login_url = settings.LOGIN_URL
-    template_name = "display/character_sheet.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        game_owner_id = get_object_or_404(Ingamecharactersheet, game_id=kwargs["pk"]).owner_uuid_id
-        context["character_sheet"] = get_object_or_404(
-            Ingamecharactersheet, game_id=kwargs["pk"], owner_uuid_id=kwargs["player_id"]
-        )
-        context["is_admin"] = bool(game_owner_id == self.request.user.id)
-        return context
 
 
 class DisplayPlayerCharacterSheet(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
