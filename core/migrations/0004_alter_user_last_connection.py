@@ -12,6 +12,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="user",
             name="last_connection",
-            field=models.DateField(auto_now_add=True, null=True, verbose_name="derniere connexion"),
+            field=models.DateField(
+                auto_now_add=True, null=True, verbose_name="derniere connexion"
+            ),
         ),
     ]

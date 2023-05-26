@@ -121,6 +121,11 @@ urlpatterns = [
         name="reset_deck"
     ),
     path(
+        "ingame/delete_player",
+        core_views.DeletePlayerView.as_view(),
+        name="delete-player"
+    ),
+    path(
         'logout/',
         auth_views.LogoutView.as_view(),
         name='user_logout',
