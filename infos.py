@@ -20,7 +20,7 @@ def getter_setting():
 """def getter_setting():
     secret_key = "g3oyjc*b03dz1%98f#*4a*6*!p%8@qr)uzw$x0te)bdfk(!l29"
     host = 'fatedeck.mysql.pythonanywhere-services.com'
-    db_name = 'fatedeck_db'
+    db_name = 'fatedeck$fatedeck_db'
     user = 'fatedeck'
     password = 'sohednebropwaifnist3'
     port = 3306
