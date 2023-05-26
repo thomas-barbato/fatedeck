@@ -166,7 +166,7 @@ class CreateNewGameAjaxView(LoginRequiredMixin, JsonableResponseMixin, FormView)
             else:
                 name = "sansnom"
 
-            regexp_name, game_invite_code = FormatName.RegexpFormat(name)
+            regexp_name, game_invite_code = FormatName.RegexpFormat(name).get_data()
             user_id = self.request.user.id
             game = Game.objects.create(name=regexp_name, game_invite_code=game_invite_code, owner_uuid_id=user_id)
             Ingameplayer.objects.create(game_id=game.id, player_id=user_id, owner_uuid_id=user_id)
