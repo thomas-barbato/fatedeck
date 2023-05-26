@@ -11,7 +11,9 @@ get_cwd = os.getcwd()
 cards_array = [element.split("\\")[-1] for element in glob.glob(get_cwd + "/*.svg")]
 i = 1
 
-with open("D:\\wamp64\\www\\malifaux-fate-gen\\malifaux\\backend\\fixtures\cards.json", "a") as file:
+with open(
+    "D:\\wamp64\\www\\malifaux-fate-gen\\malifaux\\backend\\fixtures\cards.json", "a"
+) as file:
     file.write("[\n")
     for card in cards_array:
         file.write("\t{\n")

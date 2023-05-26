@@ -45,7 +45,13 @@ from .utils import (
     FormatName,
 )
 
-from .forms import LoginForm, RegisterForm, CreateGameForm, FriendInvitationForm, CharacterSheetForm
+from .forms import (
+    LoginForm,
+    RegisterForm,
+    CreateGameForm,
+    FriendInvitationForm,
+    CharacterSheetForm,
+)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -66,7 +72,7 @@ class CreateAccount(FormView, JsonableResponseMixin, SuccessMessageMixin):
     )
 
     def form_valid(self, form):
-        form.save(self.request.POST.get('password2'))
+        form.save(self.request.POST.get("password2"))
         response = {"status": 1}
         messages.success(self.request, self.success_message)
         return JsonResponse(response, status=200)
@@ -115,7 +121,9 @@ class DisplayDashboardView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         user_id = self.request.user.id
         context["max_game_per_user"] = 7
-        context["game_list_count"] = Ingameplayer.objects.filter(player_id=user_id).count()
+        context["game_list_count"] = Ingameplayer.objects.filter(
+            player_id=user_id
+        ).count()
         context["CreateGameForm"] = CreateGameForm
         context["game_list"] = [
             {
@@ -131,7 +139,9 @@ class DisplayDashboardView(LoginRequiredMixin, ListView):
             {
                 "name": elem["player_id__username_invite_code"],
                 "id": elem["id"],
-                "is_online": LoggedInUser.objects.filter(user_id=elem["player_id"]).exists(),
+                "is_online": LoggedInUser.objects.filter(
+                    user_id=elem["player_id"]
+                ).exists(),
             }
             for elem in Friendlist.objects.select_related("player_id")
             .filter(owner_uuid_id=user_id)
@@ -156,7 +166,11 @@ class CreateNewGameAjaxView(LoginRequiredMixin, JsonableResponseMixin, FormView)
             .filter(player_id=user_id)
             .values("game_id", "game_id__name", "owner_uuid_id")
         ]
-        response_data = {"success": True, "game_count": len(cleaned_game_data), "game_data": cleaned_game_data}
+        response_data = {
+            "success": True,
+            "game_count": len(cleaned_game_data),
+            "game_data": cleaned_game_data,
+        }
         return JsonResponse(response_data)
 
     def post(self, request, *args, **kwarg):
@@ -168,8 +182,14 @@ class CreateNewGameAjaxView(LoginRequiredMixin, JsonableResponseMixin, FormView)
 
             regexp_name, game_invite_code = FormatName.RegexpFormat(name).get_data()
             user_id = self.request.user.id
-            game = Game.objects.create(name=regexp_name, game_invite_code=game_invite_code, owner_uuid_id=user_id)
-            Ingameplayer.objects.create(game_id=game.id, player_id=user_id, owner_uuid_id=user_id)
+            game = Game.objects.create(
+                name=regexp_name,
+                game_invite_code=game_invite_code,
+                owner_uuid_id=user_id,
+            )
+            Ingameplayer.objects.create(
+                game_id=game.id, player_id=user_id, owner_uuid_id=user_id
+            )
 
             for entry in Cards.objects.values("id", "name"):
                 Ingamecards(
@@ -183,14 +203,22 @@ class CreateNewGameAjaxView(LoginRequiredMixin, JsonableResponseMixin, FormView)
                 {
                     "success": True,
                     "game_list_count": game_list_count,
-                    "game_data": {"name": game.name, "id": game.id, "owner_uuid_id": user_id},
+                    "game_data": {
+                        "name": game.name,
+                        "id": game.id,
+                        "owner_uuid_id": user_id,
+                    },
                 }
             )
-        response_data = {"error": "Nombre de parties crées en simultané dépassé, 7 maximum."}
+        response_data = {
+            "error": "Nombre de parties crées en simultané dépassé, 7 maximum."
+        }
         return JsonResponse(response_data)
 
 
-class DisplayAndAddFriendListView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
+class DisplayAndAddFriendListView(
+    LoginRequiredMixin, JsonableResponseMixin, TemplateView
+):
     template_name = "display/dashboard.html"
     login_url = settings.LOGIN_URL
 
@@ -200,7 +228,9 @@ class DisplayAndAddFriendListView(LoginRequiredMixin, JsonableResponseMixin, Tem
             {
                 "name": elem["player_id__username_invite_code"],
                 "id": elem["id"],
-                "is_online": LoggedInUser.objects.filter(user_id=elem["player_id"]).exists(),
+                "is_online": LoggedInUser.objects.filter(
+                    user_id=elem["player_id"]
+                ).exists(),
             }
             for elem in Friendlist.objects.select_related("player_id")
             .filter(owner_uuid_id=user_id)
@@ -213,21 +243,27 @@ class DisplayAndAddFriendListView(LoginRequiredMixin, JsonableResponseMixin, Tem
         if self.request.POST.get("invite_code"):
             user = self.request.user
             friend_invitation_code = self.request.POST.get("invite_code")
-            friend = get_object_or_404(User, username_invite_code=friend_invitation_code)
+            friend = get_object_or_404(
+                User, username_invite_code=friend_invitation_code
+            )
             if not friend.id:
                 response_data = {"user_does_not_exists": True}
             elif user.username_invite_code == friend_invitation_code:
                 response_data = {"error_same_user": True}
             elif Friendlist.objects.filter(
-                Q(owner_uuid_id=user.id, player_id=friend.id) | Q(owner_uuid_id=friend.id, player_id=user.id)
+                Q(owner_uuid_id=user.id, player_id=friend.id)
+                | Q(owner_uuid_id=friend.id, player_id=user.id)
             ).exists():
                 response_data = {"already_friend_error": True}
             elif Friendinviation.objects.filter(
-                Q(owner_uuid_id=user.id, player_id=friend.id) | Q(owner_uuid_id=friend.id, player_id=user.id)
+                Q(owner_uuid_id=user.id, player_id=friend.id)
+                | Q(owner_uuid_id=friend.id, player_id=user.id)
             ).exists():
                 response_data = {"invitation_already_sent": True}
             else:
-                Friendinviation.objects.create(owner_uuid_id=user.id, player_id=friend.id)
+                Friendinviation.objects.create(
+                    owner_uuid_id=user.id, player_id=friend.id
+                )
                 response_data = {"success": True}
         else:
             response_data = {"empty": True}
@@ -261,7 +297,9 @@ class FriendListInvitationView(LoginRequiredMixin, JsonableResponseMixin, Templa
         if request.POST.get("choices") in ["accept", "deny"]:
             choices = request.POST.get("choices")
             user_id = request.user.id
-            contact_id = get_object_or_404(User, username_invite_code=request.POST.get("contact_name")).id
+            contact_id = get_object_or_404(
+                User, username_invite_code=request.POST.get("contact_name")
+            ).id
             if choices == "accept":
                 Friendlist.objects.bulk_create(
                     [
@@ -275,7 +313,9 @@ class FriendListInvitationView(LoginRequiredMixin, JsonableResponseMixin, Templa
                         ),
                     ]
                 )
-            Friendinviation.objects.get(owner_uuid_id=contact_id, player_id=user_id).delete()
+            Friendinviation.objects.get(
+                owner_uuid_id=contact_id, player_id=user_id
+            ).delete()
             return JsonResponse({"success": True}, safe=False)
 
 
@@ -286,11 +326,17 @@ class DeleteFriendView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         user_id = self.request.user.id
-        contact = get_object_or_404(User, username_invite_code=self.request.POST.get("contact_name"))
+        contact = get_object_or_404(
+            User, username_invite_code=self.request.POST.get("contact_name")
+        )
         response = {}
         if contact.id:
-            friend = get_object_or_404(Friendlist, owner_uuid_id=user_id, player_id=contact.id).delete()
-            friend = get_object_or_404(Friendlist, owner_uuid_id=contact.id, player_id=user_id).delete()
+            friend = get_object_or_404(
+                Friendlist, owner_uuid_id=user_id, player_id=contact.id
+            ).delete()
+            friend = get_object_or_404(
+                Friendlist, owner_uuid_id=contact.id, player_id=user_id
+            ).delete()
             response = {"success": True}
         return JsonResponse(response, safe=False)
 
@@ -312,7 +358,9 @@ class DisplayGame(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
                 "owner_uuid_id": player["owner_uuid_id"],
                 "player_id": player["player_id"],
                 "username_invite_code": player["player_id__username_invite_code"],
-                "is_online": LoggedInUser.objects.filter(user_id=player["player_id"]).exists(),
+                "is_online": LoggedInUser.objects.filter(
+                    user_id=player["player_id"]
+                ).exists(),
             }
             for player in Ingameplayer.objects.filter(game_id=game.id).values(
                 "owner_uuid_id",
@@ -344,7 +392,9 @@ class DisplayGame(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
             .order_by("?")
         )
 
-        deck_count = Ingamecards.objects.filter(game_id=game.id, current_state="PIOCHE").count()
+        deck_count = Ingamecards.objects.filter(
+            game_id=game.id, current_state="PIOCHE"
+        ).count()
 
         context["game"] = game
         context["players"] = players_list
@@ -368,7 +418,9 @@ class DisplayFriendsAndPlayers(LoginRequiredMixin, JsonableResponseMixin, Templa
                 "owner_uuid_id": player["owner_uuid_id"],
                 "player_id": player["player_id"],
                 "username_invite_code": player["player_id__username_invite_code"],
-                "is_online": LoggedInUser.objects.filter(user_id=player["player_id"]).exists(),
+                "is_online": LoggedInUser.objects.filter(
+                    user_id=player["player_id"]
+                ).exists(),
             }
             for player in Ingameplayer.objects.filter(game_id=game.id).values(
                 "owner_uuid_id",
@@ -413,7 +465,11 @@ class PlayerInvitationView(LoginRequiredMixin, JsonableResponseMixin, TemplateVi
             for elem in Gameinvitation.objects.select_related("owner_uuid_id")
             .filter(player_id=user_id)
             .values(
-                "id", "game_id", "owner_uuid_id", "owner_uuid_id__username_invite_code", "game_id__game_invite_code"
+                "id",
+                "game_id",
+                "owner_uuid_id",
+                "owner_uuid_id__username_invite_code",
+                "game_id__game_invite_code",
             )
         ]
 
@@ -432,16 +488,22 @@ class PlayerInvitationView(LoginRequiredMixin, JsonableResponseMixin, TemplateVi
             if invitation_by_select == "True":
                 player = get_object_or_404(User, id=request.POST.get("player_id"))
             else:
-                player = get_object_or_404(User, username_invite_code=request.POST.get("player_id"))
+                player = get_object_or_404(
+                    User, username_invite_code=request.POST.get("player_id")
+                )
             if game.id and player.id:
                 Gameinvitation.objects.create(
-                    game_id=game.id, player_id=player.id, owner_uuid_id=request.POST.get("game_owner")
+                    game_id=game.id,
+                    player_id=player.id,
+                    owner_uuid_id=request.POST.get("game_owner"),
                 )
             response_data = {"success": True}
         return JsonResponse(response_data, safe=False)
 
 
-class AcceptOrDenyGameInvitation(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
+class AcceptOrDenyGameInvitation(
+    LoginRequiredMixin, JsonableResponseMixin, TemplateView
+):
     template_name = "display/dashboard.html"
     login_url = settings.LOGIN_URL
 
@@ -449,23 +511,39 @@ class AcceptOrDenyGameInvitation(LoginRequiredMixin, JsonableResponseMixin, Temp
         if request.POST.get("choices") in ["accept", "deny"]:
             choices = request.POST.get("choices")
             user_id = request.user.id
-            contact_id = get_object_or_404(User, username_invite_code=request.POST.get("contact_name")).id
-            game_id = get_object_or_404(Game, game_invite_code=request.POST.get("game_name")).id
+            contact_id = get_object_or_404(
+                User, username_invite_code=request.POST.get("contact_name")
+            ).id
+            game_id = get_object_or_404(
+                Game, game_invite_code=request.POST.get("game_name")
+            ).id
             if choices == "accept":
-                Ingameplayer.objects.create(player_id=user_id, owner_uuid_id=contact_id, game_id=game_id)
-                Ingamecharactersheet.objects.create(owner_uuid_id=user_id, game_id=game_id)
-            Gameinvitation.objects.get(owner_uuid_id=contact_id, player_id=user_id).delete()
+                Ingameplayer.objects.create(
+                    player_id=user_id, owner_uuid_id=contact_id, game_id=game_id
+                )
+                Ingamecharactersheet.objects.create(
+                    owner_uuid_id=user_id, game_id=game_id
+                )
+            Gameinvitation.objects.get(
+                owner_uuid_id=contact_id, player_id=user_id
+            ).delete()
             return JsonResponse({"success": True}, safe=False)
 
 
-class DisplayPlayerCharacterSheet(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
+class DisplayPlayerCharacterSheet(
+    LoginRequiredMixin, JsonableResponseMixin, TemplateView
+):
     login_url = settings.LOGIN_URL
     template_name = "display/character_sheet.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         game_owner = get_object_or_404(Game, id=kwargs["pk"]).owner_uuid_id
-        char = get_object_or_404(Ingamecharactersheet, game_id=kwargs["pk"], owner_uuid_id=kwargs["player_id"])
+        char = get_object_or_404(
+            Ingamecharactersheet,
+            game_id=kwargs["pk"],
+            owner_uuid_id=kwargs["player_id"],
+        )
 
         context["character_sheet"] = char
         context["is_admin"] = bool(game_owner == self.request.user.id)
@@ -520,7 +598,10 @@ class PickACardView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
     def post(self, request):
         game = get_object_or_404(Game, id=request.POST.get("game_id"))
         username = request.user.username_invite_code
-        pick_order = Ingamecards.objects.filter(game_id=game.id, current_state="MAIN").count() + 1
+        pick_order = (
+            Ingamecards.objects.filter(game_id=game.id, current_state="MAIN").count()
+            + 1
+        )
 
         if pick_order > 5:
             response_data = {
@@ -551,12 +632,21 @@ class PickACardView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
             pick_card = [
                 card
                 for card in Ingamecards.objects.filter(
-                    id=update_card_id["id"], game_id=game.id, current_state="MAIN", last_picked_up_by=username
+                    id=update_card_id["id"],
+                    game_id=game.id,
+                    current_state="MAIN",
+                    last_picked_up_by=username,
                 )
                 .order_by("order")
-                .values("card_id__filename", "card_id", "order", "last_picked_up_by", "id")
+                .values(
+                    "card_id__filename", "card_id", "order", "last_picked_up_by", "id"
+                )
             ]
-            response_data = {"success": True, "picked_card": pick_card, "deck_current_len": len(cards_drawn_id_list)}
+            response_data = {
+                "success": True,
+                "picked_card": pick_card,
+                "deck_current_len": len(cards_drawn_id_list),
+            }
         return JsonResponse(response_data)
 
 
@@ -576,7 +666,12 @@ class GetCardsInformationsView(LoginRequiredMixin, JsonableResponseMixin, Templa
         deck = [card["id"] for card in cards if card["current_state"] == "PIOCHE"]
         cemetery = [card["id"] for card in cards if card["current_state"] == "DEFAUSSE"]
         picked_card = [card for card in cards if card["current_state"] == "MAIN"]
-        response_data = {"success": True, "cemetery": cemetery, "deck": deck, "picked_card": picked_card}
+        response_data = {
+            "success": True,
+            "cemetery": cemetery,
+            "deck": deck,
+            "picked_card": picked_card,
+        }
         return JsonResponse(response_data)
 
 
@@ -599,10 +694,15 @@ class ResetDeckView(LoginRequiredMixin, JsonableResponseMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         game = get_object_or_404(Game, id=request.POST.get("game_id"))
-        Ingamecards.objects.filter(game_id=game.id).exclude(current_state__in=["PIOCHE", "SPECIAL"]).update(
-            current_state="PIOCHE", order=None, last_picked_up_by=None
+        Ingamecards.objects.filter(game_id=game.id).exclude(
+            current_state__in=["PIOCHE", "SPECIAL"]
+        ).update(current_state="PIOCHE", order=None, last_picked_up_by=None)
+        deck = (
+            Ingamecards.objects.filter(game_id=game.id)
+            .exclude(current_state="SPECIAL")
+            .order("?")
+            .values("id")
         )
-        deck = Ingamecards.objects.filter(game_id=game.id).exclude(current_state="SPECIAL").order("?").values("id")
         response_data = {"success": True, "deck": deck}
         return JsonResponse(response_data, safe=False)
 
@@ -613,7 +713,9 @@ class DeletePlayerView(LoginRequiredMixin, JsonableResponseMixin, DeleteView):
     model = Ingameplayer
 
     def delete(self, request, *args, **kwargs):
-        contact = get_object_or_404(User, username_invite_code=self.request.POST.get("contact_name"))
+        contact = get_object_or_404(
+            User, username_invite_code=self.request.POST.get("contact_name")
+        )
         player_in_game = get_object_or_404(
             Ingameplayer, player_id=contact.id, game_id=self.request.POST.get("game_id")
         )

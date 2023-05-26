@@ -5,7 +5,15 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.exceptions import NON_FIELD_ERRORS
 
 import re
-from .models import User, Game, Ingameplayer, Cards, Ingamecards, Friendlist, Ingamecharactersheet
+from .models import (
+    User,
+    Game,
+    Ingameplayer,
+    Cards,
+    Ingamecards,
+    Friendlist,
+    Ingamecharactersheet,
+)
 import datetime
 from core.backend.check_data import CheckPasswordPolicy, CheckImageExtension, CheckEmail
 import random
@@ -73,7 +81,9 @@ class RegisterForm(ModelForm):
             self.instance.username.lower(),
         )
         if password2 == self.instance.password:
-            username = re.sub(r"(^-+)|(^_+)|(^'+)|(^\.+)|(-$)|(_$)|('\.$)", "", regexp_name)
+            username = re.sub(
+                r"(^-+)|(^_+)|(^'+)|(^\.+)|(-$)|(_$)|('\.$)", "", regexp_name
+            )
             self.instance.username = self.instance.username.lower()
             self.instance.email = self.instance.email
             self.instance.password = make_password(self.instance.password)
