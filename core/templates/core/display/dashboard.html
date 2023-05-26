@@ -138,10 +138,6 @@
 
 {% block javascript %}
 <script>
-
-if($('.alert').is(':visible')){
-    $('.alert').fadeOut(10000);
-}
 let vuejs_view = new Vue({
     el: '#dashboard-container',
     delimiters: ['[[', ']]'],

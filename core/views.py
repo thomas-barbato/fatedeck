@@ -82,15 +82,10 @@ class CreateAccount(FormView, JsonableResponseMixin, SuccessMessageMixin):
         return JsonResponse(response, status=200)
 
 
-class LoginAjaxView(LoginView, JsonableResponseMixin, SuccessMessageMixin):
+class LoginAjaxView(LoginView, JsonableResponseMixin):
     class_form = LoginForm
     redirect_authenticated_user = True
     success_url = reverse_lazy("dashboard_view")
-    success_message = (
-        "<div class='alert alert-success text-center mt-1' role='alert'>"
-        "<p class='alert-black-text'><b>Vous êtes connecté</b></p>"
-        "</div>"
-    )
 
     def get_success_url(self):
         return reverse_lazy("dashboard_view")
@@ -105,7 +100,8 @@ class LoginAjaxView(LoginView, JsonableResponseMixin, SuccessMessageMixin):
         if user is not None:
             login(self.request, user)
             response = {"status": 1}
-            messages.success(self.request, self.success_message)
+        else:
+            response = {"error": "Identifiants incorrects"}
         return JsonResponse(response, safe=False)
 
     def form_invalid(self, form):
