@@ -66,7 +66,7 @@
   <div class="row no-gutters d-flex align-self-center justify-content-center mx-auto col-xl-6 col-md-6 col-12" >
     <div class="card col-xl-2 col-md-4 col-sm-3 col-6 game-card-style d-flex justify-content-center card-size" v-if="count_card_in_hands <= 5" v-for="card in cards_drawn">
       <div class="card-body game-card-style">
-        <img class="card-img game-card-style" v-bind:src="card.filename"></img>
+        <img class="card-img game-card-style" v-bind:src="card.filename" v-bind:alt="card.filename"></img>
       </div>
       <div class="card-footer game-card-style text-center last-picked-up-style">
           <b class="last-picked-up-style col-12 presentation-no-font-family-bold">[[ card.last_picked_up_by ]]</b>
@@ -234,7 +234,7 @@ let ingame_view = new Vue({
           });
           $.each(response_data['friends'], function(index){
               ingame_view.friend_list.push({
-                "name": response_data['friends'][index]['player_id.username_invite_code'],
+                "name": response_data['friends'][index]['username_invite_code'],
                 "id": response_data['friends'][index]['player_id'],
               })
           });
