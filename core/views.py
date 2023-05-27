@@ -731,4 +731,12 @@ class LeaveGameRedirectView(LoginRequiredMixin, JsonableResponseMixin, RedirectV
 
 
 class DeleteGameView(LoginRequiredMixin, DeleteView):
-    pass
+    template_name = "display/ingame.html"
+    login_url = settings.LOGIN_URL
+    model = Game
+
+    def delete(self, request, *args, **kwargs):
+        get_object_or_404(
+            Game, owner_uuid_id=request.user.id, pk=self.request.POST.get("game_id")
+        ).delete()
+        return JsonResponse({"success": True}, safe=False)

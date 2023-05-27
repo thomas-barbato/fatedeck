@@ -113,7 +113,7 @@
           <p class="alert alert-warning already-friend-error">Ce contact est déjà présent dans votre liste...</p>
         </div>
         <div class="modal-footer mx-auto">
-          <button type="button" v-on:click="create_player_invitation($event)" id="submit-invitation" class="btn btn-primary success-button"data-dismiss="modal">Inviter</button>
+          <button type="button" v-on:click="create_player_invitation($event)" id="submit-invitation" class="btn btn-primary success-button" data-dismiss="modal">Inviter</button>
           <button type="button" class="btn btn-secondary cancel-button" data-dismiss="modal">Fermer</button>
         </div>
       </div>
@@ -159,17 +159,20 @@
     </div>
   </div>
   <!-- delete game confirmation modal -->
-  <div class="modal fade" id="invite-delete-modal" tabindex="-1" role="dialog" aria-labelledby="invite-friend-modal-Label" aria-hidden="true">
+  <div class="modal fade" id="delete-game-modal" tabindex="-1" role="dialog" aria-labelledby="delete-game-modal-label" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title modal-text-color">Suppression de contact</h5>
+          <h5 class="modal-title modal-text-color">Suppression du jeu</h5>
         </div>
         <div class="modal-body">
-          <p class="modal-text-color presentation-no-font-family">Êtes-vous sur de vouloir supprimer [[ selected_contact ]] ?</p>
+          <p class="modal-text-color presentation-no-font-family">Êtes-vous sur de vouloir supprimer cette partie ?</p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary success-button" on_click="ingame_view.delete_player($event)" data-dismiss="modal">Supprimer</button>
+          <form action="">
+            {% csrf_token %}
+            <button type="button" class="btn btn-primary success-button" onclick="delete_game()" data-dismiss="modal">Supprimer</button>
+          </form>
           <button type="button" class="btn btn-secondary cancel-button" data-dismiss="modal">Fermer</button>
         </div>
       </div>
@@ -225,7 +228,6 @@ let ingame_view = new Vue({
           ingame_view.players.splice(0)
           ingame_view.friend_list = []
           $.each(response_data['players'], function(index){
-              console.log(response_data['players']);
               ingame_view.players.push({
                 "name": response_data['players'][index]['username_invite_code'],
                 "id": response_data['players'][index]['player_id'],
@@ -440,9 +442,32 @@ let ingame_view = new Vue({
           },
           success: function (response_data) {},
         })
+      },
+
+  },
+});
+
+function delete_game(){
+  let url = '{% url "delete_game" %}';
+  game_id = '{{ game.id }}'
+  $.ajax({
+    url: url,
+    async: false,
+    context : this,
+    type: 'POST',
+    dataType : 'json',
+    headers: { "X-CSRFToken": "{{ csrf_token }}" },
+    data:{
+        'game_id': game_id,
+        'csrfmiddlewaretoken': '{{ csrf_token }}',
+    },
+    success: function (response_data) {
+      if(response_data.success){
+        location.href = '{% url "dashboard_view" %}';
       }
     },
-  });
+  })
+}
 
 
 function callEverything(){
