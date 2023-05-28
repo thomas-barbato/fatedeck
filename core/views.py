@@ -706,11 +706,12 @@ class DeletePlayerView(LoginRequiredMixin, JsonableResponseMixin, DeleteView):
         contact = get_object_or_404(
             User, username_invite_code=self.request.POST.get("contact_name")
         )
-        player_in_game = get_object_or_404(
+        get_object_or_404(
             Ingameplayer, player_id=contact.id, game_id=self.request.POST.get("game_id")
+        ).delete()
+        get_object_or_404(
+            Ingamecharactersheet, owner_uuid_id=contact.id, game_id=self.request.POST.get("game_id")
         )
-        if player_in_game.id:
-            player_in_game.delete()
 
 
 class LeaveGameRedirectView(LoginRequiredMixin, JsonableResponseMixin, RedirectView):
