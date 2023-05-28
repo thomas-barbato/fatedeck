@@ -108,12 +108,11 @@
           <input type="text" name="invite_code" value="" minlength="4" maxlength="22" class="form-control presentation-no-font-family" id="input-friend-name" aria-describedby="input-game-name-help" placeholder="un_user#1234">
           <small id="input-invitation-name-help" class="form-text text-muted">Pas plus de 22 caractères.</small>
           <p class="alert alert-danger friend-invitation-error">Cet utilisateur n'existe pas...</p>
-          <p class="alert alert-success friend-invitation-success">Cet utilisateur existe...</p>
-          <p class="alert alert-warning friend-same-user-error">Vous ne pouvez pas vous ajouter vous meme...</p>
-          <p class="alert alert-warning already-friend-error">Ce contact est déjà présent dans votre liste...</p>
+          <p class="alert alert-success friend-invitation-success">Invitation envoyée</p>
+          <p class="alert alert-warning already-friend-error">Cet utilisateur est déjà présent</p>
         </div>
         <div class="modal-footer mx-auto">
-          <button type="button" v-on:click="create_player_invitation($event)" id="submit-invitation" class="btn btn-primary success-button" data-dismiss="modal">Inviter</button>
+          <button type="button" v-on:click="create_player_invitation($event)" id="submit-invitation" class="btn btn-primary success-button">Inviter</button>
           <button type="button" class="btn btn-secondary cancel-button" data-dismiss="modal">Fermer</button>
         </div>
       </div>
@@ -131,9 +130,10 @@
             <option value=''>Selectionnez un contact</option>
             <option v-for="friend in friend_list" :value='[[ friend.id ]]'>[[ friend.name ]]</option>
           </select>
+          <p class="alert alert-success friend-invitation-success">Cet utilisateur est déjà présent</p>
         </div>
         <div class="modal-footer mx-auto">
-          <button type="button" v-on:click="create_player_invitation($event)" id="submit-contact" class="btn btn-primary success-button"data-dismiss="modal">Inviter</button>
+          <button type="button" v-on:click="create_player_invitation($event)" id="submit-contact" class="btn btn-primary success-button">Inviter</button>
           <button type="button" class="btn btn-secondary cancel-button" data-dismiss="modal">Fermer</button>
         </div>
       </div>
@@ -283,10 +283,14 @@ let ingame_view = new Vue({
                     ingame_view.friend_list.splice(index,1)
                   }
                 })
+                $('.friend-invitation-success').show().fadeOut(5000);
+              }else{
+                $('.already-friend-error').show().fadeOut(5000);
               }
             },
-            fail: function(response_data){
-            }
+            error : function(e) {
+              $('.friend-invitation-error').show().fadeOut(5000);
+            },
           });
         }
       },

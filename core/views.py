@@ -479,21 +479,25 @@ class PlayerInvitationView(LoginRequiredMixin, JsonableResponseMixin, TemplateVi
     def post(self, request, *args, **kwargs):
         game = get_object_or_404(Game, id=request.POST.get("game_id"))
         invitation_by_select = request.POST.get("invitation_by_select")
+        player_id = request.POST.get("player_id")
         response_data = {}
         if invitation_by_select in ["True", "False"]:
             if invitation_by_select == "True":
-                player = get_object_or_404(User, id=request.POST.get("player_id"))
+                player = get_object_or_404(User, id=player_id)
             else:
                 player = get_object_or_404(
-                    User, username_invite_code=request.POST.get("player_id")
+                    User, username_invite_code=player_id
                 )
-            if game.id and player.id:
+            ingame_player = get_object_or_404(Ingameplayer, game_id=game.id, player_id=player.id)
+            if ingame_player.id:
+                response_data = {"already_exists": True}
+            else:
                 Gameinvitation.objects.create(
                     game_id=game.id,
                     player_id=player.id,
                     owner_uuid_id=request.POST.get("game_owner"),
                 )
-            response_data = {"success": True}
+                response_data = {"success": True}
         return JsonResponse(response_data, safe=False)
 
 
