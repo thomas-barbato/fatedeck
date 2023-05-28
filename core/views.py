@@ -711,7 +711,7 @@ class DeletePlayerView(LoginRequiredMixin, JsonableResponseMixin, DeleteView):
         ).delete()
         get_object_or_404(
             Ingamecharactersheet, owner_uuid_id=contact.id, game_id=self.request.POST.get("game_id")
-        )
+        ).delete()
 
 
 class LeaveGameRedirectView(LoginRequiredMixin, JsonableResponseMixin, RedirectView):
