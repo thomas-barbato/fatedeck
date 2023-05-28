@@ -130,7 +130,9 @@
             <option value=''>Selectionnez un contact</option>
             <option v-for="friend in friend_list" :value='[[ friend.id ]]'>[[ friend.name ]]</option>
           </select>
-          <p class="alert alert-success friend-invitation-success">Cet utilisateur est déjà présent</p>
+          <p class="alert alert-danger friend-invitation-error">Cet utilisateur n'existe pas...</p>
+          <p class="alert alert-success friend-invitation-success">Invitation envoyée</p>
+          <p class="alert alert-warning already-friend-error">Cet utilisateur est déjà présent</p>
         </div>
         <div class="modal-footer mx-auto">
           <button type="button" v-on:click="create_player_invitation($event)" id="submit-contact" class="btn btn-primary success-button">Inviter</button>
