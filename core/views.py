@@ -540,7 +540,9 @@ class DisplayPlayerCharacterSheet(
             game_id=kwargs["pk"],
             owner_uuid_id=kwargs["player_id"],
         )
-
+        context["player_name"] = get_object_or_404(
+            User, id=kwargs["player_id"]
+        ).username_invite_code
         context["character_sheet"] = char
         context["is_admin"] = bool(game_owner == self.request.user.id)
         return context
@@ -549,7 +551,9 @@ class DisplayPlayerCharacterSheet(
         game_id = request.POST.get("game_id")
         owner_uuid_id = request.POST.get("player_id")
 
-        Ingamecharactersheet.objects.filter(game_id=game_id, owner_uuid_id=owner_uuid_id).update(
+        Ingamecharactersheet.objects.filter(
+            game_id=game_id, owner_uuid_id=owner_uuid_id
+        ).update(
             charinfo=json.loads(request.POST.get("character_information")),
             origin=json.loads(request.POST.get("origine")),
             occupation=json.loads(request.POST.get("occupation")),
@@ -697,7 +701,9 @@ class DeletePlayerView(LoginRequiredMixin, JsonableResponseMixin, DeleteView):
             Ingameplayer, player_id=contact.id, game_id=self.request.POST.get("game_id")
         ).delete()
         get_object_or_404(
-            Ingamecharactersheet, owner_uuid_id=contact.id, game_id=self.request.POST.get("game_id")
+            Ingamecharactersheet,
+            owner_uuid_id=contact.id,
+            game_id=self.request.POST.get("game_id"),
         ).delete()
 
 
