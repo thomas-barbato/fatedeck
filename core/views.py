@@ -562,26 +562,20 @@ class DisplayPlayerCharacterSheet(
         spellbook = json.loads(request.POST.get("spellbook"))
         twist_deck = json.loads(request.POST.get("twist_deck"))
 
-        Ingamecharactersheet.objects.update_or_create(
-            game_id=game_id,
-            owner_uuid_id=owner_uuid_id,
-            defaults={
-                "game_id": game_id,
-                "owner_uuid_id": owner_uuid_id,
-                "charinfo": char_info,
-                "origin": origin,
-                "occupation": occupation,
-                "aspect": aspect,
-                "sub_aspect": sub_aspect,
-                "attack": attack,
-                "attack2": attack2,
-                "skill": skill,
-                "destiny": destiny,
-                "talent": talent,
-                "inventory": inventory,
-                "spellbook": spellbook,
-                "twist_deck": twist_deck,
-            },
+        Ingamecharactersheet.objects.filter(game_id=game_id, owner_uuid_id=owner_uuid_id).update(
+            charinfo=json.loads(request.POST.get("character_information")),
+            origin=json.loads(request.POST.get("origine")),
+            occupation=json.loads(request.POST.get("occupation")),
+            aspect=json.loads(request.POST.get("aspect")),
+            sub_aspect=json.loads(request.POST.get("sub_aspect")),
+            attack=json.loads(request.POST.get("attack")),
+            attack2=json.loads(request.POST.get("attack2")),
+            skill=json.loads(request.POST.get("skill")),
+            destiny=json.loads(request.POST.get("destiny")),
+            talent=json.loads(request.POST.get("talent")),
+            inventory=json.loads(request.POST.get("inventory")),
+            spellbook=json.loads(request.POST.get("spellbook")),
+            twist_deck=json.loads(request.POST.get("twist_deck")),
         )
         response_data = {"success": True}
         return JsonResponse(response_data)
