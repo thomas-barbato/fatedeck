@@ -548,19 +548,6 @@ class DisplayPlayerCharacterSheet(
     def post(self, request):
         game_id = request.POST.get("game_id")
         owner_uuid_id = request.POST.get("player_id")
-        char_info = json.loads(request.POST.get("character_information"))
-        origin = json.loads(request.POST.get("origine"))
-        occupation = json.loads(request.POST.get("occupation"))
-        aspect = json.loads(request.POST.get("aspect"))
-        sub_aspect = json.loads(request.POST.get("sub_aspect"))
-        attack = json.loads(request.POST.get("attack"))
-        attack2 = json.loads(request.POST.get("attack2"))
-        skill = json.loads(request.POST.get("skill"))
-        destiny = json.loads(request.POST.get("destiny"))
-        talent = json.loads(request.POST.get("talent"))
-        inventory = json.loads(request.POST.get("inventory"))
-        spellbook = json.loads(request.POST.get("spellbook"))
-        twist_deck = json.loads(request.POST.get("twist_deck"))
 
         Ingamecharactersheet.objects.filter(game_id=game_id, owner_uuid_id=owner_uuid_id).update(
             charinfo=json.loads(request.POST.get("character_information")),
