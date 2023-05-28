@@ -126,6 +126,11 @@ urlpatterns = [
         name="delete-player"
     ),
     path(
+        "ingame/delete_game",
+        core_views.DeleteGameView.as_view(),
+        name="delete_game"
+    ),
+    path(
         'logout/',
         auth_views.LogoutView.as_view(),
         name='user_logout',
