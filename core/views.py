@@ -72,12 +72,14 @@ class CreateAccount(FormView, JsonableResponseMixin, SuccessMessageMixin):
     )
 
     def form_valid(self, form):
+        print("ok1")
         form.save(self.request.POST.get("password2"))
         response = {"status": 1}
         messages.success(self.request, self.success_message)
         return JsonResponse(response, status=200)
 
     def form_invalid(self, form):
+        print("ok2")
         response = {"status": 0, "errors": dict(form.errors.items())}
         return JsonResponse(response, status=200)
 
@@ -488,8 +490,8 @@ class PlayerInvitationView(LoginRequiredMixin, JsonableResponseMixin, TemplateVi
                 player = get_object_or_404(
                     User, username_invite_code=player_id
                 )
-            ingame_player = get_object_or_404(Ingameplayer, game_id=game.id, player_id=player.id)
-            if ingame_player.id:
+
+            if Ingameplayer.objects.filter(game_id=game.id, player_id=player.id).exists():
                 response_data = {"already_exists": True}
             else:
                 Gameinvitation.objects.create(
