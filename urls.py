@@ -101,7 +101,7 @@ urlpatterns = [
         name="pick_a_card"
     ),
     path(
-        "ingame/leave",
+        "ingame/leave/",
         core_views.LeaveGameRedirectView.as_view(),
         name="leave_game"
     ),

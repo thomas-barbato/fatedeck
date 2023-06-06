@@ -20,11 +20,11 @@
                         <a href="{% url 'display_player_character_sheet' pk=game.id player_id=player.player_id %}" class="dropdown-item dropdown-option-menu-color" target="_blank"><i class="fas fa-user-graduate"><span class="p-2 align-middle navbar-text-color"></i>Fiche de {{ player.username_invite_code }}</span></a>
                         {% endif %}
                     {% endfor %}
-                <span class="dropdown-item dropdown-option-menu-color"  data-toggle="modal" data-target="#delete-game-modal"><i class="fas fa-cogs"><span class="p-2 align-middle navbar-text-color"></i>Supprimer ce jeu</span></span>
+                <span class="dropdown-item dropdown-option-menu-color" data-toggle="modal" data-target="#delete-game-modal"><i class="fas fa-cogs"><span class="p-2 align-middle navbar-text-color"></i>Supprimer ce jeu</span></span>
                 {% else %}
                 <a href="{% url 'display_player_character_sheet' pk=game.id player_id=user.id %}" class="dropdown-item dropdown-option-menu-color" target="_blank"><i class="fas fa-user-graduate"><span class="p-2 align-middle navbar-text-color"></i>Ma fiche de personnage</span></a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item dropdown-option-menu-color" href="{% url 'leave_game' %}"><i class="fas fa-cogs"><span class="p-2 align-middle navbar-text-color"></i>Quitter la partie</span></a>
+                    <a class="dropdown-item dropdown-option-menu-color" href="" data-toggle="modal" data-target="#leave-game-modal"><i class="fas fa-cogs"><span class="p-2 align-middle navbar-text-color"></i>Quitter la partie</span></a>
                 {% endif %}
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item logout" href="{% url 'user_logout' %}"><i class="fas fa-sign-out-alt"><span class="p-2 align-middle"></i>Deconnexion</span></a>
