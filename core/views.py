@@ -719,8 +719,9 @@ class LeaveGameRedirectView(LoginRequiredMixin, JsonableResponseMixin, RedirectV
     pattern_name = "dashboard_view"
 
     def get_redirect_url(self, *args, **kwargs):
-        player = get_object_or_404(Ingameplayer, player_id=self.request.user.id)
-        player.delete()
+        id = self.request.POST.get('game_id')
+        Ingameplayer.objects.filter(game_id=id, player_id=self.request.user.id).delete()
+        Ingamecharactersheet.objects.filter(game_id=id, owner_uuid_id=self.request.user.id).delete()
         return super().get_redirect_url(*args, **kwargs)
 
 

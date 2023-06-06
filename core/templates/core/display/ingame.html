@@ -180,6 +180,28 @@
       </div>
     </div>
   </div>
+  <!-- leave game confirmation modal -->
+  <div class="modal fade" id="leave-game-modal" tabindex="-1" role="dialog" aria-labelledby="leave-game-modal-label" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title modal-text-color">Quitter le jeu</h5>
+        </div>
+        <div class="modal-body">
+          <p class="modal-text-color presentation-no-font-family">Êtes-vous sur de vouloir quitter cette partie ?</p>
+          <p class="modal-text-color presentation-no-font-family">(Vous perdrez votre fiche de personnage)</p>
+        </div>
+        <div class="modal-footer">
+          <form action="{% url 'leave_game' %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" value="{{ game.id }}" id="game_id" name="game_id"/>
+            <button type="submit" class="btn btn-primary success-button">Partir</button>
+          </form>
+          <button type="button" class="btn btn-secondary cancel-button" data-dismiss="modal">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </div>
 {% endblock %}
